@@ -33,9 +33,13 @@ include_once('dBug.php'); // TODO - remove
 
 if ( ! defined( 'PAU_PLUGIN_NAME' ) )
 	define( 'PAU_PLUGIN_NAME', 'picasa-album-uploader' );	// Plugin name
-IF ( ! defined ( 'PAU_PLUGIN_DIR') )
+if ( ! defined ( 'PAU_PLUGIN_DIR') )
 	define( 'PAU_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . PAU_PLUGIN_NAME );	// Base directory for Plugin
-
+	
+define ('PAU_BUTTON', 1);
+define ('PAU_MINIBROWSER', 2);
+define ('PAU_UPLOAD', 3);
+	
 // ============================
 // = Include needed libraries =
 // ============================
@@ -53,12 +57,16 @@ if ( ( include_once 'lib/zip.lib.php') == FALSE ) {
 if ( ! class_exists( 'picasa_album_uploader' ) ) {
 	class picasa_album_uploader {
 		
+		// FIXME Create object to define allowed plugin paramters
+		
+		
 		var $slug = "picasa_album";  // TODO - Make this configurable
 		
 		var $is_pau = false;  // True if page should be handled by template provided by this plugin
 		
 		// Constructor function		
 		function picasa_album_uploader() {
+			
 			// Shortcode to generate URL to download Picassa Button
 			add_shortcode( 'pau_download_button', array( &$this, 'sc_download_button' ) );
 			// Shortcode to display album
@@ -94,13 +102,15 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			global $wp;
 			global $wp_query;
 			
-			$slug_regex = "/^" . $this->slug . "\//";
+			/*
+				Request should be handled by this plugin
+					- Syntax check request, return if not valid for wp_core processing
+			*/
 			
-			$slug_match = preg_match( $slug_regex, $wp->request);
-			
-			if (! $slug_match) {
+			$requested_page = self::parse_request($wp->request);
+			if (! $requested_page) {
 				return $posts;
-			}	
+			}
 			
 			/*
 				Setup a dummy post class 
@@ -112,6 +122,8 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			
 			// Request should be handled by this plugin
 			$this->is_pau = true;
+			
+			// FIXME save detected request for processing during template redirect
 			
 			// Add template redirect action to process the page
 			add_action('template_redirect', array(&$this, 'template_redirect'));
@@ -129,8 +141,45 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			return array($post);
 		}
 		
+		/*
+			parse_request($wp_request)
+			
+			Parse incoming request and confirm it is valid
+		*/
+		function parse_request( $wp_request ){
+			$tokens = split( '/', $wp_request );
+
+			// TODO Enforce only two parameters
+
+			if ( $this->slug != $tokens[0] ) {
+				return false;
+			}
+			
+			/*
+				Valid values for 2nd parameter:
+					button
+					mini_browser
+					upload
+			*/
+			
+			$retval = false;
+			
+			if ( $tokens[1] == 'button' ) {
+				$this->pau_serve = PAU_BUTTON;
+				$retval = true;
+			} else if ( $tokens[1] == 'minibrowser' ) {
+				$this->pau_serve = PAU_MINIBROWSER;
+				$retval = true;
+			} else if ( $tokens[1] == 'upload' ) {
+				$this->pau_serve = PAU_UPLOAD;
+				$retval = true;
+			}
+			
+			return $retval;
+		}
+		
 		// =================================================================
-		// = Template Redirection - used to grab request for picasa button =
+		// = Template Redirection - used to grab request for picasa plugin =
 		// =================================================================
 		
 		function template_redirect( $requested_url=null, $do_redirect=true ) {
@@ -139,7 +188,17 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				return;
 			}
 			
-			self::send_picasa_button();
+			switch ( $this->pau_serve ) {
+				case PAU_BUTTON:
+					self::send_picasa_button();
+					break;
+				case PAU_MINIBROWSER:
+					self::minibrowser();
+					break;
+				case PAU_UPLOAD:
+					self::upload_images();
+					break;
+			}
 		}
 		
 		/*
@@ -151,9 +210,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		*/
 
 		function send_picasa_button( ) {
-			$blogname = get_bloginfo( 'name');
+			$blogname = get_bloginfo( 'name' );
 			$guid = self::guid();
-			$upload_url = $this->slug . '/upload';
+			$upload_url = get_bloginfo( 'wpurl' ) . $this->slug . '/minibrowser';
 			
 			/*
 				XML to describe the Picasa plugin button
@@ -208,137 +267,89 @@ EOF;
 			exit;
 		}
 		
-		function mini_browser() {
-			// Some stuff to generate a valid post
-			// $formattedNow = date('Y-m-d H:i:s');
-			// 
-			// $lme_post = new stdClass();
-			// $lme_post->ID = -1;
-			// $lme_post->post_author = 1;
-			// $lme_post->post_date = $formattedNow;
-			// $lme_post->post_date_gmt = $formattedNow;
-			// $lme_post->post_content = $this->get_content();
-			// $lme_post->post_title = $this->location_for_display . ' Real Estate Information';
-			// $lme_post->post_category = 0;
-			// $lme_post->post_excerpt = '';
-			// $lme_post->post_status = 'publish';
-			// $lme_post->comment_status = 'closed';
-			// $lme_post->ping_status = 'closed';
-			// $lme_post->post_password = '';
-			// $lme_post->post_name = $lme_post->post_title;
-			// $lme_post->to_ping = '';
-			// $lme_post->pinged = '';
-			// $lme_post->post_content_filtered = '';
-			// $lme_post->post_parent = 0;
-			// $lme_post->guid = get_bloginfo('wpurl') . '/' . $this->slug . '/' . $this->zip . '/' . $this->neighborhood . '/' . $this->city . '/' . $this->state;
-			// $lme_post->menu_order = 0;
-			// $lme_post->post_type = 'page';
-			// $lme_post->post_mime_type = '';
-			// $lme_post->comment_count = 0;
+		//FIXME
+		function minibrowser() {
 			
-			/*
+			// FIXME Add security check
 			
-			  Sample Code to generate the mini-browser page
+// Add jQuery?
+// <script type="text/javascript">
+//     function chURL(psize){
+//         $("input[type='hidden']").each(function()
+//         {
+//             this.name = this.name.replace(/size=.*/,"size="+psize);
+//         });
+//     }
+// </script>
+
+			echo <<<'HEAD'
+<html>
+<head>
+<link rel="STYLESHEET" type="text/css" href="style.css">
+</head>
+HEAD;
 			
-				<?php
+			new dBug($_SESSION);
+			
+			$url = get_bloginfo('wpurl') . '/' . $this->slug . '/upload';
+			echo "
+<form name='f' method='post' action='$url'>
+<div class='h'>Selected images</div>
+<div>";
 
-				
-				Plugin Name: Picasa2Wordpress
-				Plugin URI: http://clyang.net/blog/2009/02/06/128
-				Description: Integrade Picasa client with wordpress, which allows user upload the photos to wordpress via Picasa directly
-				Version: 0.1
-				Author: Cheng-Lin Yang
-				Author URI: http://clyang.net/blog/
-				
+			// Get Posted photos
+			if($_SESSION['POST']['rss']) {
+				$xh = new xmlHandler();
+				$nodeNames = array("PHOTO:THUMBNAIL", "PHOTO:IMGSRC", "TITLE");
+				$xh->setElementNames($nodeNames);
+				$xh->setStartTag("ITEM");
+				$xh->setVarsDefault();
+				$xh->setXmlParser();
+				$xh->setXmlData(stripslashes($_SESSION['POST']['rss']));
+				$pData = $xh->xmlParse();
+				$br = 0;
 
-				define('WP_ADMIN', true);
-				require_once('../wp-load.php');
-				require_once('includes/admin.php');
+				foreach($pData as $e)
+					echo "<img src='".$e['photo:thumbnail']."?size=-96'>\r\n";
 
-				session_start();
-				//Start the session to store POST data
-				if(!is_user_logged_in()){
-				    $_SESSION['POST'] = $_POST;
-				}else if(is_user_logged_in() && $_POST){
-				    $_SESSION['POST'] = $_POST;
+				foreach($pData as $e) {
+					$large = $e['photo:imgsrc']."?size=1024";
+          echo "<input type=hidden name='".$large."'>\r\n";
 				}
-				require_once('admin.php');
-				require_once("xmlHandler.class");
-				?>
 
-				<html>
-				<head>
-				<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.1/jquery.min.js"></script>
-				<link rel="STYLESHEET" type="text/css" href="style.css">
-				<script type="text/javascript">
-				    function chURL(psize){
-				        $("input[type='hidden']").each(function()
-				        {
-				            this.name = this.name.replace(/size=.* /,"size="+psize);
-				        });
-				    }
-				</script>
-				</head>
+				echo <<<FORM_FIN
+</div>
 
-				<body>
-				<form name='f' method='post' action='picasa_post.php'>
-
-				<div class='h'>Picasa2Wordpress</div>
-				<div><i>Any comment? Please leave message on http://clyang.net/blog/</i></div>
-
-				<div class='h'>Selected images</div>
-
-				<div>
-				<?
-				if($_SESSION['POST']['rss'])
-				{
-					$xh = new xmlHandler();
-					$nodeNames = array("PHOTO:THUMBNAIL", "PHOTO:IMGSRC", "TITLE");
-					$xh->setElementNames($nodeNames);
-					$xh->setStartTag("ITEM");
-					$xh->setVarsDefault();
-					$xh->setXmlParser();
-					$xh->setXmlData(stripslashes($_SESSION['POST']['rss']));
-					$pData = $xh->xmlParse();
-					$br = 0;
-
-					foreach($pData as $e)
-						echo "<img src='".$e['photo:thumbnail']."?size=-96'>\r\n";
-
-					foreach($pData as $e) {
-						$large = $e['photo:imgsrc']."?size=1024";
-				                echo "<input type=hidden name='".$large."'>\r\n";
-					}
-				} else {
-					echo "Sorry, but no pictures were received.";
-				}
-				?>
-				</div>
-
-				<div class='h'>Select your upload image size
-				<INPUT type=radio name=size onclick="chURL('640')">640
-				<INPUT type=radio name=size onclick="chURL('1024')" CHECKED>1024
-				<INPUT type=radio name=size onclick="chURL('1600')">1600
-				<INPUT type=radio name=size onclick="chURL('0')">Original
-				</div>
-
-				<div class='h'>
-				<input type=submit value="Upload">&nbsp;
-				<input type=button value="Discard" onclick="location.href='minibrowser:close'"><br/>
-				</div>
-
-				<div style="margin-top: 30px; text-align:center">
-				<a target="_x" href="http://clyang.net/blog/2009/02/06/128">Picasa2Wordpress is written by clyang</a>
-				</div>
-
-				</form>
-				</body>
-				</html>
+<div class='h'>
+<input type=submit value="Upload">&nbsp;
+</div>
+<div class='h'>Select your upload image size
+<INPUT type=radio name=size onclick="chURL('640')">640
+<INPUT type=radio name=size onclick="chURL('1024')" CHECKED>1024
+<INPUT type=radio name=size onclick="chURL('1600')">1600
+<INPUT type=radio name=size onclick="chURL('0')">Original
+</div>
+FORM_FIN;
 				
-			*/
+			} else {
+				echo <<< FORM_FIN
+Sorry, but no pictures were received.<br />
+<input type=button value="Discard" onclick="location.href='minibrowser:close'"><br />
+FORM_FIN;
+			}
+
+			echo <<<FOOT
+
+</form>
+</body>
+</html>
+FOOT;
+
+		exit; // Finished displaying the minibrowser page
 		}
 		
-		function picasa_post_handler() {
+		//FIXME
+		function upload_images() {
 			/*
 			<?php
 			require_once('admin.php');
@@ -397,7 +408,7 @@ EOF;
 		}
 		
 		function sc_download_button( $atts, $content = null ) {
-			return 'BUTTON URL';
+			return '<a href="' . get_bloginfo('wpurl') . '/' . $this->slug . '/button" title="Download Picasa Button">Download Picasa Button</a>';
 		}
 		
 		// =====================
@@ -436,11 +447,9 @@ EOF;
 // =========================
 // = Plugin initialization =
 // =========================
-function init() {
-	global $pau;
-	
-	if ( class_exists( 'picasa_album_uploader' ) ) {
-		$pau = new picasa_album_uploader();
-	}
+
+global $pau;
+if ( class_exists( 'picasa_album_uploader' ) ) {
+	$pau = new picasa_album_uploader();
 }
 ?>
