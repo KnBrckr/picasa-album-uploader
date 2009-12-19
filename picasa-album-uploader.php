@@ -157,14 +157,14 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			
 			/*
 				Valid values for 2nd parameter:
-					button
+					wordpress_uploader.pbz
 					mini_browser
 					upload
 			*/
 			
 			$retval = false;
 			
-			if ( $tokens[1] == 'button' ) {
+			if ( $tokens[1] == 'wordpress_uploader.pbz' ) {
 				$this->pau_serve = PAU_BUTTON;
 				$retval = true;
 			} else if ( $tokens[1] == 'minibrowser' ) {
@@ -212,7 +212,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		function send_picasa_button( ) {
 			$blogname = get_bloginfo( 'name' );
 			$guid = self::guid();
-			$upload_url = get_bloginfo( 'wpurl' ) . $this->slug . '/minibrowser';
+			$upload_url = get_bloginfo( 'wpurl' ) . '/' . $this->slug . '/minibrowser';
 			
 			/*
 				XML to describe the Picasa plugin button
@@ -329,12 +329,13 @@ HEAD;
 <INPUT type=radio name=size onclick="chURL('1600')">1600
 <INPUT type=radio name=size onclick="chURL('0')">Original
 </div>
+<input type=button value="Discard" onclick="location.href='minibrowser:close'"><br />
 FORM_FIN;
 				
 			} else {
 				echo <<< FORM_FIN
 Sorry, but no pictures were received.<br />
-<input type=button value="Discard" onclick="location.href='minibrowser:close'"><br />
+<input type=button value="Close" onclick="location.href='minibrowser:close'"><br />
 FORM_FIN;
 			}
 
@@ -408,7 +409,7 @@ FOOT;
 		}
 		
 		function sc_download_button( $atts, $content = null ) {
-			return '<a href="' . get_bloginfo('wpurl') . '/' . $this->slug . '/button" title="Download Picasa Button">Download Picasa Button</a>';
+			return '<a href="picasa://importbutton/?url=' . get_bloginfo('wpurl') . '/' . $this->slug . '/wordpress_uploader.pbz" title="Download Picasa Button">Download Picasa Button</a>';
 		}
 		
 		// =====================
