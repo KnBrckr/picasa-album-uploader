@@ -272,6 +272,7 @@ EOF;
 		function minibrowser() {
 			
 			// FIXME Add security check
+			// Add Nonce
 			
 			
 			
