@@ -25,6 +25,7 @@ You should have received a copy of the GNU General Public License
 along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
 
 */
+require_once('xmlHandler.class');
 include_once('dBug.php'); // TODO - remove
 
 // =======================================
@@ -223,13 +224,13 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 <buttons format="1" version="0.1">
    <button id="$guid" type="dynamic">
    	<icon name="$guid/layername" src="pbz"/>
-   	<label>WP Upload</label>
-		<label_en>WP Upload</label_en>
+   	<label>WordPress</label>
+		<label_en>Wordpress</label_en>
 		<label_zh-tw>上传</label_zh-tw>
 		<label_zh-cn>上載</label_zh-cn>
 		<label_cs>Odeslat</label_cs>
 		<label_nl>Uploaden</label_nl>
-		<label_en-gb>WP Upload</label_en-gb>
+		<label_en-gb>Wordpress</label_en-gb>
 		<label_fr>Transférer</label_fr>
 		<label_de>Hochladen</label_de>
 		<label_it>Carica</label_it>
@@ -272,25 +273,10 @@ EOF;
 			
 			// FIXME Add security check
 			
-// Add jQuery?
-// <script type="text/javascript">
-//     function chURL(psize){
-//         $("input[type='hidden']").each(function()
-//         {
-//             this.name = this.name.replace(/size=.*/,"size="+psize);
-//         });
-//     }
-// </script>
+			
+			
+			// Setup the POST Content
 
-			echo <<<'HEAD'
-<html>
-<head>
-<link rel="STYLESHEET" type="text/css" href="style.css">
-</head>
-HEAD;
-			
-			new dBug($_SESSION);
-			
 			$url = get_bloginfo('wpurl') . '/' . $this->slug . '/upload';
 			echo "
 <form name='f' method='post' action='$url'>
@@ -298,14 +284,14 @@ HEAD;
 <div>";
 
 			// Get Posted photos
-			if($_SESSION['POST']['rss']) {
+			if($_POST['rss']) {
 				$xh = new xmlHandler();
 				$nodeNames = array("PHOTO:THUMBNAIL", "PHOTO:IMGSRC", "TITLE");
 				$xh->setElementNames($nodeNames);
 				$xh->setStartTag("ITEM");
 				$xh->setVarsDefault();
 				$xh->setXmlParser();
-				$xh->setXmlData(stripslashes($_SESSION['POST']['rss']));
+				$xh->setXmlData(stripslashes($_POST['rss']));
 				$pData = $xh->xmlParse();
 				$br = 0;
 
@@ -318,35 +304,24 @@ HEAD;
 				}
 
 				echo <<<FORM_FIN
-</div>
-
-<div class='h'>
-<input type=submit value="Upload">&nbsp;
-</div>
 <div class='h'>Select your upload image size
 <INPUT type=radio name=size onclick="chURL('640')">640
 <INPUT type=radio name=size onclick="chURL('1024')" CHECKED>1024
 <INPUT type=radio name=size onclick="chURL('1600')">1600
 <INPUT type=radio name=size onclick="chURL('0')">Original
 </div>
-<input type=button value="Discard" onclick="location.href='minibrowser:close'"><br />
+<div class='h'>
+<input type="submit" value="Upload">&nbsp;
+</div>
 FORM_FIN;
 				
 			} else {
-				echo <<< FORM_FIN
-Sorry, but no pictures were received.<br />
-<input type=button value="Close" onclick="location.href='minibrowser:close'"><br />
-FORM_FIN;
+				echo '<h3>Sorry, but no pictures were received.</h3>';
 			}
+			
+			// If Theme has a defined the plugin template, use it, otherwise use elements from the plugin
 
-			echo <<<FOOT
-
-</form>
-</body>
-</html>
-FOOT;
-
-		exit; // Finished displaying the minibrowser page
+			exit; // Finished displaying the minibrowser page
 		}
 		
 		//FIXME
