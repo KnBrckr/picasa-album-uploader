@@ -25,7 +25,6 @@ You should have received a copy of the GNU General Public License
 along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-require_once('xmlHandler.class');
 include_once('dBug.php'); // TODO - remove
 
 // =======================================
@@ -34,8 +33,12 @@ include_once('dBug.php'); // TODO - remove
 
 if ( ! defined( 'PAU_PLUGIN_NAME' ) )
 	define( 'PAU_PLUGIN_NAME', 'picasa-album-uploader' );	// Plugin name
-if ( ! defined ( 'PAU_PLUGIN_DIR') )
+if ( ! defined( 'PAU_PLUGIN_DIR') )
 	define( 'PAU_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . PAU_PLUGIN_NAME );	// Base directory for Plugin
+if ( ! defined( 'PAU_PLUGIN_URL') )
+	define ( 'PAU_PLUGIN_URL', WP_PLUGIN_URL . '/' . PAU_PLUGIN_NAME);	// Base URL for plugin directory
+if ( ! defined( 'PAU_NONCE_UPLOAD' ) )
+	define ( 'PAU_NONCE_UPLOAD', 'picasa-album-uploader-upload-images');
 	
 define ('PAU_BUTTON', 1);
 define ('PAU_MINIBROWSER', 2);
@@ -45,10 +48,16 @@ define ('PAU_UPLOAD', 3);
 // = Include needed libraries =
 // ============================
 
-/* zip.lib.php is copied from phpMyAdmin - great little library for generating zip archives on the fly */
-if ( ( include_once 'lib/zip.lib.php') == FALSE ) {
+// zip.lib.php is copied from phpMyAdmin - great little library for generating zip archives on the fly
+if ( ( include_once PAU_PLUGIN_DIR . '/lib/zip.lib.php') == FALSE ) {
 	// TODO - Improve error handling
 	echo "unable to load zip lib\n";
+}
+
+// xmlHandler.class copied from Google's sample handler
+if ( ( include_once PAU_PLUGIN_DIR . '/lib/xmlHandler.class')  == FALSE ) {
+	// TODO - Improve error handling
+	echo "Unable to load xml Handler";
 }
 
 // =================================
@@ -59,7 +68,6 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 	class picasa_album_uploader {
 		
 		// FIXME Create object to define allowed plugin paramters
-		
 		
 		var $slug = "picasa_album";  // TODO - Make this configurable
 		
@@ -79,17 +87,6 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			// Add action to check if requested URL matches slug handled by plugin
 			add_filter( 'the_posts', array( &$this, 'check_url' ));
 		}
-		
-		// ====================
-		// = XML RPC Handling =
-		// ====================
-		
-		// TODO - Might not be needed
-		// // Add the XML-RPC methods needed for the plugin
-		// function attach_new_xmlrpc( $methods ) {
-		// 	$methods['pau.picasa_button'] = array( &$this, 'send_picasa_button' );
-		// 	return $methods;
-		// }
 		
 		/*
 			function check_url( $posts )
@@ -272,20 +269,30 @@ EOF;
 		function minibrowser() {
 			
 			// FIXME Add security check
-			// Add Nonce
-			
-			
 			
 			// Setup the POST Content
-
-			$url = get_bloginfo('wpurl') . '/' . $this->slug . '/upload';
-			echo "
-<form name='f' method='post' action='$url'>
-<div class='h'>Selected images</div>
-<div>";
-
+			$targetUrl = get_bloginfo('wpurl') . '/' . $this->slug . '/upload';
+			
+			// // Add plugin javascript module - depends on jQuery
+			// wp_enqueue_script('picasa-album-uploader', PAU_PLUGIN_URL . '/pau.js' ,'jquery');
+			// 
+			
 			// Get Posted photos
 			if($_POST['rss']) {
+				$content = "<form name='f' method='post' action='$targetUrl'>\n";
+				
+				// Add nonce field to the form if nonce is supported
+				if ( function_exists( 'wp_nonce_field' ) ) {
+					// Set referrer field, do not echo hidden nonce field
+					$content .= wp_nonce_field(PAU_NONCE_UPLOAD, PAU_NONCE_UPLOAD, true, false);
+					// Don't echo the referer field
+					$content .= wp_referer_field(false);
+				}
+
+				// Start div used to display images
+				$content .= "<div class='h'>Selected images</div>\n<div>\n";
+
+				// Parse the RSS feed from Picasa to get the images to be uploaded
 				$xh = new xmlHandler();
 				$nodeNames = array("PHOTO:THUMBNAIL", "PHOTO:IMGSRC", "TITLE");
 				$xh->setElementNames($nodeNames);
@@ -296,20 +303,19 @@ EOF;
 				$pData = $xh->xmlParse();
 				$br = 0;
 
-				foreach($pData as $e)
-					echo "<img src='".$e['photo:thumbnail']."?size=-96'>\r\n";
-
+				// For each image, display the image and setup hidden form field for upload processing.
 				foreach($pData as $e) {
-					$large = $e['photo:imgsrc']."?size=1024";
-          echo "<input type=hidden name='".$large."'>\r\n";
+					$content .= "<img src='".attribute_escape( $e['photo:thumbnail'] )."?size=-96'>\r\n";
+					$large = attribute_escape( $e['photo:imgsrc'] )."?size=1024";
+          $content .= "<input type='hidden' name='file[]' value='".attribute_escape( $e['photo:imgsrc'] )."'>\r\n";
 				}
 
-				echo <<<FORM_FIN
+				$content .= <<<FORM_FIN
 <div class='h'>Select your upload image size
-<INPUT type=radio name=size onclick="chURL('640')">640
-<INPUT type=radio name=size onclick="chURL('1024')" CHECKED>1024
-<INPUT type=radio name=size onclick="chURL('1600')">1600
-<INPUT type=radio name=size onclick="chURL('0')">Original
+<INPUT type="radio" name="size" value='640'">640
+<INPUT type="radio" name="size" value='1024'" CHECKED>1024
+<INPUT type="radio" name="size" value='1600'">1600
+<INPUT type="radio" name="size" value='0')">Original
 </div>
 <div class='h'>
 <input type="submit" value="Upload">&nbsp;
@@ -317,16 +323,34 @@ EOF;
 FORM_FIN;
 				
 			} else {
-				echo '<h3>Sorry, but no pictures were received.</h3>';
+			 	$content = '<h3>Sorry, but no pictures were received.</h3>';
 			}
 			
+			// Generate the post data structure
+			self::gen_post($content);
+			
 			// If Theme has a defined the plugin template, use it, otherwise use elements from the plugin
+			if ($theme_template = get_query_template('page-picasa_album_uploader')) {
+				include($theme_template);
+			} else {
+				include(PAU_PLUGIN_DIR.'/templates/page-picasa_album_uploader.php');
+			}
 
 			exit; // Finished displaying the minibrowser page
 		}
 		
-		//FIXME
 		function upload_images() {
+			// Confirm the nonce field to allow operation to continue
+			// FIXME On Nonce failure generate better failure screen.
+			check_admin_referer(PAU_NONCE_UPLOAD, PAU_NONCE_UPLOAD);
+			
+			// User must be able to upload files to proceed
+			if (! current_user_can('upload_files'))
+			  // FIXME - Trap to a 404?
+				$content = 'You do not have permission to upload files.';
+			else {
+
+			}
 			/*
 			<?php
 			require_once('admin.php');
@@ -374,6 +398,18 @@ FORM_FIN;
 			?>
 			
 			*/
+			
+			// Generate the post data structure
+			self::gen_post($content);
+			
+			// If Theme has a defined the plugin template, use it, otherwise use elements from the plugin
+			if ($theme_template = get_query_template('page-picasa_album_uploader')) {
+				include($theme_template);
+			} else {
+				include(PAU_PLUGIN_DIR.'/templates/page-picasa_album_uploader.php');
+			}
+
+			exit; // Finished displaying the minibrowser page
 		}
 		
 		// =======================
@@ -416,6 +452,41 @@ FORM_FIN;
 					.chr(125);	// "}"
 				return $uuid;
 			}
+		}
+		
+		
+		/*
+			Fill in POST data structure
+			
+			Input: Content
+			Output:  Updates global $post
+		*/
+		private function gen_post($content) {
+			global $post;
+			
+			// Create POST Data Structure
+			$formattedNow = date('Y-m-d H:i:s');
+			$post->post_author = 1;
+			$post->post_date = $formattedNow;
+			$post->post_date_gmt = $formattedNow;
+			$post->post_content = $content;
+			$post->post_title = 'Picasa Uploader';
+			$post->post_category = 0;
+			$post->post_excerpt = '';
+			$post->post_status = 'publish';
+			$post->comment_status = 'closed';
+			$post->ping_status = 'closed';
+			$post->post_password = '';
+			$post->post_name = $post->post_title;
+			$post->to_ping = '';
+			$post->pinged = '';
+			$post->post_content_filtered = '';
+			$post->post_parent = 0;
+			$post->guid = $url;
+			$post->menu_order = 0;
+			$post->post_type = 'page';
+			$post->post_mime_type = '';
+			$post->comment_count = 0;
 		}
 		
 	}
