@@ -3,7 +3,7 @@
 Plugin Name: Picasa Album Uploader
 Plugin URI: http://pumastudios.com/<TBD>
 Description: Publish directly from Google Picasa desktop using a button into a Wordpress photo album.
-Version: 0.0
+Version: 0.1
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/<TBD>
 
@@ -199,13 +199,13 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			}
 		}
 		
-		/*
-			function send_picasa_buttion()
-			
-			Generate the Picasa PZB file and emit for web browser to download
-			
-			Assumes that no other data, including headers, has been sent to browser.
-		*/
+		/**
+		 *	function send_picasa_buttion()
+		 *
+		 *	Generate the Picasa PZB file and emit for web browser to download
+		 *
+		 * 	Assumes that no other data, including headers, has been sent to browser.
+		 */
 
 		function send_picasa_button( ) {
 			$blogname = get_bloginfo( 'name' );
@@ -221,7 +221,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 <buttons format="1" version="0.1">
    <button id="$guid" type="dynamic">
    	<icon name="$guid/layername" src="pbz"/>
-   	<label>WordPress</label>
+   	<label>Wordpress</label>
 		<label_en>Wordpress</label_en>
 		<label_zh-tw>上传</label_zh-tw>
 		<label_zh-cn>上載</label_zh-cn>
@@ -237,7 +237,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		<label_ru>Загрузка</label_ru>
 		<label_es>Cargar</label_es>
 		<label_th>อัปโหลด</label_th>
-		<tooltip>Upload images to the "$blogname" Wordpress Gallery.</tooltip>
+		<tooltip>Upload to "$blogname"</tooltip>
 		<action verb="hybrid">
 		   <param name="url" value="$upload_url"/>
 		</action>
@@ -249,6 +249,8 @@ EOF;
 			$zip = new zipfile();
 			$zip->addFile( $pbf, $guid . '.pbf' );
 			
+			// FIXME Icon not showing up
+			// TODO Allow icon to be replaced by theme
 			// Add PSD icon to zip
 			$psd_filename =  PAU_PLUGIN_DIR . '/images/wordpress-logo-blue.psd'; // button icon
 			$fsize = @filesize( $psd_filename );
@@ -265,66 +267,35 @@ EOF;
 			exit;
 		}
 		
-		//FIXME
+		/**
+		 * function minibrowser()
+		 *
+		 * Generate post content for Picasa minibrowser image uploading
+		 */
+		//FIXME Add plugin based classes to all elements for end-user formatting
 		function minibrowser() {
+			// Open the plugin content div for theme formatting
+			$content = '<div class="picasa-album-uploader">';
 			
-			// FIXME Add security check
-			
-			// Setup the POST Content
-			$targetUrl = get_bloginfo('wpurl') . '/' . $this->slug . '/upload';
-			
-			// // Add plugin javascript module - depends on jQuery
-			// wp_enqueue_script('picasa-album-uploader', PAU_PLUGIN_URL . '/pau.js' ,'jquery');
-			// 
-			
-			// Get Posted photos
-			if($_POST['rss']) {
-				$content = "<form name='f' method='post' action='$targetUrl'>\n";
-				
-				// Add nonce field to the form if nonce is supported
-				if ( function_exists( 'wp_nonce_field' ) ) {
-					// Set referrer field, do not echo hidden nonce field
-					$content .= wp_nonce_field(PAU_NONCE_UPLOAD, PAU_NONCE_UPLOAD, true, false);
-					// Don't echo the referer field
-					$content .= wp_referer_field(false);
-				}
-
-				// Start div used to display images
-				$content .= "<div class='h'>Selected images</div>\n<div>\n";
-
-				// Parse the RSS feed from Picasa to get the images to be uploaded
-				$xh = new xmlHandler();
-				$nodeNames = array("PHOTO:THUMBNAIL", "PHOTO:IMGSRC", "TITLE");
-				$xh->setElementNames($nodeNames);
-				$xh->setStartTag("ITEM");
-				$xh->setVarsDefault();
-				$xh->setXmlParser();
-				$xh->setXmlData(stripslashes($_POST['rss']));
-				$pData = $xh->xmlParse();
-				$br = 0;
-
-				// For each image, display the image and setup hidden form field for upload processing.
-				foreach($pData as $e) {
-					$content .= "<img src='".attribute_escape( $e['photo:thumbnail'] )."?size=-96'>\r\n";
-					$large = attribute_escape( $e['photo:imgsrc'] )."?size=1024";
-          $content .= "<input type='hidden' name='file[]' value='".attribute_escape( $e['photo:imgsrc'] )."'>\r\n";
-				}
-
-				$content .= <<<FORM_FIN
-<div class='h'>Select your upload image size
-<INPUT type="radio" name="size" value='640'">640
-<INPUT type="radio" name="size" value='1024'" CHECKED>1024
-<INPUT type="radio" name="size" value='1600'">1600
-<INPUT type="radio" name="size" value='0')">Original
-</div>
-<div class='h'>
-<input type="submit" value="Upload">&nbsp;
-</div>
-FORM_FIN;
-				
+			// Make sure user is logged in to proceed
+			if (false == is_user_logged_in()) {
+				// Redirect back to this page after login complete
+				$content .= '<p>Please <a href="'.wp_login_url( get_bloginfo('wpurl') . '/' . $this->slug . '/minibrowser' ).'" title="Login">login</a> to continue.</p>';
 			} else {
-			 	$content = '<h3>Sorry, but no pictures were received.</h3>';
+				// As long as current user is allowed to upload files, check for requested files
+				if ( current_user_can('upload_files') ) {
+					if ($_POST['rss']) {
+						$content = self::build_upload_form();					
+					} else {
+					 	$content = '<p>Sorry, but no pictures were received.</p>';
+					}					
+				} else {
+					// User is not allowed to upload files
+					$content = '<p>Sorry, you do not have permission to upload files.</p>';
+				}
 			}
+			
+			$content .= '</div>';  // Close the Div for this post text
 			
 			// Generate the post data structure
 			self::gen_post($content);
@@ -339,77 +310,76 @@ FORM_FIN;
 			exit; // Finished displaying the minibrowser page
 		}
 		
+		/**
+		 * function upload_images()
+		 *
+		 * Processes POST request from Picasa to upload images and save in Wordpress
+		 */
 		function upload_images() {
+			require_once( ABSPATH . 'wp-admin/includes/admin.php' ); // Load functions to handle uploads
+			
 			// Confirm the nonce field to allow operation to continue
 			// FIXME On Nonce failure generate better failure screen.
 			check_admin_referer(PAU_NONCE_UPLOAD, PAU_NONCE_UPLOAD);
 			
+			// FIXME Errors in processing here don't get displayed by Picasa
+			
+			// Open the plugin content div for theme formatting
+			$content = '<div class="picasa-album-uploader">';
+			
 			// User must be able to upload files to proceed
 			if (! current_user_can('upload_files'))
 			  // FIXME - Trap to a 404?
-				$content = 'You do not have permission to upload files.';
+				$content .= '<p>Sorry, you do not have permission to upload files.</p>';
 			else {
+				if ( $_FILES ) {
+					// Don't need to test that this is the wp_upload_form in wp_handle_upload()
+					$overrides = array( 'test_form' => false );
+					
+					foreach ( $_FILES as $key => $file ) {
+						if ( empty( $file ) ) {
+							continue; // Skip if value empty
+						}
+						
+						$status = wp_handle_upload( $file, $overrides );
+						if (isset($status['error'])) {
+							continue; // Error on this file, go to next one.
+						}
+						$url = $status['url'];
+            $type = $status['type'];
+            $file = $status['file'];
+            $filename = basename($file);
+            $content = '';
 
-			}
-			/*
-			<?php
-			require_once('admin.php');
-			if (!current_user_can('upload_files'))
-			    wp_die(__('You do not have permission to upload files.'));
-			if($_FILES) {
-			    $_POST['action'] = "wp_handle_upload";
-			    foreach($_FILES as $key => $file) {
-			        if (!empty($file)) {
-			            $overrides = array('test_form' => false);
-			            $status = wp_handle_upload($file,$overrides);
-			            unset($file);
-			            if (isset($status['error']) ){
-			                continue;
-			            }else{
-			                $url = $status['url'];
-			                $type = $status['type'];
-			                $file = $status['file'];
-			                $filename = basename($file);
-			                $content = '';
+            if ( $image_meta = @wp_read_image_metadata($file) ) {
+                if ( trim($image_meta['title']) )
+                    $title = $image_meta['title'];
+                if ( trim($image_meta['caption']) )
+                    $content = $image_meta['caption'];
+            }
+            $object = array_merge( array(
+            'post_title' => $filename,
+            'post_content' => $content,
+            'post_parent' => 0,
+            'post_mime_type' => $type,
+            'guid' => $url), array());
 
-			                if ( $image_meta = @wp_read_image_metadata($file) ) {
-			                    if ( trim($image_meta['title']) )
-			                        $title = $image_meta['title'];
-			                    if ( trim($image_meta['caption']) )
-			                        $content = $image_meta['caption'];
-			                }
-			                $object = array_merge( array(
-			                'post_title' => $filename,
-			                'post_content' => $content,
-			                'post_parent' => 0,
-			                'post_mime_type' => $type,
-			                'guid' => $url), array());
-
-			                $id = wp_insert_attachment($object, $file,0);
-			                if ( !is_wp_error($id) ) {
-			                    wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
-			                    do_action('wp_create_file_in_uploads', $file, $id); // for replication
-			                }
-			            }
-			        }
-			    }
-			}
-
-			?>
+            $id = wp_insert_attachment($object, $file,0);
+            if ( !is_wp_error($id) ) {
+                wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
+                do_action('wp_create_file_in_uploads', $file, $id); // for replication
+            }						
+					} // end foreach $file
+				} else {
+					$content .="<p>Sorry, no files were uploaded by Picasa.</p>";
+				}
+			}			
+			$content .= '</div>'; // Close the div for this post entry
 			
-			*/
+			// FIXME Report any errors
 			
-			// Generate the post data structure
-			self::gen_post($content);
-			
-			// If Theme has a defined the plugin template, use it, otherwise use elements from the plugin
-			if ($theme_template = get_query_template('page-picasa_album_uploader')) {
-				include($theme_template);
-			} else {
-				include(PAU_PLUGIN_DIR.'/templates/page-picasa_album_uploader.php');
-			}
-
-			exit; // Finished displaying the minibrowser page
+			// Picasa will close the minibrowser - Any HTML output will be ignored.
+			exit;
 		}
 		
 		// =======================
@@ -434,7 +404,7 @@ FORM_FIN;
 			Generate a standard format guid
 			
 			Input:  None
-			Returns:  UUID string in form: 
+			Returns:  UUID string in form: FIXME
 		*/
 		private function guid() {
 			if ( function_exists( 'com_create_guid' ) ) {
@@ -452,6 +422,66 @@ FORM_FIN;
 					.chr(125);	// "}"
 				return $uuid;
 			}
+		}
+		
+		/*
+			function build_upload_form()
+			
+			Generate the form used in the Picasa minibrowser to confirm the upload
+			
+			Input: None
+			Output: HTML form returned as string
+		*/
+		private function build_upload_form() {
+			// URL used to POST form
+			$targetUrl = 'upload'; // Must be simple page name for Picasa to process the input URLs correctly.
+
+			// Get Posted photos
+			$content = "<form method='post' action='$targetUrl'>\n";
+
+			// Add nonce field to the form if nonce is supported
+			if ( function_exists( 'wp_nonce_field' ) ) {
+				// Set referrer field, do not echo hidden nonce field
+				$content .= wp_nonce_field(PAU_NONCE_UPLOAD, PAU_NONCE_UPLOAD, true, false);
+				// Don't echo the referer field
+				$content .= wp_referer_field(false);
+			}
+
+			// Start div used to display images
+			$content .= "<div><p>Selected images</p>\n";
+
+			// Parse the RSS feed from Picasa to get the images to be uploaded
+			$xh = new xmlHandler();
+			$nodeNames = array("PHOTO:THUMBNAIL", "PHOTO:IMGSRC", "TITLE");
+			$xh->setElementNames($nodeNames);
+			$xh->setStartTag("ITEM");
+			$xh->setVarsDefault();
+			$xh->setXmlParser();
+			$xh->setXmlData(stripslashes($_POST['rss']));
+			$pData = $xh->xmlParse();
+			$br = 0;
+
+			// For each image, display the image and setup hidden form field for upload processing.
+			foreach($pData as $e) {
+				$content .= "<img src='".attribute_escape( $e['photo:thumbnail'] )."?size=-96' title='".attribute_escape( $e['title'] )."'>";
+				$large = attribute_escape( $e['photo:imgsrc'] ) ."?size=1024";
+         $content .= "<input type=hidden name='$large'>";
+			}
+
+			$content .= <<<FORM_FIN
+</div>
+<div class='h'>Select your upload image size
+<INPUT type="radio" name="size" value='640'">640
+<INPUT type="radio" name="size" value='1024'" CHECKED>1024
+<INPUT type="radio" name="size" value='1600'">1600
+<INPUT type="radio" name="size" value='0')">Original
+</div>
+<div class='h'>
+<input type="submit" value="Upload">&nbsp;
+</div>
+FORM_FIN;
+
+			return $content;
 		}
 		
 		

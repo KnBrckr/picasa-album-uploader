@@ -11,11 +11,6 @@
 			<div class="post" id="post-<?php the_ID(); ?>">
 				<div class="entry">
 					<?php the_content(); ?>
-				
-				<?php	
-					new dBug($_POST);
-					new dBug($_REQUEST);
-					?>
 				</div>
 			</div>
 		<?php endwhile; ?>
