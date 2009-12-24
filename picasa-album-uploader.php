@@ -140,7 +140,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			$tokens = split( '/', $wp_request );
 
 			if ( $this->slug != $tokens[0] ) {
-				return false;
+				return false; // Request is not for this plugin
 			}
 			
 			/*
@@ -163,10 +163,10 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 					break;
 				
 				default:
-					return false;
+					return false; // slug matched, but 2nd token did not
 			}
 			
-			return true;
+			return true; // Have a valid request to be handled by this plugin
 		}
 		
 		// =================================================================
@@ -176,7 +176,8 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		function template_redirect( $requested_url=null, $do_redirect=true ) {
 
 			if (! $this->is_pau ) {
-				return;
+				// Should never be the case, redirect only added when request should be handled
+				return; 
 			}
 			
 			switch ( $this->pau_serve ) {
@@ -190,14 +191,14 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 					self::upload_images();
 					break;
 			}
+			// Will not get here - each case above exits so that default template processing
+			// by Wordpress is not performed.
 		}
 		
 		/**
 		 *	function send_picasa_buttion()
 		 *
-		 *	Generate the Picasa PZB file and emit for web browser to download
-		 *
-		 * 	Assumes that no other data, including headers, has been sent to browser.
+		 *	Generate the Picasa PZB file and emit for Picasa to download and install.
 		 */
 
 		function send_picasa_button( ) {
@@ -257,7 +258,7 @@ EOF;
 			header( 'Content-length: ' . strlen($zipcontents) . "\n\n" );
 
 			echo $zipcontents;
-			exit;
+			exit; // Finished sending the button - No more WP processing should be performed
 		}
 		
 		/**
@@ -294,20 +295,22 @@ EOF;
 			// Generate the post data structure
 			self::gen_post($content);
 			
-			// If Theme has a defined the plugin template, use it, otherwise use elements from the plugin
+			// If Theme has a defined the plugin template, use it, otherwise use template from the plugin
 			if ($theme_template = get_query_template('page-picasa_album_uploader')) {
 				include($theme_template);
 			} else {
 				include(PAU_PLUGIN_DIR.'/templates/page-picasa_album_uploader.php');
 			}
 
-			exit; // Finished displaying the minibrowser page
+			exit; // Finished displaying the minibrowser page - No more WP processing should be performed
 		}
 		
 		/**
 		 * function upload_images()
 		 *
-		 * Processes POST request from Picasa to upload images and save in Wordpress
+		 * Processes POST request from Picasa to upload images and save in Wordpress.
+		 *
+		 * Picasa will close the minibrowser - Any HTML output will be ignored.
 		 */
 		function upload_images() {
 			require_once( ABSPATH . 'wp-admin/includes/admin.php' ); // Load functions to handle uploads
@@ -316,13 +319,10 @@ EOF;
 			// FIXME On Nonce failure generate better failure screen.
 			check_admin_referer(PAU_NONCE_UPLOAD, PAU_NONCE_UPLOAD);
 			
-			// Open the plugin content div for theme formatting
-			$content = '<div class="picasa-album-uploader">';
-			
 			// User must be able to upload files to proceed
 			if (! current_user_can('upload_files'))
 			  // FIXME - Trap to a 404?
-				$content .= '<p>Sorry, you do not have permission to upload files.</p>';
+				$content = '<p>Sorry, you do not have permission to upload files.</p>';
 			else {
 				if ( $_FILES ) {
 					// Don't need to test that this is the wp_upload_form in wp_handle_upload()
@@ -363,15 +363,13 @@ EOF;
             }						
 					} // end foreach $file
 				} else {
-					$content .="<p>Sorry, no files were uploaded by Picasa.</p>";
+					$content ="<p>Sorry, no files were uploaded by Picasa.</p>"; // FIXME
 				}
 			}			
-			$content .= '</div>'; // Close the div for this post entry
 			
 			// FIXME Report any errors
-			
-			// Picasa will close the minibrowser - Any HTML output will be ignored.
-			exit;
+						
+			exit; // No more WP processing should be performed.
 		}
 		
 		// =======================
