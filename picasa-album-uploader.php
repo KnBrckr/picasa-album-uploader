@@ -419,7 +419,7 @@ EOF;
 			
 			Generate the form used in the Picasa minibrowser to confirm the upload
 			
-			Input: None
+			Input: $_POST['rss']
 			Output: HTML form returned as string
 		*/
 		private function build_upload_form() {
@@ -452,6 +452,7 @@ EOF;
 
 			// For each image, display the image and setup hidden form field for upload processing.
 			foreach($pData as $e) {
+				// TODO Add fields to update image descriptions, etc.
 				$content .= "<img src='".attribute_escape( $e['photo:thumbnail'] )."?size=-96' title='".attribute_escape( $e['title'] )."'>";
 				$large = attribute_escape( $e['photo:imgsrc'] ) ."?size=1024";
 				$content .= "<input type=hidden name='$large'>";
