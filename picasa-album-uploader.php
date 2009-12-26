@@ -69,12 +69,6 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 	class picasa_album_uploader {
 		
 		// FIXME Create object to define allowed plugin parameters and provide manipulation via admin panel
-		/**
-		 * undocumented class variable
-		 *
-		 * @var string
-		 **/
-		var $;
 		var $slug = "picasa_album";  // TODO - Make this configurable
 		
 		var $is_pau = false;  // True if page should be handled by template provided by this plugin
