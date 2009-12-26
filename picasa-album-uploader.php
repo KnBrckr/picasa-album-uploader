@@ -3,7 +3,7 @@
 Plugin Name: Picasa Album Uploader
 Plugin URI: http://pumastudios.com/blog/<TBD>
 Description: Publish directly from Google Picasa desktop using a button into a Wordpress photo album.
-Version: 0.1
+Version: 0.2
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/blog/
 
@@ -23,6 +23,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
+
+TODO Optionally Create a New Post to attach the uploaded images as a WP gallery using [gallery] shortcode.
 
 */
 
@@ -67,33 +69,48 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 	class picasa_album_uploader {
 		
 		// FIXME Create object to define allowed plugin parameters and provide manipulation via admin panel
-		
+		/**
+		 * undocumented class variable
+		 *
+		 * @var string
+		 **/
+		var $;
 		var $slug = "picasa_album";  // TODO - Make this configurable
 		
 		var $is_pau = false;  // True if page should be handled by template provided by this plugin
 		
-		// Constructor function		
+		/**
+		 * Constructor function for picasa_album_uploader class.
+		 *
+		 * Adds the needed shortcodes and filters to processing stream
+		 **/
 		function picasa_album_uploader() {
 			
 			// Shortcode to generate URL to download Picassa Button
+			// TODO put download button into the admin screen for the plugin - any reason users would need this button?
 			add_shortcode( 'pau_download_button', array( &$this, 'sc_download_button' ) );
-			
-			// TODO - Needs to be implemented
-			// Shortcode to display album
-			add_shortcode( 'pau_album', array( &$this, 'sc_album' ) );  
-			
+						
 			// Add action to check if requested URL matches slug handled by plugin
 			add_filter( 'the_posts', array( &$this, 'check_url' ));
 		}
 		
-		/*
-			function check_url( $posts )
-
-			Examines requested URL for match to slug handled by plugin.
-			
-			If URL is handled by plugin, environment setup to catch it in the template redirect			
-		*/
+		/**
+		 * Turn the download button shortcode into HTML link
+		 *
+		 * @return string URL to download Picasa button
+		 */
+		function sc_download_button( $atts, $content = null ) {
+			return '<a href="picasa://importbutton/?url=' . get_bloginfo('wpurl') . '/' . $this->slug . '/wordpress_uploader.pbz" title="Download Picasa Button">Download Picasa Button</a>';
+		}	
 		
+		/**
+		 * Called via 'the_posts' filter to examine requested URL for match to slug handled by plugin.
+		 *
+		 * If URL is handled by plugin, environment setup to catch it in the template redirect and
+		 * a new Array of Posts containing a single element is created for the plugin processed post.
+		 *
+		 * @return array Array of Posts
+		 */		
 		function check_url( $posts ) {
 			global $wp;
 			global $wp_query;
@@ -104,11 +121,10 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				return $posts;
 			}
 			
-			/*
-				Request is for this plugin.  Setup a dummy Post.
-				- very little detail needed to deliver results at this stage, just enough that wp-core
-				  doesn't treat this as a 404 event.
-			*/
+			
+			//	Request is for this plugin.  Setup a dummy Post.
+			//	- very little detail needed to deliver results at this stage, just enough that wp-core
+			//	  doesn't treat this as a 404 event.
 			$post = new stdClass();
 			$post->ID = -1;										// Fake ID# for the post
 			
@@ -130,49 +146,14 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 
 			return array($post);
 		}
-		
-		/*
-			parse_request($wp_request)
-			
-			Parse incoming request and confirm it is valid
-		*/
-		function parse_request( $wp_request ){
-			$tokens = split( '/', $wp_request );
 
-			if ( $this->slug != $tokens[0] ) {
-				return false; // Request is not for this plugin
-			}
-			
-			/*
-				Valid values for 2nd parameter:
-					wordpress_uploader.pbz
-					mini_browser
-					upload
-			*/
-			switch ( $tokens[1] ) {
-				case 'wordpress_uploader.pbz':
-					$this->pau_serve = PAU_BUTTON;
-					break;
-				
-				case 'minibrowser':
-					$this->pau_serve = PAU_MINIBROWSER;
-					break;
-				
-				case 'upload':
-					$this->pau_serve = PAU_UPLOAD;
-					break;
-				
-				default:
-					return false; // slug matched, but 2nd token did not
-			}
-			
-			return true; // Have a valid request to be handled by this plugin
-		}
-		
-		// =================================================================
-		// = Template Redirection - used to grab request for picasa plugin =
-		// =================================================================
-		
+		/**
+		 * Perform template redirect processing for requests handled by the plugin
+		 *
+		 * This function will not return under normal conditions.  Each case
+		 * handled by the plugin results in a complete page or action with no
+		 * further action needed by WordPress core.
+		 **/
 		function template_redirect( $requested_url=null, $do_redirect=true ) {
 
 			if (! $this->is_pau ) {
@@ -194,22 +175,59 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			// Will not get here - each case above exits so that default template processing
 			// by Wordpress is not performed.
 		}
+
+		/**
+		 * Parse incoming request and test if it should be handled by this plugin.
+		 *
+		 * @return boolean True if request is to be handled by the plugin
+		 * @access private
+		 */
+		private function parse_request( $wp_request ){
+			$tokens = split( '/', $wp_request );
+
+			if ( $this->slug != $tokens[0] ) {
+				return false; // Request is not for this plugin
+			}
+			
+			// Valid values for 2nd parameter:
+			//	wordpress_uploader.pbz
+			//	mini_browser
+			//	upload
+			switch ( $tokens[1] ) {
+				case 'wordpress_uploader.pbz':
+					$this->pau_serve = PAU_BUTTON;
+					break;
+				
+				case 'minibrowser':
+					$this->pau_serve = PAU_MINIBROWSER;
+					break;
+				
+				case 'upload':
+					$this->pau_serve = PAU_UPLOAD;
+					break;
+				
+				default:
+					return false; // slug matched, but 2nd token did not
+			}
+			
+			return true; // Have a valid request to be handled by this plugin
+		}
 		
 		/**
-		 *	function send_picasa_buttion()
+		 * Generate the Picasa PZB file and emit for Picasa to download and install.
+		 * This function does not return
 		 *
-		 *	Generate the Picasa PZB file and emit for Picasa to download and install.
+		 * See http://code.google.com/apis/picasa/docs/button_api.html for a
+		 * description of the contents of the PZB file.
+		 *
+		 * @access private
 		 */
-
-		function send_picasa_button( ) {
+		private function send_picasa_button( ) {
 			$blogname = get_bloginfo( 'name' );
 			$guid = self::guid();
 			$upload_url = get_bloginfo( 'wpurl' ) . '/' . $this->slug . '/minibrowser';
 			
-			/*
-				XML to describe the Picasa plugin button
-					See http://code.google.com/apis/picasa/docs/button_api.html
-			*/
+			// XML to describe the Picasa plugin button
 			$pbf = <<<EOF
 <?xml  version="1.0" encoding="utf-8" ?>
 <buttons format="1" version="0.1">
@@ -262,11 +280,12 @@ EOF;
 		}
 		
 		/**
-		 * function minibrowser()
+		 * Generate post content for Picasa minibrowser image uploading.  This function
+		 * does not return.
 		 *
-		 * Generate post content for Picasa minibrowser image uploading
+		 * @access private
 		 */
-		function minibrowser() {
+		private function minibrowser() {
 			
 			// Open the plugin content div for theme formatting
 			$content = '<div class="picasa-album-uploader">';
@@ -306,13 +325,14 @@ EOF;
 		}
 		
 		/**
-		 * function upload_images()
-		 *
 		 * Processes POST request from Picasa to upload images and save in Wordpress.
 		 *
-		 * Picasa will close the minibrowser - Any HTML output will be ignored.
+		 * Picasa will close the minibrowser - Any HTML output will be ignored.  This function
+		 * does not return.
+		 *
+		 * @access private
 		 */
-		function upload_images() {
+		private function upload_images() {
 			require_once( ABSPATH . 'wp-admin/includes/admin.php' ); // Load functions to handle uploads
 			
 			// Confirm the nonce field to allow operation to continue
@@ -337,6 +357,9 @@ EOF;
 						if (isset($status['error'])) {
 							continue; // Error on this file, go to next one.
 						}
+						
+						// Initial image processing below lifted from Google example
+
 						$url = $status['url'];
             $type = $status['type'];
             $file = $status['file'];
@@ -371,31 +394,13 @@ EOF;
 						
 			exit; // No more WP processing should be performed.
 		}
-		
-		// =======================
-		// = Shortcode Functions =
-		// =======================
 
-		function sc_album( $atts, $content = null ) {
-			return 'This is the album Shortcode Replacement';
-		}
-		
-		function sc_download_button( $atts, $content = null ) {
-			return '<a href="picasa://importbutton/?url=' . get_bloginfo('wpurl') . '/' . $this->slug . '/wordpress_uploader.pbz" title="Download Picasa Button">Download Picasa Button</a>';
-		}
-		
-		// =====================
-		// = Private Functions =
-		// =====================		
-		
-		/*
-			function guid ()
-			
-			Generate a standard format guid
-			
-			Input:  None
-			Returns:  UUID string in form: FIXME
-		*/
+		/**
+		 * Generate a standard format guid
+		 *
+		 * @return string UUID in form: FIXME
+		 * @access private
+		 */
 		private function guid() {
 			if ( function_exists( 'com_create_guid' ) ) {
 				return com_create_guid();
@@ -414,14 +419,16 @@ EOF;
 			}
 		}
 		
-		/*
-			function build_upload_form()
-			
-			Generate the form used in the Picasa minibrowser to confirm the upload
-			
-			Input: $_POST['rss']
-			Output: HTML form returned as string
-		*/
+		/**
+		 * Generate the form used in the Picasa minibrowser to confirm the upload
+		 *
+		 * Examines $_POST['rss'] for RSS feed from Picasa to display form dialog
+		 * used to confirm images to be uploaded and set any per-image fields
+		 * per user request.
+	   *
+		 * @return string HTML form
+		 * @access private
+		 */
 		private function build_upload_form() {
 			// Form handling requires some javascript - depends on jQuery
 			wp_enqueue_script('picasa-album-uploader', PAU_PLUGIN_URL . '/pau.js' ,'jquery');
@@ -476,12 +483,12 @@ FORM_FIN;
 		}
 		
 		
-		/*
-			Fill in POST data structure
-			
-			Input: Content
-			Output:  Updates global $post
-		*/
+		/**
+		 * Fill in WordPress global $post data structure to describe the fake post
+		 *
+		 * @params string Content of the entry post
+		 * @access private
+		 */
 		private function gen_post($content) {
 			global $post;
 			
