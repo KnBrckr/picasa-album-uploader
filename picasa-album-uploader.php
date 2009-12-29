@@ -25,6 +25,7 @@ You should have received a copy of the GNU General Public License
 along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
 
 TODO Optionally Create a New Post to attach the uploaded images as a WP gallery using [gallery] shortcode.
+TODO Internationalize Plugin
 
 */
 
@@ -58,7 +59,13 @@ if ( ( include_once PAU_PLUGIN_DIR . '/lib/zip.lib.php') == FALSE ) {
 // xmlHandler.class copied from Google's sample handler
 if ( ( include_once PAU_PLUGIN_DIR . '/lib/xmlHandler.class')  == FALSE ) {
 	// TODO - Improve error handling
-	echo "Unable to load xml Handler";
+	echo "Unable to load xml Handler\n";
+}
+
+// Include admin portion of plugin
+if ( ( include_once PAU_PLUGIN_DIR . '/admin/options.php' ) == FALSE ) {
+	// TODO - Improve error handling
+	echo "Unable to load admin/options\n";
 }
 
 // =================================
@@ -67,18 +74,21 @@ if ( ( include_once PAU_PLUGIN_DIR . '/lib/xmlHandler.class')  == FALSE ) {
 
 if ( ! class_exists( 'picasa_album_uploader' ) ) {
 	class picasa_album_uploader {
-		
-		// FIXME Create object to define allowed plugin parameters and provide manipulation via admin panel
-		var $slug = "picasa_album";  // TODO - Make this configurable
-		
-		var $is_pau = false;  // True if page should be handled by template provided by this plugin
+		/**
+		 * Option settings used by plugin
+		 *
+		 * @var string
+		 * @access private
+		 **/
+		var $pau_options;
 		
 		/**
 		 * Constructor function for picasa_album_uploader class.
 		 *
 		 * Adds the needed shortcodes and filters to processing stream
-		 **/
+		 */
 		function picasa_album_uploader() {
+			$this->pau_options = new picasa_album_uploader_options();
 			
 			// Shortcode to generate URL to download Picassa Button
 			// TODO put download button into the admin screen for the plugin - any reason users would need this button?
@@ -94,7 +104,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * @return string URL to download Picasa button
 		 */
 		function sc_download_button( $atts, $content = null ) {
-			return '<a href="picasa://importbutton/?url=' . get_bloginfo('wpurl') . '/' . $this->slug . '/wordpress_uploader.pbz" title="Download Picasa Button">Download Picasa Button</a>';
+			return '<a href="picasa://importbutton/?url=' . get_bloginfo('wpurl') . '/' . $this->pau_options->slug() . '/wordpress_uploader.pbz" title="Download Picasa Button">Download Picasa Button</a>';
 		}	
 		
 		/**
@@ -115,15 +125,11 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				return $posts;
 			}
 			
-			
 			//	Request is for this plugin.  Setup a dummy Post.
 			//	- very little detail needed to deliver results at this stage, just enough that wp-core
 			//	  doesn't treat this as a 404 event.
 			$post = new stdClass();
 			$post->ID = -1;										// Fake ID# for the post
-			
-			// Request should be handled by this plugin
-			$this->is_pau = true;
 			
 			// Add template redirect action to process the page
 			add_action('template_redirect', array(&$this, 'template_redirect'));
@@ -148,13 +154,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * handled by the plugin results in a complete page or action with no
 		 * further action needed by WordPress core.
 		 **/
-		function template_redirect( $requested_url=null, $do_redirect=true ) {
-
-			if (! $this->is_pau ) {
-				// Should never be the case, redirect only added when request should be handled
-				return; 
-			}
-			
+		function template_redirect( $requested_url=null, $do_redirect=true ) {			
 			switch ( $this->pau_serve ) {
 				case PAU_BUTTON:
 					self::send_picasa_button();
@@ -179,7 +179,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		private function parse_request( $wp_request ){
 			$tokens = split( '/', $wp_request );
 
-			if ( $this->slug != $tokens[0] ) {
+			if ( $this->pau_options->slug() != $tokens[0] ) {
 				return false; // Request is not for this plugin
 			}
 			
@@ -219,7 +219,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		private function send_picasa_button( ) {
 			$blogname = get_bloginfo( 'name' );
 			$guid = self::guid();
-			$upload_url = get_bloginfo( 'wpurl' ) . '/' . $this->slug . '/minibrowser';
+			$upload_url = get_bloginfo( 'wpurl' ) . '/' . $this->pau_options->slug() . '/minibrowser';
 			
 			// XML to describe the Picasa plugin button
 			$pbf = <<<EOF
@@ -288,7 +288,7 @@ EOF;
 			if (false == is_user_logged_in()) {
 				// TODO Generate immediate redirect to the login page
 				// Redirect back to this page after login complete
-				$content .= '<p>Please <a href="'.wp_login_url( get_bloginfo('wpurl') . '/' . $this->slug . '/minibrowser' ).'" title="Login">login</a> to continue.</p>';
+				$content .= '<p>Please <a href="'.wp_login_url( get_bloginfo('wpurl') . '/' . $this->pau_options->slug() . '/minibrowser' ).'" title="Login">login</a> to continue.</p>';
 			} else {
 				// As long as current user is allowed to upload files, check for requested files
 				if ( current_user_can('upload_files') ) {
