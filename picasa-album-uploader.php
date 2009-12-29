@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Picasa Album Uploader
-Plugin URI: http://pumastudios.com/blog/<TBD>
+Plugin URI: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Description: Publish directly from Google Picasa desktop using a button into a Wordpress photo album.
-Version: 0.2
+Version: 0.3
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/blog/
 
@@ -104,7 +104,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * @return string URL to download Picasa button
 		 */
 		function sc_download_button( $atts, $content = null ) {
-			return '<a href="picasa://importbutton/?url=' . get_bloginfo('wpurl') . '/' . $this->pau_options->slug() . '/wordpress_uploader.pbz" title="Download Picasa Button">Download Picasa Button</a>';
+			return '<a href="picasa://importbutton/?url=' . get_bloginfo('wpurl') . '/' . $this->pau_options->slug() . '/wordpress_uploader.pbz" title="Download Picasa Button and Install in Picasa">Install Button in Picasa Desktop</a>';
 		}	
 		
 		/**

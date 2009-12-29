@@ -1,12 +1,12 @@
 === Plugin Name ===
 Contributors: draca
-FIXME Donate link: http://pumastudios.com/donate/
+Donate link: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Tags: picasa, upload, images, albums, media
 Requires at least: 2.8.5
 Tested up to: 2.8.5
 Stable tag: trunk FIXME
 
-Publish directly from Google Picasa desktop into WordPress media and optionally create a post entry displaying the uploaded images using the Wordpress `[gallery]` tag.
+Easily upload media from Google Picasa Desktop into WordPress and optionally create a post entry displaying the uploaded images using the Wordpress `[gallery]` tag.
 
 == Description ==
 
@@ -27,21 +27,17 @@ stable.
 
 1. Upload the picasa-album-uploader to the `wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Configure the plugin through the FIXME screen
-1. Use the 'Download Picasa Button' Button in the FIXME screen to import the button into Picasa
-1. Begin uploading photos from Picasa
+1. Configure the plugin through the Admin Settings for Media
+1. Use the 'Download Picasa Button' Button in the Admin Settings for Media to import the button into Picasa
+1. Begin uploading photos from Picasa to your blog.
 
 == Frequently Asked Questions ==
 
 TODO FAQs?
 
-= A question that someone might have =
+= I changed the slug name (or other part of my WordPress URL) and my button in Picasa stopped working.  What do I do? =
 
-An answer to that question.
-
-= What about foo bar? =
-
-Answer to foo bar dilemma.
+The Picasa button contains a URL to your WordPress installation, including the slug name used by this plugin.  If any portion of the URL changes, the button in Picasa must be replaced so that the button is sending to the correct URL.
 
 == Screenshots ==
 
@@ -52,6 +48,9 @@ the directory of the stable readme.txt, so in this case, `/tags/4.3/screenshot-1
 2. This is the second screen shot
 
 == Changelog ==
+
+= 0.3 =
+* Created Admin Settings Section on the Media page.
 
 = 0.2 =
 * Primary functions of interacting with Picasa and uploading images into WP media complete.

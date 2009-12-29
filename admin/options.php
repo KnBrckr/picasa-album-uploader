@@ -15,7 +15,7 @@ class picasa_album_uploader_options
 	function picasa_album_uploader_options()
 	{
 		// Default slug name
-		$options['slug'] = 'picasa_album';
+		$options['slug'] = 'picasa_album_uploader';
 		
 		// Store defaults to WP database
 		add_option( 'pau_plugin_settings', $options);
@@ -48,20 +48,23 @@ class picasa_album_uploader_options
 		add_settings_field( 'pau_plugin_settings[slug]', 'Slug', array( &$this, 'pau_settings_slug_html' ), 'media', 'pau_settings_section' );
 		
 		// Register the slug name setting;
-		register_setting( 'media', 'pau_plugin_settings', array (&$this, 'sanitize_settings') ); // FIXME Add sanitization of slug name - wp_unique_post_slug($slug, $post_ID, $post_status, $post_type, $post_parent)
+		register_setting( 'media', 'pau_plugin_settings', array (&$this, 'sanitize_settings') );
 		
 		// FIXME Need an unregister_setting routine for de-install of plugin
 	}
 	
 	/**
-	 * Sanitize the Plugin Options
+	 * Sanitize the Plugin Options received from the user
 	 *
 	 * @return hash Sanitized hash of plugin options
 	 **/
 	function sanitize_settings($options)
 	{
-		$options['slug'] = preg_replace("/\s/", "-", $options['slug']);
-		$options['slug'] = preg_replace("/[^a-zA-Z0-9-_]/","", $options['slug']);
+		$pattern[0] = '/\s*/'; // Translate white space to a -
+		$pattern[1] = '/[^a-zA-Z0-9-_]/'; // Only allow alphanumeric, dash (-) and underscore (_)
+		$replacement[0] = '-';
+		$replacement[1] = '';
+		$options['slug'] = preg_replace($pattern, $replacement, $options['slug']);
 		
 		return $options;
 	}
@@ -71,16 +74,25 @@ class picasa_album_uploader_options
 	 **/
 	function pau_settings_section_html()
 	{
-		echo "<p>The following settings configure the Picasa Album Uploader Plugin.</p>";
 		echo do_shortcode( "[pau_download_button]" );
+		?>
+		<p>To use the Picasa Album Uploader, install the Button in Picasa Desktop using the link above.</p>
+		<p>Settings for the plugin are made below.</p>
+		<?php
+
 	}
 	
 	/**
 	 * Emit HTML to create form field for slug name
 	 **/
 	function pau_settings_slug_html()
-	{
-		echo "<input type='text' name='pau_plugin_settings[slug]' value='".$this->slug()."' />";
+	{ ?>
+		<input type='text' name='pau_plugin_settings[slug]' value='<?php echo $this->slug(); ?>' /><br />
+		Set the slug used by the plugin.  
+		Only alphanumeric, dash (-) and underscore (_) characters are allowed.
+		White space will be convereted to dash, illegal characters will be removed.
+		<br />When the slug name is changed, a new button must be installed in Picasa to match the new setting.
+		<?php
 	}
 } // END class 
 ?>
