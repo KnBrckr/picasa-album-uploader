@@ -76,6 +76,7 @@ When formatting the page, it is best to avoid links that will navigate away from
 
 = 0.3 =
 * Created Admin Settings Section on the Media page.
+* Redirect immediately to login screen if user not logged in
 
 = 0.2 =
 * Primary functions of interacting with Picasa and uploading images into WP media complete.

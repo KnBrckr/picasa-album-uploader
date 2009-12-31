@@ -7,7 +7,7 @@ Version: 0.3
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/blog/
 
-Copyright: 2009 Kenneth J. Brucker (email: ken@pumastudios.com)
+Copyright: 2010 Kenneth J. Brucker (email: ken@pumastudios.com)
 
 This file is part of Picasa Album Uploader, a plugin for Wordpress.
 
@@ -309,6 +309,7 @@ EOF;
 					}					
 				} else {
 					// User is not allowed to upload files
+					// FIXME Confirm user priv check works
 					$content = '<p class="error">Sorry, you do not have permission to upload files.</p>';
 				}
 			}
@@ -338,64 +339,65 @@ EOF;
 		 */
 		private function upload_images() {
 			require_once( ABSPATH . 'wp-admin/includes/admin.php' ); // Load functions to handle uploads
-			
+
 			// Confirm the nonce field to allow operation to continue
 			// FIXME On Nonce failure generate better failure screen.
 			check_admin_referer(PAU_NONCE_UPLOAD, PAU_NONCE_UPLOAD);
-			
+
 			// User must be able to upload files to proceed
 			if (! current_user_can('upload_files'))
-			  // FIXME - Trap to a 404?
-				$content = '<p>Sorry, you do not have permission to upload files.</p>';
+				// FIXME - Trap to a 404?
+			$content = '<p>Sorry, you do not have permission to upload files.</p>';
 			else {
 				if ( $_FILES ) {
-					// Don't need to test that this is the wp_upload_form in wp_handle_upload()
+					// Don't need to test that this is a wp_upload_form in wp_handle_upload()
 					$overrides = array( 'test_form' => false );
-					
+
+					$i = 0; // Loop counter
 					foreach ( $_FILES as $key => $file ) {
 						if ( empty( $file ) ) {
 							continue; // Skip if value empty
 						}
-						
+
 						$status = wp_handle_upload( $file, $overrides );
 						if (isset($status['error'])) {
 							continue; // Error on this file, go to next one.
 						}
-						
-						// Initial image processing below lifted from Google example
+
+						// Image processing below based on Google example
 
 						$url = $status['url'];
-            $type = $status['type'];
-            $file = $status['file'];
-            $filename = basename($file);
-            $content = '';
+						$type = $status['type'];
+						$file = $status['file'];
+						
+						// Use title, caption and description received from form
+						$title = $_POST['title'][$i];
+						$excerpt = $_POST['caption'][$i];
+						$content = $_POST['description'][$i];
 
-            if ( $image_meta = @wp_read_image_metadata($file) ) {
-                if ( trim($image_meta['title']) )
-                    $title = $image_meta['title'];
-                if ( trim($image_meta['caption']) )
-                    $content = $image_meta['caption'];
-            }
-            $object = array_merge( array(
-            'post_title' => $filename,
-            'post_content' => $content,
-            'post_parent' => 0,
-            'post_mime_type' => $type,
-            'guid' => $url), array());
+						$object = array_merge( array(
+							'post_title' => $title,
+							'post_content' => $content,
+							'post_excerpt' => $excerpt,
+							'post_parent' => 0,
+							'post_mime_type' => $type,
+							'guid' => $url), array());
 
-            $id = wp_insert_attachment($object, $file,0);
-            if ( !is_wp_error($id) ) {
-                wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
-                do_action('wp_create_file_in_uploads', $file, $id); // for replication
-            }						
+						$id = wp_insert_attachment($object, $file,0);
+						if ( !is_wp_error($id) ) {
+							wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
+							do_action('wp_create_file_in_uploads', $file, $id); // for replication
+						}
+						
+						$i++; // Next array element					
 					} // end foreach $file
 				} else {
 					$content ="<p>Sorry, no files were uploaded by Picasa.</p>"; // FIXME
 				}
 			}			
-			
+
 			// FIXME Report any errors
-						
+
 			exit; // No more WP processing should be performed.
 		}
 
@@ -466,7 +468,12 @@ EOF;
 				// TODO Add fields to update image descriptions, etc.
 				$content .= "<img src='".attribute_escape( $e['photo:thumbnail'] )."?size=-96' title='".attribute_escape( $e['title'] )."'>";
 				$large = attribute_escape( $e['photo:imgsrc'] ) ."?size=1024";
-				$content .= "<input type=hidden name='$large'>";
+				$content .= "<input type='hidden' name='$large'>";
+				
+				// Add input tags to update image description, etc.
+				$content .= "<input type='text' name='title[]' value='".attribute_escape( $e['title'] )."' />";
+				$content .= "<input type='text' name='caption[]' />";				
+				$content .= "<textarea name='description[]'>".attribute_escape( $e['description'] )."</textarea>";
 			}
 
 			// TODO Provide method for admin screen to pick available image sizes
