@@ -91,8 +91,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			$this->pau_options = new picasa_album_uploader_options();
 			
 			// Shortcode to generate URL to download Picassa Button
-			// TODO put download button into the admin screen for the plugin - any reason users would need this button?
-			add_shortcode( 'pau_download_button', array( &$this, 'sc_download_button' ) );
+			add_shortcode( 'picasa_album_uploader_button', array( &$this, 'sc_download_button' ) );
 						
 			// Add action to check if requested URL matches slug handled by plugin
 			add_filter( 'the_posts', array( &$this, 'check_url' ));
@@ -104,7 +103,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * @return string URL to download Picasa button
 		 */
 		function sc_download_button( $atts, $content = null ) {
-			return '<a href="picasa://importbutton/?url=' . get_bloginfo('wpurl') . '/' . $this->pau_options->slug() . '/wordpress_uploader.pbz" title="Download Picasa Button and Install in Picasa">Install Button in Picasa Desktop</a>';
+			return '<a href="picasa://importbutton/?url=' . get_bloginfo('wpurl') . '/' . $this->pau_options->slug() . '/wordpress_uploader.pbz" title="Download Picasa Button and Install in Picasa Desktop">Install Image Upload Button in Picasa Desktop</a>';
 		}	
 		
 		/**
@@ -130,6 +129,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			//	  doesn't treat this as a 404 event.
 			$post = new stdClass();
 			$post->ID = -1;										// Fake ID# for the post
+			
+			// Set field for themes to use to detect if displayed page is for the plugin
+			$wp_query-> is_picasa_album_slug = true;
 			
 			// Add template redirect action to process the page
 			add_action('template_redirect', array(&$this, 'template_redirect'));
@@ -286,9 +288,17 @@ EOF;
 			
 			// Make sure user is logged in to proceed
 			if (false == is_user_logged_in()) {
-				// TODO Generate immediate redirect to the login page
-				// Redirect back to this page after login complete
-				$content .= '<p>Please <a href="'.wp_login_url( get_bloginfo('wpurl') . '/' . $this->pau_options->slug() . '/minibrowser' ).'" title="Login">login</a> to continue.</p>';
+				
+				// Redirect user to the login page - come back here after login complete
+				if (wp_redirect(wp_login_url( get_bloginfo('wpurl') . '/' . $this->pau_options->slug() . '/minibrowser' ))) {
+					// Requested browser to redirect - done here.
+					exit;
+				}
+				
+				// wp_redirect failed for some reason - setup page text with redirect back to this location
+				$content .= '<p>Please <a href="'.wp_login_url( get_bloginfo('wpurl') . '/' 
+						. $this->pau_options->slug() . '/minibrowser' )
+						. '" title="Login">login</a> to continue.</p>';
 			} else {
 				// As long as current user is allowed to upload files, check for requested files
 				if ( current_user_can('upload_files') ) {

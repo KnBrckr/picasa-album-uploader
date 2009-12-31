@@ -14,12 +14,6 @@ class picasa_album_uploader_options
 	 **/
 	function picasa_album_uploader_options()
 	{
-		// Default slug name
-		$options['slug'] = 'picasa_album_uploader';
-		
-		// Store defaults to WP database
-		add_option( 'pau_plugin_settings', $options);
-		
 		// If admin screens in use, enable settings fields for manipulation
 		if ( is_admin() ) {			
 			add_action( 'admin_init', array( &$this, 'pau_settings_admin_init' ) );
@@ -33,7 +27,8 @@ class picasa_album_uploader_options
 	 **/
 	function slug() {
 		$options = get_option('pau_plugin_settings');
-		return $options['slug'];
+		$slug = ($options['slug'] ? $options['slug']: 'picasa_album_uploader');
+		return $slug;
 	}
 	
 	/**
@@ -50,7 +45,7 @@ class picasa_album_uploader_options
 		// Register the slug name setting;
 		register_setting( 'media', 'pau_plugin_settings', array (&$this, 'sanitize_settings') );
 		
-		// FIXME Need an unregister_setting routine for de-install of plugin
+		// TODO Need an unregister_setting routine for de-install of plugin
 	}
 	
 	/**
@@ -60,7 +55,7 @@ class picasa_album_uploader_options
 	 **/
 	function sanitize_settings($options)
 	{
-		$pattern[0] = '/\s*/'; // Translate white space to a -
+		$pattern[0] = '/\s+/'; // Translate white space to a -
 		$pattern[1] = '/[^a-zA-Z0-9-_]/'; // Only allow alphanumeric, dash (-) and underscore (_)
 		$replacement[0] = '-';
 		$replacement[1] = '';
@@ -73,13 +68,13 @@ class picasa_album_uploader_options
 	 * Emit HTML to create a settings section for the plugin in admin screen.
 	 **/
 	function pau_settings_section_html()
-	{
-		echo do_shortcode( "[pau_download_button]" );
+	{	
+		// Display button to download the Picasa Button Plugin
+		echo do_shortcode( "[picasa_album_uploader_button]" );
+		
 		?>
 		<p>To use the Picasa Album Uploader, install the Button in Picasa Desktop using the link above.</p>
-		<p>Settings for the plugin are made below.</p>
 		<?php
-
 	}
 	
 	/**
