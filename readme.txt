@@ -8,8 +8,6 @@ Stable tag: trunk
 
 Easily upload media from Google Picasa Desktop into WordPress.
 
-FIXME Correct file name quoting to use back-tick.
-
 == Description ==
 
 Provides a button to be installed into the Google Picasa desktop to directly upload files from Picasa as WordPress media.  Once the button has been downloaded and installed in Picasa, images can be selected in Picasa and uploaded to your WordPress blog with a simple click of the button within Picasa.
@@ -23,9 +21,9 @@ This is a real plugin that lives in the `wp-content/plugins/` directory and does
 == Installation ==
 
 1. Upload the picasa-album-uploader to the `wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
+1. Activate the plugin through the "Plugins" menu in WordPress
 1. Configure the plugin through the Admin Settings for Media
-1. Use the 'Install Image Upload Button in Picasa Desktop' Link in the Admin Settings -> Media to import the button into Picasa
+1. Use the "Install Image Upload Button in Picasa Desktop" Link in the Admin Settings -> Media to import the button into Picasa
 1. If desired, create the files header-picasa_album_uploader.php and footer-picasa_album_uploader.php in the top level of your themes directory to provide customized header and footer in the upload confirmation dialog displayed by Picasa.
 1. Begin uploading photos from Picasa to your blog.
 
@@ -47,10 +45,10 @@ There is no code in the download.  It is comprised of two elements, an XML file 
 
 = How do I remove the button from Picasa? =
 
-1. In Picasa Select 'Tools->Configure Buttons...'
-1. In the 'Current Buttons' section of the Picasa Dialog, select the 'Wordpress' button.
-1. Click the 'Remove' button.
-1. To completely remove the button from Picasa, remove the associated 'wordpress_uploader.pbz' file from the Picasa configuration.  On Mac OSX the 'pbz' file can be found in the directory '~/Library/Application Support/Google/Picasa3/buttons'.
+1. In Picasa Select "Tools->Configure Buttons..."
+1. In the "Current Buttons" section of the Picasa Dialog, select the "Wordpress" button.
+1. Click the "Remove" button.
+1. To completely remove the button from Picasa, remove the associated `picasa_album_uploader.pbz` file from the Picasa configuration.  On Mac OSX the `pbz` file can be found in the directory `~/Library/Application Support/Google/Picasa3/buttons`.
 
 = Can I have buttons from multiple WordPress blogs installed at the same time? =
 
@@ -58,7 +56,7 @@ Yes!  The tool tip for the button will identify the name of the WordPress blog a
 
 = Can I change the button image? =
 
-In the future, a theme will be allowed to override the button graphic.  Right now, the only way to change the button is by replacing the file 'picasa-album-uploader/images/wordpress-logo-blue.psd' in the plugin directory with the desired content.
+In the future, a theme will be allowed to override the button graphic.  Right now, the only way to change the button is by replacing the file `picasa-album-uploader/images/wordpress-logo-blue.psd` in the plugin directory with the desired content.  The layer containing the button image must be "upload-button".  The image should be no larger than 40 pixels wide by 25 pixels high with 72 dpi resolution.  The color model used must be RGB with 8 bits/channel and should use a transparent background.  Full details can be found at the [Picasa Button API](http://code.google.com/apis/picasa/docs/button_api.html "Picasa Button API") reference.
 
 == Screenshots ==
 
@@ -68,18 +66,12 @@ FIXME Screen shots of Admin Screen
 the directory of the stable readme.txt, so in this case, `/tags/4.3/screenshot-1.png` (or jpg, jpeg, gif)
 2. This is the second screen shot
 
-== To Do ==
-
-* Provide uninstall option to delete plugin settings from database
-* Add i18n support
-* Allow Picasa button icon to be replaced by theme
-* Allow customization of image sizes available in upload screen
-
 == Changelog ==
 
 = 0.3 =
 * Created Admin Settings Section on the Media page.
 * Redirect immediately to login screen if user not logged in
+* Add fields to upload screen to set Title, Caption and Description for uploaded file(s).
 
 = 0.2 =
 * Primary functions of interacting with Picasa and uploading images into WP media complete.
@@ -92,22 +84,23 @@ the directory of the stable readme.txt, so in this case, `/tags/4.3/screenshot-1
 
 == Upgrade Notice ==
 
-= 0.x =
-FIXME - 
+= 1.0 =
+The first release!  This is what you want! 
 
-== Theme Additions ==
+== Theme Formatting ==
+
+When formatting the upload confirmation dialog displayed by Picasa, it is best to avoid links that will navigate away from the upload confirmation screen.  The plugin will handle redirecting to the WordPress login screen to validate the user as necessary.
 
 There are two ways for a theme to control the output of the upload dialog displayed by Picasa Desktop.
 
 1.  The variable `$wp_query-> is_picasa_album_slug` will be set if the page is being handled by the plugin.
-2.  Three templates files can be used to configure the page.
+2.  Three templates files can be used to configure the page:  `page-picasa_album_uploader.php`, `header-picasa_album_uploader.php`, `footer-picasa_album_uploader.php`
 
-FIXME Make following sub-bullets under 2. above.  Or make a table?
+* `page-picasa_album_uploader.php` –
+The file `picasa_album_uploader/templates/page-picasa_album_uploader.php`, supplied by the plugin, is the default page template used to display the upload confirmation dialog.  This file can be copied to the active template and modified as needed.
+* `header-picasa_album_uploader.php` and `footer-picasa_album_uploader.php` –
+If they exist in the active theme, the plugin will use the template files `header-picasa_album_uploader.php` and `footer-picasa_album_uploader.php` for the header and footer respectively.  If they do not exist, the `header.php` and `footer.php` files from the active theme will be used.
 
-The file `picasa_album_uploader/templates/page-picasa_album_uploader.php`, supplied by the plugin, is the default page template used to display the upload confirmation screen.  This file can be copied to the active template and modified as needed.
 
-If they exist in the active theme, the plugin will use the template files header-picasa_album_uploader.php and footer-picasa_album_uploader.php for the header and footer respectively.  If they do not exist, the header.php and footer.php files from the active theme will be used.
-
-When formatting the page, it is best to avoid links that will navigate away from the upload confirmation screen.  The plugin will handle redirecting to the WordPress login screen to validate the user as necessary.
 
 

@@ -103,7 +103,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * @return string URL to download Picasa button
 		 */
 		function sc_download_button( $atts, $content = null ) {
-			return '<a href="picasa://importbutton/?url=' . get_bloginfo('wpurl') . '/' . $this->pau_options->slug() . '/wordpress_uploader.pbz" title="Download Picasa Button and Install in Picasa Desktop">Install Image Upload Button in Picasa Desktop</a>';
+			return '<a href="picasa://importbutton/?url=' . get_bloginfo('wpurl') . '/' . $this->pau_options->slug() . '/picasa_album_uploader.pbz" title="Download Picasa Button and Install in Picasa Desktop">Install Image Upload Button in Picasa Desktop</a>';
 		}	
 		
 		/**
@@ -186,11 +186,11 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			}
 			
 			// Valid values for 2nd parameter:
-			//	wordpress_uploader.pbz
+			//	picasa_album_uploader.pbz
 			//	mini_browser
 			//	upload
 			switch ( $tokens[1] ) {
-				case 'wordpress_uploader.pbz':
+				case 'picasa_album_uploader.pbz':
 					$this->pau_serve = PAU_BUTTON;
 					break;
 				
@@ -220,15 +220,15 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 */
 		private function send_picasa_button( ) {
 			$blogname = get_bloginfo( 'name' );
-			$guid = self::guid();
+			$guid = self::guid(); // TODO Only Generate GUID once for a blog - keep same guid - allow blog config to update it.
 			$upload_url = get_bloginfo( 'wpurl' ) . '/' . $this->pau_options->slug() . '/minibrowser';
 			
 			// XML to describe the Picasa plugin button
 			$pbf = <<<EOF
 <?xml  version="1.0" encoding="utf-8" ?>
-<buttons format="1" version="0.1">
-   <button id="$guid" type="dynamic">
-   	<icon name="$guid/layername" src="pbz"/>
+<buttons format="1" version="1">
+   <button id="picasa-album-uploader/$guid" type="dynamic">
+   	<icon name="$guid/upload-button" src="pbz"/>
    	<label>Wordpress</label>
 		<label_en>Wordpress</label_en>
 		<label_zh-tw>上传</label_zh-tw>
@@ -257,7 +257,6 @@ EOF;
 			$zip = new zipfile();
 			$zip->addFile( $pbf, $guid . '.pbf' );
 			
-			// FIXME Icon not showing up
 			// TODO Allow icon to be replaced by theme
 			// Add PSD icon to zip
 			$psd_filename =  PAU_PLUGIN_DIR . '/images/wordpress-logo-blue.psd'; // button icon
@@ -268,7 +267,7 @@ EOF;
 			// Emit zip file to browser
 			$zipcontents = $zip->file();
 			header( "Content-type: application/octet-stream\n" );
-			header( "Content-Disposition: attachment; filename=\"wordpress_uploader.pbz\"\n" );
+			header( "Content-Disposition: attachment; filename=\"picasa_album_uploader.pbz\"\n" );
 			header( 'Content-length: ' . strlen($zipcontents) . "\n\n" );
 
 			echo $zipcontents;
@@ -440,6 +439,8 @@ EOF;
 			// Form handling requires some javascript - depends on jQuery
 			wp_enqueue_script('picasa-album-uploader', PAU_PLUGIN_URL . '/pau.js' ,'jquery');
 			
+			// Add plugin CSS
+			
 			// Must be simple page name target in the POST action for Picasa to process the input URLs correctly.
 			$content = "<form method='post' action='upload'>\n";
 
@@ -472,9 +473,11 @@ EOF;
 				$content .= "<input type='hidden' name='$large'>";
 				
 				// Add input tags to update image description, etc.
-				$content .= "<input type='text' name='title[]' value='".attribute_escape( $e['title'] )."' />";
-				$content .= "<input type='text' name='caption[]' />";				
-				$content .= "<textarea name='description[]'>".attribute_escape( $e['description'] )."</textarea>";
+				$content .= "<dl>\n"; // Start Definition List
+				$content .= "<dt>Title<dd><input type='text' name='title[]' value='".attribute_escape( $e['title'] )."' />";
+				$content .= "<dt>Caption<dd><input type='text' name='caption[]' />";				
+				$content .= "<dt>Description<dd><textarea name='description[]'>".attribute_escape( $e['description'] )."</textarea>";
+				$content .= "</dl>\n"; // End Definition List
 			}
 
 			// TODO Provide method for admin screen to pick available image sizes
