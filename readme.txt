@@ -8,6 +8,8 @@ Stable tag: trunk
 
 Easily upload media from Google Picasa Desktop into WordPress.
 
+FIXME Correct file name quoting to use back-tick.
+
 == Description ==
 
 Provides a button to be installed into the Google Picasa desktop to directly upload files from Picasa as WordPress media.  Once the button has been downloaded and installed in Picasa, images can be selected in Picasa and uploaded to your WordPress blog with a simple click of the button within Picasa.
@@ -99,6 +101,8 @@ There are two ways for a theme to control the output of the upload dialog displa
 
 1.  The variable `$wp_query-> is_picasa_album_slug` will be set if the page is being handled by the plugin.
 2.  Three templates files can be used to configure the page.
+
+FIXME Make following sub-bullets under 2. above.  Or make a table?
 
 The file `picasa_album_uploader/templates/page-picasa_album_uploader.php`, supplied by the plugin, is the default page template used to display the upload confirmation screen.  This file can be copied to the active template and modified as needed.
 
