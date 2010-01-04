@@ -33,18 +33,27 @@ TODO Internationalize Plugin
 // = Define constants used by the plugin =
 // =======================================
 
-if ( ! defined( 'PAU_PLUGIN_NAME' ) )
-	define( 'PAU_PLUGIN_NAME', 'picasa-album-uploader' );	// Plugin name
-if ( ! defined( 'PAU_PLUGIN_DIR') )
-	define( 'PAU_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . PAU_PLUGIN_NAME );	// Base directory for Plugin
-if ( ! defined( 'PAU_PLUGIN_URL') )
-	define ( 'PAU_PLUGIN_URL', WP_PLUGIN_URL . '/' . PAU_PLUGIN_NAME);	// Base URL for plugin directory
-if ( ! defined( 'PAU_NONCE_UPLOAD' ) )
-	define ( 'PAU_NONCE_UPLOAD', 'picasa-album-uploader-upload-images');
+if ( ! defined( 'PAU_PLUGIN_NAME' ) ) {
+	// If Plugin Name not defined, then must need to define all constants used
 	
-define ('PAU_BUTTON', 1);
-define ('PAU_MINIBROWSER', 2);
-define ('PAU_UPLOAD', 3);
+	define( 'PAU_PLUGIN_NAME', 'picasa-album-uploader' );	// Plugin name
+	define( 'PAU_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . PAU_PLUGIN_NAME );	// Base directory for Plugin
+	define ( 'PAU_PLUGIN_URL', WP_PLUGIN_URL . '/' . PAU_PLUGIN_NAME);	// Base URL for plugin directory
+	
+	// Name string used in Nonce hanldling
+	define ( 'PAU_NONCE_UPLOAD', 'picasa-album-uploader-upload-images');
+
+	// plugin function requested based on URL request
+	define ('PAU_BUTTON', 1);
+	define ('PAU_MINIBROWSER', 2);
+	define ('PAU_UPLOAD', 3);
+	define ('PAU_RESULT', 4);
+	
+	// result codes on upload completion or failure
+	define ('PAU_RESULT_SUCCESS', 'success');
+	define ('PAU_RESULT_NO_FILES', 'no-files');
+	define ('PAU_RESULT_NO_PERMISSION', 'no-permission');
+}	
 	
 // ============================
 // = Include needed libraries =
@@ -83,6 +92,18 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		var $pau_options;
 		
 		/**
+		 * Mapping from result codes to message strings
+		 *
+		 * @var array
+		 * @access private
+		 **/
+		var $result_strings = array (
+			PAU_RESULT_SUCCESS => "Files uploaded successfully.",
+			PAU_RESULT_NO_FILES => "Error:  No files provided for upload",
+			PAU_RESULT_NO_PERMISSION => "Sorry, You do not have permission to upload files to this Blog."
+		);
+		
+		/**
 		 * Constructor function for picasa_album_uploader class.
 		 *
 		 * Adds the needed shortcodes and filters to processing stream
@@ -95,6 +116,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 						
 			// Add action to check if requested URL matches slug handled by plugin
 			add_filter( 'the_posts', array( &$this, 'check_url' ));
+			
+			// Add CSS to HTML header
+			add_action('wp_head', array(&$this, 'add_css'));
 		}
 		
 		/**
@@ -124,17 +148,11 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				return $posts;
 			}
 			
-			//	Request is for this plugin.  Setup a dummy Post.
-			//	- very little detail needed to deliver results at this stage, just enough that wp-core
-			//	  doesn't treat this as a 404 event.
-			$post = new stdClass();
-			$post->ID = -1;										// Fake ID# for the post
+			//	Request is for this plugin.  Setup a dummy Post.			
+			$post = self::gen_post();
 			
 			// Set field for themes to use to detect if displayed page is for the plugin
 			$wp_query-> is_picasa_album_slug = true;
-			
-			// Add template redirect action to process the page
-			add_action('template_redirect', array(&$this, 'template_redirect'));
 			
 			$wp_query->is_page = true;	// might not be needed; set it like a true page just in case
 			$wp_query->is_single = true;
@@ -146,6 +164,15 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			$wp_query->query_vars["error"]="";
 			$wp_query->is_404 = false;
 
+			// If this is a result page it will be handled by default browser - template redirect is not needed
+			if ( PAU_RESULT == $this->pau_serve ) {
+				$result = $_REQUEST['result'];
+				$post->post_content = $this->result_strings[$result];
+			} else {
+				// Add template redirect action to process the page
+				add_action('template_redirect', array(&$this, 'template_redirect'));				
+			}
+			
 			return array($post);
 		}
 
@@ -153,23 +180,32 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * Perform template redirect processing for requests handled by the plugin
 		 *
 		 * This function will not return under normal conditions.  Each case
-		 * handled by the plugin results in a complete page or action with no
+		 * handled by the plugin via template redirect results in a complete page or action with no
 		 * further action needed by WordPress core.
 		 **/
 		function template_redirect( $requested_url=null, $do_redirect=true ) {			
 			switch ( $this->pau_serve ) {
 				case PAU_BUTTON:
 					self::send_picasa_button();
-					break;
+					// Should not get here
+					exit;
 				case PAU_MINIBROWSER:
 					self::minibrowser();
-					break;
+					// Should not get here
+					exit;
 				case PAU_UPLOAD:
 					self::upload_images();
-					break;
+					// Should not get here
+					exit;
 			}
-			// Will not get here - each case above exits so that default template processing
-			// by Wordpress is not performed.
+		}
+		
+		/**
+		 * emit HTML needed to include plugin's CSS file
+		 **/
+		function add_css()
+		{
+			echo '<link rel="stylesheet" type="text/css" href="' . PAU_PLUGIN_URL . '/picasa-album-uploader.css" />';
 		}
 
 		/**
@@ -200,6 +236,10 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				
 				case 'upload':
 					$this->pau_serve = PAU_UPLOAD;
+					break;
+					
+				case 'result':
+					$this->pau_serve = PAU_RESULT;
 					break;
 				
 				default:
@@ -281,6 +321,7 @@ EOF;
 		 * @access private
 		 */
 		private function minibrowser() {
+			global $post; // To setup the Post content
 			
 			// Open the plugin content div for theme formatting
 			$content = '<div class="picasa-album-uploader">';
@@ -308,15 +349,14 @@ EOF;
 					}					
 				} else {
 					// User is not allowed to upload files
-					// FIXME Confirm user priv check works
 					$content = '<p class="error">Sorry, you do not have permission to upload files.</p>';
 				}
 			}
 			
 			$content .= '</div>';  // Close the Div for this post text
 			
-			// Generate the post data structure
-			self::gen_post($content);
+			// Setup post content
+			$post->post_content = $content;
 			
 			// If Theme has a defined the plugin template, use it, otherwise use template from the plugin
 			if ($theme_template = get_query_template('page-picasa_album_uploader')) {
@@ -340,14 +380,13 @@ EOF;
 			require_once( ABSPATH . 'wp-admin/includes/admin.php' ); // Load functions to handle uploads
 
 			// Confirm the nonce field to allow operation to continue
-			// FIXME On Nonce failure generate better failure screen.
+			// TODO On Nonce failure generate better failure screen.
 			check_admin_referer(PAU_NONCE_UPLOAD, PAU_NONCE_UPLOAD);
 
 			// User must be able to upload files to proceed
-			if (! current_user_can('upload_files'))
-				// FIXME - Trap to a 404?
-			$content = '<p>Sorry, you do not have permission to upload files.</p>';
-			else {
+			if (! current_user_can('upload_files')) {
+				$result = PAU_RESULT_NO_PERMISSION;
+			} else {
 				if ( $_FILES ) {
 					// Don't need to test that this is a wp_upload_form in wp_handle_upload()
 					$overrides = array( 'test_form' => false );
@@ -390,13 +429,14 @@ EOF;
 						
 						$i++; // Next array element					
 					} // end foreach $file
+					$result = PAU_RESULT_SUCCESS;
 				} else {
-					$content ="<p>Sorry, no files were uploaded by Picasa.</p>"; // FIXME
+					$result = PAU_RESULT_NO_FILES;
 				}
 			}
 
-			// FIXME Report any errors
-			echo get_bloginfo('wpurl');
+			// Tell Picasa to open a result page in the browser.
+			echo get_bloginfo('wpurl') . '/' . $this->pau_options->slug() . '/result?' . $result;
 
 			exit; // No more WP processing should be performed.
 		}
@@ -404,7 +444,7 @@ EOF;
 		/**
 		 * Generate a standard format guid
 		 *
-		 * @return string UUID in form: FIXME
+		 * @return string UUID in form: {xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}
 		 * @access private
 		 */
 		private function guid() {
@@ -438,8 +478,6 @@ EOF;
 		private function build_upload_form() {
 			// Form handling requires some javascript - depends on jQuery
 			wp_enqueue_script('picasa-album-uploader', PAU_PLUGIN_URL . '/pau.js' ,'jquery');
-			
-			// Add plugin CSS
 			
 			// Must be simple page name target in the POST action for Picasa to process the input URLs correctly.
 			$content = "<form method='post' action='upload'>\n";
@@ -501,19 +539,19 @@ FORM_FIN;
 		/**
 		 * Fill in WordPress global $post data structure to describe the fake post
 		 *
-		 * @params string Content of the entry post
 		 * @access private
 		 */
-		private function gen_post($content) {
-			global $post;
+		private function gen_post() {
+			$formattedNow = date('Y-m-d H:i:s');
 			
 			// Create POST Data Structure
-			$formattedNow = date('Y-m-d H:i:s');
+			$post = new stdClass();
+			
+			$post->ID = -1;										// Fake ID# for the post
 			$post->post_author = 1;
 			$post->post_date = $formattedNow;
 			$post->post_date_gmt = $formattedNow;
-			$post->post_content = $content;
-			$post->post_title = 'Picasa Uploader';
+			$post->post_title = 'Picasa Album Uploader';
 			$post->post_category = 0;
 			$post->post_excerpt = '';
 			$post->post_status = 'publish';
@@ -530,6 +568,8 @@ FORM_FIN;
 			$post->post_type = 'page';
 			$post->post_mime_type = '';
 			$post->comment_count = 0;
+			
+			return $post;
 		}
 		
 	}
