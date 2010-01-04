@@ -39,9 +39,28 @@ The Picasa button contains a URL to your WordPress installation, including the s
 
 Yes!  Just put the shortcode `[picasa_album_uploader_button]` where you want the button to display.
 
+= What's in that download that needs to be installed into Picasa? =
+
+There is no code in the download.  It is comprised of two elements, an XML file describing the button to Picasa Desktop that includes the URL to reference when the button is clicked and a file containing the button graphic to display within the Picasa Desktop.
+
+= How do I remove the button from Picasa? =
+
+1. In Picasa Select 'Tools->Configure Buttons...'
+1. In the 'Current Buttons' section of the Picasa Dialog, select the 'Wordpress' button.
+1. Click the 'Remove' button.
+1. To completely remove the button from Picasa, remove the associated 'wordpress_uploader.pbz' file from the Picasa configuration.  On Mac OSX the 'pbz' file can be found in the directory '~/Library/Application Support/Google/Picasa3/buttons'.
+
+= Can I have buttons from multiple WordPress blogs installed at the same time? =
+
+Yes!  The tool tip for the button will identify the name of the WordPress blog associated with the button.
+
+= Can I change the button image? =
+
+In the future, a theme will be allowed to override the button graphic.  Right now, the only way to change the button is by replacing the file 'picasa-album-uploader/images/wordpress-logo-blue.psd' in the plugin directory with the desired content.
+
 == Screenshots ==
 
-FIXME Screen shots?
+FIXME Screen shots of Admin Screen
 
 1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Note that the screenshot is taken from
 the directory of the stable readme.txt, so in this case, `/tags/4.3/screenshot-1.png` (or jpg, jpeg, gif)
