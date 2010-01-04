@@ -394,9 +394,10 @@ EOF;
 				} else {
 					$content ="<p>Sorry, no files were uploaded by Picasa.</p>"; // FIXME
 				}
-			}			
+			}
 
 			// FIXME Report any errors
+			echo get_bloginfo('wpurl');
 
 			exit; // No more WP processing should be performed.
 		}

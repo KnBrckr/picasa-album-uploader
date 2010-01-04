@@ -1,12 +1,12 @@
-=== Plugin Name ===
+=== Picsa Album Uploader ===
 Contributors: draca
 Donate link: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Tags: picasa, upload, images, albums, media
 Requires at least: 2.8.5
 Tested up to: 2.8.5
-Stable tag: trunk FIXME
+Stable tag: trunk
 
-Easily upload media from Google Picasa Desktop into WordPress and optionally create a post entry displaying the uploaded images using the Wordpress `[gallery]` tag.
+Easily upload media from Google Picasa Desktop into WordPress.
 
 == Description ==
 
@@ -17,11 +17,6 @@ If you are not logged in to your blog, you will first be directed to the login p
 This plugin is based on the initial works by [clyang](http://clyang.net/blog/2009/02/06/128 "Picasa2Wordpress Blog Article") and the examples from Google for the [Picasa Button API](http://code.google.com/apis/picasa/docs/button_api.html "Picasa Button API") and [Picasa Web Uploader API](http://code.google.com/apis/picasa/docs/web_uploader.html "Picasa Web Uploader API").
 
 This is a real plugin that lives in the `wp-content/plugins/` directory and does not require special files to be placed in either your server root or in the `wp-admin/` directory.
-
-
-*   Stable tag should indicate the Subversion "tag" of the latest stable version, or "trunk," if you use `/trunk/` for
-stable.
-
 
 == Installation ==
 
@@ -46,24 +41,11 @@ Yes!  Just put the shortcode `[picasa_album_uploader_button]` where you want the
 
 == Screenshots ==
 
-TODO Screen shots?
+FIXME Screen shots?
 
 1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Note that the screenshot is taken from
 the directory of the stable readme.txt, so in this case, `/tags/4.3/screenshot-1.png` (or jpg, jpeg, gif)
 2. This is the second screen shot
-
-== Theme Additions ==
-
-There are two ways for a theme to control the output of the upload dialog displayed by Picasa Desktop.
-
-1.  The variable `$wp_query-> is_picasa_album_slug` will be set if the page is being handled by the plugin.
-2.  Three templates files can be used to configure the page.
-
-The file `picasa_album_uploader/templates/page-picasa_album_uploader.php`, supplied by the plugin, is the default page template used to display the upload confirmation screen.  This file can be copied to the active template and modified as needed.
-
-If they exist in the active theme, the plugin will use the template files header-picasa_album_uploader.php and footer-picasa_album_uploader.php for the header and footer respectively.  If they do not exist, the header.php and footer.php files from the active theme will be used.
-
-When formatting the page, it is best to avoid links that will navigate away from the upload confirmation screen.  The plugin will handle redirecting to the WordPress login screen to validate the user as necessary.
 
 == To Do ==
 
@@ -86,3 +68,23 @@ When formatting the page, it is best to avoid links that will navigate away from
 
 = 0.0 =
 * Plugin development initiated
+
+== Upgrade Notice ==
+
+= 0.x =
+FIXME - 
+
+== Theme Additions ==
+
+There are two ways for a theme to control the output of the upload dialog displayed by Picasa Desktop.
+
+1.  The variable `$wp_query-> is_picasa_album_slug` will be set if the page is being handled by the plugin.
+2.  Three templates files can be used to configure the page.
+
+The file `picasa_album_uploader/templates/page-picasa_album_uploader.php`, supplied by the plugin, is the default page template used to display the upload confirmation screen.  This file can be copied to the active template and modified as needed.
+
+If they exist in the active theme, the plugin will use the template files header-picasa_album_uploader.php and footer-picasa_album_uploader.php for the header and footer respectively.  If they do not exist, the header.php and footer.php files from the active theme will be used.
+
+When formatting the page, it is best to avoid links that will navigate away from the upload confirmation screen.  The plugin will handle redirecting to the WordPress login screen to validate the user as necessary.
+
+
