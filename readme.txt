@@ -48,7 +48,7 @@ There is no code in the download.  It is comprised of two elements, an XML file 
 1. In Picasa Select "Tools->Configure Buttons..."
 1. In the "Current Buttons" section of the Picasa Dialog, select the "Wordpress" button.
 1. Click the "Remove" button.
-1. To completely remove the button from Picasa, remove the associated `picasa_album_uploader.pbz` file from the Picasa configuration.  On Mac OSX the `pbz` file can be found in the directory `~/Library/Application Support/Google/Picasa3/buttons`.
+1. To completely remove the button from Picasa, remove the associated `picasa_album_uploader.pbz` file from the Picasa configuration.  On Mac OSX the `pbz` file can be found in the Folder `Home/Library/Application Support/Google/Picasa3/buttons`.
 
 = Can I have buttons from multiple WordPress blogs installed at the same time? =
 
@@ -59,6 +59,8 @@ Yes!  The tool tip for the button will identify the name of the WordPress blog a
 In the future, a theme will be allowed to override the button graphic.  Right now, the only way to change the button is by replacing the file `picasa-album-uploader/images/wordpress-logo-blue.psd` in the plugin directory with the desired content.  The layer containing the button image must be "upload-button".  The image should be no larger than 40 pixels wide by 25 pixels high with 72 dpi resolution.  The color model used must be RGB with 8 bits/channel and should use a transparent background.  Full details can be found at the [Picasa Button API](http://code.google.com/apis/picasa/docs/button_api.html "Picasa Button API") reference.
 
 == Screenshots ==
+
+1. Picasa Album Uploader Options in Media Settings Admin Screen.
 
 == Changelog ==
 
