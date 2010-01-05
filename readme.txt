@@ -10,13 +10,18 @@ Easily upload media from Google Picasa Desktop into WordPress.
 
 == Description ==
 
-Provides a button to be installed into the Google Picasa desktop to directly upload files from Picasa as WordPress media.  Once the button has been downloaded and installed in Picasa, images can be selected in Picasa and uploaded to your WordPress blog with a simple click of the button within Picasa.
+Provides a button to be installed into the Google Picasa Desktop to directly upload files from Picasa as WordPress media.  Once the button has been downloaded and installed in Picasa, images can be selected in Picasa and uploaded to your WordPress blog with a simple click of the button within Picasa.
 
 If you are not logged in to your blog, you will first be directed to the login page and then return to the upload screen to select the upload options.
 
 This plugin is based on the initial works by [clyang](http://clyang.net/blog/2009/02/06/128 "Picasa2Wordpress Blog Article") and the examples from Google for the [Picasa Button API](http://code.google.com/apis/picasa/docs/button_api.html "Picasa Button API") and [Picasa Web Uploader API](http://code.google.com/apis/picasa/docs/web_uploader.html "Picasa Web Uploader API").
 
-This is a real plugin that lives in the `wp-content/plugins/` directory and does not require special files to be placed in either your server root or in the `wp-admin/` directory.
+= What's Next? =
+
+1.  Provide uninstall method
+1.  At upload, optionally create a new post using the WP shortcode [gallery] to publish the newly uploaded files.
+1.  Internationalization
+1.  Refine default display of images to be uploaded.
 
 == Installation ==
 
@@ -43,13 +48,6 @@ Yes!  Just put the shortcode `[picasa_album_uploader_button]` where you want the
 
 There is no code in the download.  It is comprised of two elements, an XML file describing the button to Picasa Desktop that includes the URL to reference when the button is clicked and a file containing the button graphic to display within the Picasa Desktop.
 
-= How do I remove the button from Picasa? =
-
-1. In Picasa Select "Tools -> Configure Buttons..."
-1. In the "Current Buttons" section of the Picasa Dialog, select the "Wordpress" button.
-1. Click the "Remove" button.
-1. To completely remove the button from Picasa, remove the associated `picasa_album_uploader.pbz` file from the Picasa configuration.  On Mac OSX the `pbz` file can be found in the Folder `Home/Library/Application Support/Google/Picasa3/buttons`.
-
 = Can I have buttons from multiple WordPress blogs installed at the same time? =
 
 Yes!  The tool tip for the button will identify the name of the WordPress blog associated with the button.
@@ -57,6 +55,27 @@ Yes!  The tool tip for the button will identify the name of the WordPress blog a
 = Can I change the button image? =
 
 In the future, a theme will be allowed to override the button graphic.  Right now, the only way to change the button is by replacing the file `picasa-album-uploader/images/wordpress-logo-blue.psd` in the plugin directory with the desired content.  The layer containing the button image must be "upload-button".  The image should be no larger than 40 pixels wide by 25 pixels high with 72 dpi resolution.  The color model used must be RGB with 8 bits/channel and should use a transparent background.  Full details can be found at the [Picasa Button API](http://code.google.com/apis/picasa/docs/button_api.html "Picasa Button API") reference.
+
+= Other Picasa Uploader plugins require files be placed in the `wp-admin` and/or the server root.  Does this plugin require the same? =
+
+This is a real plugin that lives in the `wp-content/plugins/` directory and does not require special files to be placed in either your server root or in the `wp-admin/` directory.  Further, the plugin supports themes to customize the appearance of the upload dialog displayed by Picasa.
+
+= How do I uninstall this plugin? =
+
+1. Deactivate the plugin from the Admin -> Plugins Screen
+1. Delete the directory `wp-content/plugins/picasa-album-uploader` in your WordPress installation
+1. The plugin adds a single DB entry to the WordPress options table called "pau_plugin_settings".  Using phpMyAdmin or similar utility remove this entry from the table.
+
+In the future, an uninstall script will be provided to delete the options entry from the options table.
+
+= How do I remove the button from Picasa? =
+
+1. In Picasa Select "Tools -> Configure Buttons..."
+1. In the "Current Buttons" section of the Picasa Dialog, select the "WordPress" button.
+1. Click the "Remove" button.
+1. To completely remove the button from Picasa, remove the associated `picasa_album_uploader.pbz` file from the Picasa configuration.  On Mac OSX the `pbz` file can be found in the Folder `Home/Library/Application Support/Google/Picasa3/buttons`.
+
+
 
 == Screenshots ==
 

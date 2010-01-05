@@ -505,12 +505,12 @@ EOF;
 
 			// For each image, display the image and setup hidden form field for upload processing.
 			foreach($pData as $e) {
-				// TODO Add fields to update image descriptions, etc.
 				$content .= "<img class='pau_img' src='".attribute_escape( $e['photo:thumbnail'] )."?size=-96' title='".attribute_escape( $e['title'] )."'>";
 				$large = attribute_escape( $e['photo:imgsrc'] ) ."?size=1024";
 				$content .= "<input type='hidden' name='$large'>";
 				
 				// Add input tags to update image description, etc.
+				// TODO Put fields into div that can be hidden/displayed
 				$content .= "<dl class='pau_attributes'>\n"; // Start Definition List
 				$content .= "<dt class='pau_img_header'>Title<dd><input type='text' name='title[]' class='pau_img_text' value='".attribute_escape( $e['title'] )."' />";
 				$content .= "<dt class='pau_img_header'>Caption<dd><input type='text' name='caption[]' class='pau_img_text' />";				
