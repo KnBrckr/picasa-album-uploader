@@ -345,11 +345,11 @@ EOF;
 					if ($_POST['rss']) {
 						$content = self::build_upload_form();					
 					} else {
-					 	$content = '<p class="error">Sorry, but no pictures were received.</p>';
+					 	$content .= '<p class="error">Sorry, but no pictures were received.</p>';
 					}					
 				} else {
 					// User is not allowed to upload files
-					$content = '<p class="error">Sorry, you do not have permission to upload files.</p>';
+					$content .= '<p class="error">Sorry, you do not have permission to upload files.</p>';
 				}
 			}
 			
@@ -501,20 +501,20 @@ EOF;
 			$pData = $xh->xmlParse();
 
 			// Start div used to display images
-			$content .= "<p class='photo-header'>Selected images</p><div class='photos'>\n";
+			$content .= "<p class='pau_header'>Selected images</p><div class='pau_images'>\n";
 
 			// For each image, display the image and setup hidden form field for upload processing.
 			foreach($pData as $e) {
 				// TODO Add fields to update image descriptions, etc.
-				$content .= "<img src='".attribute_escape( $e['photo:thumbnail'] )."?size=-96' title='".attribute_escape( $e['title'] )."'>";
+				$content .= "<img class='pau_img' src='".attribute_escape( $e['photo:thumbnail'] )."?size=-96' title='".attribute_escape( $e['title'] )."'>";
 				$large = attribute_escape( $e['photo:imgsrc'] ) ."?size=1024";
 				$content .= "<input type='hidden' name='$large'>";
 				
 				// Add input tags to update image description, etc.
-				$content .= "<dl>\n"; // Start Definition List
-				$content .= "<dt>Title<dd><input type='text' name='title[]' value='".attribute_escape( $e['title'] )."' />";
-				$content .= "<dt>Caption<dd><input type='text' name='caption[]' />";				
-				$content .= "<dt>Description<dd><textarea name='description[]'>".attribute_escape( $e['description'] )."</textarea>";
+				$content .= "<dl class='pau_attributes'>\n"; // Start Definition List
+				$content .= "<dt class='pau_img_header'>Title<dd><input type='text' name='title[]' class='pau_img_text' value='".attribute_escape( $e['title'] )."' />";
+				$content .= "<dt class='pau_img_header'>Caption<dd><input type='text' name='caption[]' class='pau_img_text' />";				
+				$content .= "<dt class='pau_img_header'>Description<dd><textarea name='description[]' class='pau_img_textarea' rows='4' cols='80'>".attribute_escape( $e['description'] )."</textarea>";
 				$content .= "</dl>\n"; // End Definition List
 			}
 

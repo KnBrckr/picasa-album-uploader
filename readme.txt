@@ -4,7 +4,7 @@ Donate link: http://pumastudios.com/software/picasa-album-uploader-wordpress-plu
 Tags: picasa, upload, images, albums, media
 Requires at least: 2.8.5
 Tested up to: 2.8.5
-Stable tag: trunk
+Stable tag: 0.3
 
 Easily upload media from Google Picasa Desktop into WordPress.
 
@@ -60,18 +60,13 @@ In the future, a theme will be allowed to override the button graphic.  Right no
 
 == Screenshots ==
 
-FIXME Screen shots of Admin Screen
-
-1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Note that the screenshot is taken from
-the directory of the stable readme.txt, so in this case, `/tags/4.3/screenshot-1.png` (or jpg, jpeg, gif)
-2. This is the second screen shot
-
 == Changelog ==
 
 = 0.3 =
 * Created Admin Settings Section on the Media page.
 * Redirect immediately to login screen if user not logged in
 * Add fields to upload screen to set Title, Caption and Description for uploaded file(s).
+* Initial CSS Formatting of upload screen
 
 = 0.2 =
 * Primary functions of interacting with Picasa and uploading images into WP media complete.
@@ -84,8 +79,8 @@ the directory of the stable readme.txt, so in this case, `/tags/4.3/screenshot-1
 
 == Upgrade Notice ==
 
-= 1.0 =
-The first release!  This is what you want! 
+= 0.3 =
+The first Beta Release!
 
 == Theme Formatting ==
 

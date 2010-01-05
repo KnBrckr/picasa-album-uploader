@@ -1,0 +1,32 @@
+/*
+ * Picasa does not appear to be able to handle multiple element selectors
+ */
+.pau_error {
+	color: red;
+}
+
+.pau_header {
+	font-size: 120%;
+}
+
+/* Applies to div section around all photos */
+.pau_images {
+	
+}
+
+/* Applies to each img displayed */
+.pau_img {
+}
+
+/* Format Form Table field headers */
+.pau_img_header {
+	font-size: 110%;
+}
+
+.pau_img_text {
+	width: 35em;
+}
+.pau_img_textarea {
+	height: 4em;
+	width: 35em;
+}
