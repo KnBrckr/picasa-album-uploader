@@ -104,11 +104,11 @@ In the future, an uninstall script will be provided to delete the options entry 
 
 == Upgrade Notice ==
 
-= 0.3 =
-* The first Beta Release!
-
 = 0.3.1 =
 * Fixes interaction issue with WordPress.com Stats plugin - When both plugins are enabled, navigation to the picasa uploader pages will cause an execution timeout in the Stats plugin.
+
+= 0.3 =
+* The first Beta Release!
 
 == Theme Formatting ==
 
