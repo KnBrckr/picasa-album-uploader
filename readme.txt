@@ -83,6 +83,10 @@ In the future, an uninstall script will be provided to delete the options entry 
 
 == Changelog ==
 
+= 0.3.1 =
+* Fix defect in redirect URL to display results page
+* Fix interaction issue with WordPress.com Stats plugin
+
 = 0.3 =
 * Created Admin Settings Section on the Media page.
 * Redirect immediately to login screen if user not logged in
@@ -101,7 +105,7 @@ In the future, an uninstall script will be provided to delete the options entry 
 == Upgrade Notice ==
 
 = 0.3 =
-The first Beta Release!
+* The first Beta Release!
 
 == Theme Formatting ==
 

@@ -1,0 +1,1 @@
+(cd ~/Sites/wordpress/wp-content/plugins/picasa-album-uploader/ ; tar cf - --exclude .DS_Store --exclude dev_tools .) | (cd ~/Projects/picasa-album-uploader/trunk ; tar xvf -)
