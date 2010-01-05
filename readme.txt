@@ -107,6 +107,9 @@ In the future, an uninstall script will be provided to delete the options entry 
 = 0.3 =
 * The first Beta Release!
 
+= 0.3.1 =
+* Fixes interaction issue with WordPress.com Stats plugin - When both plugins are enabled, navigation to the picasa uploader pages will cause an execution timeout in the Stats plugin.
+
 == Theme Formatting ==
 
 When formatting the upload confirmation dialog displayed by Picasa, it is best to avoid links that will navigate away from the upload confirmation screen.  The plugin will handle redirecting to the WordPress login screen to validate the user as necessary.
