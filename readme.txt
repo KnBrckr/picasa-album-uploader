@@ -4,7 +4,7 @@ Donate link: http://pumastudios.com/software/picasa-album-uploader-wordpress-plu
 Tags: picasa, upload, images, albums, media
 Requires at least: 2.8.5
 Tested up to: 2.8.5
-Stable tag: 0.3
+Stable tag: 0.3.1
 
 Easily upload media from Google Picasa Desktop into WordPress.
 
