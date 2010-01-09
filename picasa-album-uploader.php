@@ -535,7 +535,6 @@ FORM_FIN;
 			return $content;
 		}
 		
-		
 		/**
 		 * Fill in WordPress global $post data structure to describe the fake post
 		 *
@@ -571,7 +570,6 @@ FORM_FIN;
 			
 			return $post;
 		}
-		
 	}
 } // End Class picasa_album_uploader
 
