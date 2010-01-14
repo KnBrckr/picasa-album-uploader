@@ -24,6 +24,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
 
+TODO Document how to handle failures to install in Picasa.
+TODO Add link to directly download the .pbz file for manual install in Picasa.
 TODO Optionally Create a New Post to attach the uploaded images as a WP gallery using [gallery] shortcode.
 TODO Internationalize Plugin
 
