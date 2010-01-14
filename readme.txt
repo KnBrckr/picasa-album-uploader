@@ -82,6 +82,24 @@ In the future, an uninstall script will be provided to delete the options entry 
 1. Click the "Remove" button.
 1. To completely remove the button from Picasa, remove the associated `picasa_album_uploader.pbz` file from the Picasa configuration.  On Mac OSX the `pbz` file can be found in the Folder `Home/Library/Application Support/Google/Picasa3/buttons`.
 
+FIXME Windows file locations:
+C:\Program Files\Google\Picasa3\buttons
+On XP:  C:\Documents and Settings\[Username]\Local Settings\Application Data\Google\Picasa2\buttons  where [Username] is your Windows username.
+
+On Vista, it's C:\Users\[Username]\AppData\Local\Google\Picasa2\buttons.
+
+FIXME Troubleshooting section
+Reword
+When I click the "install" button, Firefox says it does not recognize the protocol.
+
+This message means that Picasa has not registered itself with Firefox as being able to handle links starting with picasa://, which are used to install plugins. You could reinstall Picasa, which should cause it to re-register itself. If it doesn't, or if you don't want to reinstall Picasa, it's also possible to install the button manually.
+
+FIXME How do I install the plugin manually?
+
+Just download this file (right click and "save link as") to the "buttons" subdirectory of your Picasa installation (usually C:\Program Files\Google\Picasa3\buttons on Windows). Then, restart Picasa and the button should show up.
+
+If it doesn't, you may need to go to Tools -> Configure Buttons and move the button to the right column so that it shows up.
+
 == Screenshots ==
 
 1. Picasa Album Uploader Options in Media Settings Admin Screen.

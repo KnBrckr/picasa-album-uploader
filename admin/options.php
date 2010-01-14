@@ -85,12 +85,16 @@ class picasa_album_uploader_options
 	 **/
 	function pau_settings_section_html()
 	{	
+		?>
+		<p>To use the Picasa Album Uploader, install the Button in Picasa Desktop using this automated install link:</p>
+		<?php
 		// Display button to download the Picasa Button Plugin
 		echo do_shortcode( "[picasa_album_uploader_button]" );
-		
 		?>
-		<p>To use the Picasa Album Uploader, install the Button in Picasa Desktop using the link above.</p>
+		
+		In the event the automated install does not work, you can also try to manually install the plugin.
 		<?php
+		// FIXME Provide instructions on manual install
 	}
 	
 	/**
