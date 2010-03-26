@@ -39,12 +39,45 @@ class picasa_album_uploader_options
 	/**
 	 * slug used to detect pages requiring plugin processing
 	 *
-	 * @returns string Slug Name Setting
+	 * @return string Slug Name Setting
+	 * @access public
 	 **/
 	function slug() {
 		$options = get_option('pau_plugin_settings');
-		$slug = ($options['slug'] ? $options['slug']: 'picasa_album_uploader');
-		return $slug;
+		return ($options['slug'] ? $options['slug'] : 'picasa_album_uploader');
+	}
+	
+	/**
+	 * Return relative path to button file
+	 *
+	 * @return string Relative path within WP_CONTENT_DIR to use for button file
+	 **/
+	function button_file()
+	{
+		$options = get_option('pau_plugin_settings');
+		return ($options['button_file'] ? $options['button_file'] : '');
+	}
+	
+	/**
+	 * Return full path to button file.
+	 *
+	 * @return string Path within WP_CONTENT_DIR to use for button file
+	 **/
+	function button_file_path()
+	{
+		$button_file = self::button_file();
+		return WP_CONTENT_DIR . '/' . ($button_file ? $button_file . '/' : '') . 'picasa_album_uploader.pbz';
+	}
+	
+	/**
+	 * Return URL path to button file
+	 *
+	 * @return string URL path to button file
+	 **/
+	function button_file_url()
+	{
+		$button_file = self::button_file();
+		return WP_CONTENT_URL . '/' . ($button_file ? $button_file . '/' : '') . 'picasa_album_uploader.pbz';
 	}
 	
 	/**
@@ -55,8 +88,14 @@ class picasa_album_uploader_options
 		// Add settings section to the 'media' Settings page
 		add_settings_section( 'pau_settings_section', 'Picasa Album Uploader Settings', array( &$this, 'pau_settings_section_html'), 'media' );
 		
+		// FIXME Add button to generate Picasa button.
+		// FIXME Add warnings if the slug or permalink structure modified that button must be regenerated.
+		
 		// Add slug name field to the plugin admin settings section
 		add_settings_field( 'pau_plugin_settings[slug]', 'Slug', array( &$this, 'pau_settings_slug_html' ), 'media', 'pau_settings_section' );
+		
+		// Add button file name field
+		add_settings_field( 'pau_plugin_settings[button_file]', 'Button File', array( &$this, 'pau_settings_button_file_html' ), 'media', 'pau_settings_section' );
 		
 		// Register the slug name setting;
 		register_setting( 'media', 'pau_plugin_settings', array (&$this, 'sanitize_settings') );
@@ -71,12 +110,21 @@ class picasa_album_uploader_options
 	 **/
 	function sanitize_settings($options)
 	{
-		$pattern[0] = '/\s+/'; // Translate white space to a -
-		$pattern[1] = '/[^a-zA-Z0-9-_]/'; // Only allow alphanumeric, dash (-) and underscore (_)
-		$replacement[0] = '-';
-		$replacement[1] = '';
-		$options['slug'] = preg_replace($pattern, $replacement, $options['slug']);
+		// Slug must be alpha-numeric, dash and underscore.
+		$slug_pattern[0] = '/\s+/'; 						// Translate white space to a -
+		$slug_replacement[0] = '-';
+		$slug_pattern[1] = '/[^a-zA-Z0-9-_]/'; 	// Only allow alphanumeric, dash (-) and underscore (_)
+		$slug_replacement[1] = '';
+		$options['slug'] = preg_replace($slug_pattern, $slug_replacement, $options['slug']);
 		
+		// button file path can not contain .. references
+		$button_file_pattern[0] = '/^\.\.\//';	// Not allowed to start with ../
+		$button_file_replacement[0] = '';
+		$button_file_pattern[1] = '/\/\.\.\/';	// No intermediate ..
+		$button_file_replacement[1] = '/';
+		$button_file_pattern[2] = '/^\/|\/$/';	// Trim Leading and Trailing slashes
+		$button_file_replacement[2] = '';
+		$options['button_file'] = preg_replace($button_file_pattern, $button_file_replacement, $options['button_file']);
 		return $options;
 	}
 	
@@ -91,8 +139,7 @@ class picasa_album_uploader_options
 		// Display button to download the Picasa Button Plugin
 		echo do_shortcode( "[picasa_album_uploader_button]" );
 		?>
-		
-		In the event the automated install does not work, you can also try to manually install the plugin.
+		<p>In the event the automated install does not work, you can also try to manually install the plugin.</p>
 		<?php
 		// FIXME Provide instructions on manual install
 	}
@@ -102,12 +149,31 @@ class picasa_album_uploader_options
 	 **/
 	function pau_settings_slug_html()
 	{ ?>
-		<input type='text' name='pau_plugin_settings[slug]' value='<?php echo $this->slug(); ?>' /><br />
+		<input type='text' name='pau_plugin_settings[slug]' value='<?php echo self::slug(); ?>' /><br />
 		Set the slug used by the plugin.  
 		Only alphanumeric, dash (-) and underscore (_) characters are allowed.
-		White space will be convereted to dash, illegal characters will be removed.
-		<br />When the slug name is changed, a new button must be installed in Picasa to match the new setting.
+		White space will be converted to dash, illegal characters will be removed.
+		<br />When the slug name is changed or permalink settings are altered, 
+		a new button must be installed in Picasa to match the new setting.
 		<?php
+	}
+	
+	/**
+	 * Emit HTML to create form field for button file name
+	 **/
+	function pau_settings_button_file_html()
+	{ ?>
+		<input type='text' name='pau_plugin_settings[button_file]' value='<?php echo self::button_file(); ?>' /><br />
+		Set the path to be used for the button file that is downloaded into Picasa.  
+		The path is relative to the wp_content directory and the path must be writable for the file to be generated.
+		By default, the button file will be generated in the wp_content directory.
+		<br />The file must be re-generated if
+		the slug name is changed or the site permalink settings are altered.
+		<?php
+		// Put up warning if the directory is not writable
+		if (! is_writable(dirname(self::button_file_path())) ) {
+			echo "<p>FIXME WARNING - Directory '" . dirname(self::button_file_path()) . "' not writeable</p>";
+		}
 	}
 } // END class 
 ?>
