@@ -3,7 +3,7 @@
 Plugin Name: Picasa Album Uploader
 Plugin URI: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Description: Easily upload media from Google Picasa Desktop into WordPress.  Navigate to <a href="options-media.php">Settings &rarr; Media</a> to configure.
-Version: 0.3.1
+Version: 0.4
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/blog/
 
@@ -131,11 +131,18 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * @return string URL to download Picasa button
 		 */
 		function sc_download_button( $atts, $content = null ) {
-			// Build the URL to the button - must be sensitive to use of permalinks
-			// FIXME - Change to use pre-generated button from wp-content directory
-			$buttonUrl = $this->pau_options->button_file_url();
+			// Build the URL to the button
+			$button_path = $this->pau_options->button_file_path();
+			$button_url = $this->pau_options->button_file_url();
 			
-			return '<a href="picasa://importbutton/?url=' . $buttonUrl . '" title="Download Picasa Button and Install in Picasa Desktop">Install Image Upload Button in Picasa Desktop</a>';
+			if ( is_readable($button_path) ) {
+				$text = '<a href="picasa://importbutton/?url=' . $button_url . '" title="Download Picasa Button and Install in Picasa Desktop">Install Image Upload Button in Picasa Desktop</a>';				
+			} else {
+				// Button file not readable on the server
+				$text = "Button File is not available - Use Admin Screen to generate it.";
+			}
+			
+			return $text;
 		}	
 		
 		/**

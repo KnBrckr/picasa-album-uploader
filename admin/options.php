@@ -174,6 +174,11 @@ class picasa_album_uploader_options
 		if (! is_writable(dirname(self::button_file_path())) ) {
 			echo "<p>FIXME WARNING - Directory '" . dirname(self::button_file_path()) . "' not writeable</p>";
 		}
+		
+		// FIXME Detect if the Permalink or slug settings have changed and the button needs to be regenerated.
+		// Alternative is to always use the non-permalink settings which will always work.  Only change is if the
+		// URL to the site changes.
+		
 	}
 } // END class 
 ?>

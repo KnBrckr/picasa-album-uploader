@@ -22,15 +22,17 @@ This plugin is based on the initial works by [clyang](http://clyang.net/blog/200
 1.  At upload, optionally create a new post using the WP shortcode [gallery] to publish the newly uploaded files.
 1.  Internationalization
 1.  Refine default display of images to be uploaded.
+1.  Improve default formatting in Picasa Mini-browser
 
 == Installation ==
 
-1. Upload the picasa-album-uploader to the `wp-content/plugins/` directory
-1. Activate the plugin through the Admin -> Plugins Screen
-1. Configure the plugin through the Admin -> Settings -> Media Screen.
-1. Use the "Install Image Upload Button in Picasa Desktop" Link in the Admin Settings -> Media to import the button into Picasa
-1. If desired, create the files header-picasa_album_uploader.php and footer-picasa_album_uploader.php in the top level of your themes directory to provide customized header and footer in the upload confirmation dialog displayed by Picasa.
-1. Begin uploading photos from Picasa to your blog.
+1.  Upload the picasa-album-uploader to the `wp-content/plugins/` directory
+1.  Activate the plugin through the Admin -> Plugins Screen
+1.  Configure the plugin through the Admin -> Settings -> Media Screen.
+1.  Generate the Picasa Button Download File
+1.  Use the "Install Image Upload Button in Picasa Desktop" Link in the Admin Settings -> Media to import the generated button into Picasa
+1.  If desired, create the files header-picasa_album_uploader.php and footer-picasa_album_uploader.php in the top level of your themes directory to provide customized header and footer in the upload confirmation dialog displayed by Picasa.
+1.  Begin uploading photos from Picasa to your blog.
 
 To display the button load link in a post or page, simply insert the shortcode `[picasa_album_uploader_button]` at the desired location.
 
@@ -39,6 +41,10 @@ To display the button load link in a post or page, simply insert the shortcode `
 = I changed the slug name (or other part of my WordPress URL) and my button in Picasa stopped working.  What do I do? =
 
 The Picasa button contains a URL to your WordPress installation, including the slug name used by this plugin.  If any portion of the URL changes, the button in Picasa must be replaced so that the button is sending to the correct location in your WordPress site.
+
+= What happens if I change my permalink settings? =
+
+This should only affect you when you enable or disable permalink usage.  The URL contained within the button is sensitive to having permalinks enabled or disabled and must be regenerated if the setting changes.  The plugin attempts to detect these changes and notify you when you need to regenerate the button.
 
 = The URL to download the button points to a .pbz file that does not exist in the installed material.  What's up? =
 
@@ -106,6 +112,10 @@ If it doesn't, you may need to go to Tools -> Configure Buttons and move the but
 
 == Changelog ==
 
+= 0.4 =
+* Change Picasa Button handling to pre-generate button file for download.
+* Address issues in URL format when permalinks are not being used on a site.
+
 = 0.3.1 =
 * Fix defect in redirect URL to display results page
 * Fix interaction issue with WordPress.com Stats plugin
@@ -126,6 +136,10 @@ If it doesn't, you may need to go to Tools -> Configure Buttons and move the but
 * Plugin development initiated
 
 == Upgrade Notice ==
+
+= 0.4 =
+* Allow sites not using Permalinks to work with the plugin
+* Improved debugging and error messages to isolate plugin problems detected by users
 
 = 0.3.1 =
 * Fixes interaction issue with WordPress.com Stats plugin - When both plugins are enabled, navigation to the picasa uploader pages will cause an execution timeout in the Stats plugin.
