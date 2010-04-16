@@ -21,6 +21,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
  **/
+
+if ( ! defined('PAU_BUTTON_FILE_NAME') ) {
+	//FIXME - revert name to original
+	// define ( 'PAU_BUTTON_FILE_NAME', 'picasa_album_uploader.pbz');
+	define ( 'PAU_BUTTON_FILE_NAME', 'picasa_album_uploader_dev.pbz');
+}
+
 class picasa_album_uploader_options
 {
 	/**
@@ -79,7 +86,7 @@ class picasa_album_uploader_options
 		$this->slug = $options['slug'] ? $options['slug'] : 'picasa_album_uploader';
 
 		// Init paths to the button file
-		$button_file_name = 'picasa_album_uploader.pbz';
+		$button_file_name = PAU_BUTTON_FILE_NAME;
 		$this->button_file_rel_dirname = $options['button_file_rel_dirname'] ? $options['button_file_rel_dirname'] : '';
 		$relpath = $this->button_file_rel_dirname ? $this->button_file_rel_dirname . '/' . $button_file_name : $button_file_name;		
 		$this->button_file_path = WP_CONTENT_DIR . '/' . $relpath;

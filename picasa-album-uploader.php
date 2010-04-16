@@ -352,13 +352,21 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			// Confirm the nonce field to allow operation to continue
 			// TODO On Nonce failure generate better failure screen.
 			check_admin_referer(PAU_NONCE_UPLOAD, PAU_NONCE_UPLOAD);
+			
+// FIXME
+echo "<pre>";
+echo "_POST\n";
+print_r($_POST);
+echo "_FILES\n";
+print_r($_FILES);
+echo "</pre>";
 
 			// User must be able to upload files to proceed
 			if (! current_user_can('upload_files')) {
 				$result = PAU_RESULT_NO_PERMISSION;
 			} else {
 				if ( $_FILES ) {
-					// Don't need to test that this is a wp_upload_form in wp_handle_upload()
+					// Don't need to test that this is a wp_upload_form in wp_handle_upload() in loop below
 					$overrides = array( 'test_form' => false );
 
 					$i = 0; // Loop counter
@@ -426,13 +434,12 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			wp_enqueue_script('picasa-album-uploader', PAU_PLUGIN_URL . '/pau.js' ,'jquery');
 			
 			// Must be simple page name target in the POST action for Picasa to process the input URLs correctly.
-			$content = "<form method='post' action='upload'>\n";
+			$content = '<form method="post"" action="' . self::build_url('upload') . '">';
 
 			// Add nonce field to the form if nonce is supported to improve security
 			if ( function_exists( 'wp_nonce_field' ) ) {
-				// Set referrer field, do not echo hidden nonce field
+				// Set nonce and referer fields, use return value vs. echo
 				$content .= wp_nonce_field(PAU_NONCE_UPLOAD, PAU_NONCE_UPLOAD, true, false);
-				// Don't echo the referer field
 				$content .= wp_referer_field(false);
 			}
 
@@ -451,9 +458,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 
 			// For each image, display the image and setup hidden form field for upload processing.
 			foreach($pData as $e) {
-				$content .= "<img class='pau_img' src='".attribute_escape( $e['photo:thumbnail'] )."?size=-96' title='".attribute_escape( $e['title'] )."'>";
+				$content .= "<img class='pau_img' src='".attribute_escape( $e['photo:thumbnail'] )."?size=-96' title='".attribute_escape( $e['title'] )."'>\n";
 				$large = attribute_escape( $e['photo:imgsrc'] ) ."?size=1024";
-				$content .= "<input type='hidden' name='$large'>";
+				$content .= '<input type="hidden" name="' . $large. '">' . "\n";
 				
 				// Add input tags to update image description, etc.
 				// TODO Put fields into div that can be hidden/displayed
