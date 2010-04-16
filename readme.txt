@@ -26,6 +26,7 @@ This plugin is based on the initial works by [clyang](http://clyang.net/blog/200
 
 == Installation ==
 
+1.  Configure one of the permlink options in the Admin Settings -> Permalinks screen.  See FAQ for details.
 1.  Upload the picasa-album-uploader to the `wp-content/plugins/` directory
 1.  Activate the plugin through the Admin -> Plugins Screen
 1.  Configure the plugin through the Admin -> Settings -> Media Screen.
@@ -38,13 +39,17 @@ To display the button load link in a post or page, simply insert the shortcode `
 
 == Frequently Asked Questions ==
 
+= Why are Permalinks required? =
+
+The Picasa Desktop client is very picky about the format of the URLs that it will accept during the upload process and will only accept a simple URL consisting of a single filename.  The use of the slash (/) and question-marks (?) in the URL syntax results in no files being uploaded by Picasa to the server.
+
 = I changed the slug name (or other part of my WordPress URL) and my button in Picasa stopped working.  What do I do? =
 
 The Picasa button contains a URL to your WordPress installation, including the slug name used by this plugin.  If any portion of the URL changes, the button in Picasa must be replaced so that the button is sending to the correct location in your WordPress site.
 
 = What happens if I change my permalink settings? =
 
-This should only affect you when you enable or disable permalink usage.  The URL contained within the button is sensitive to having permalinks enabled or disabled and must be regenerated if the setting changes.  The plugin attempts to detect these changes and notify you when you need to regenerate the button.
+You may freely change the format of your permalinks without affecting the ability to upload files from Picasa Desktop.  You must however keep permalinks enabled as discussed above.
 
 = The URL to download the button points to a .pbz file that does not exist in the installed material.  What's up? =
 
