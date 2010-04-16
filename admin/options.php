@@ -80,7 +80,7 @@ class picasa_album_uploader_options
 
 		// Init paths to the button file
 		$button_file_name = 'picasa_album_uploader.pbz';
-		$this->button_file_rel_dirname = $options['button_file_rel_dirname'] || '';
+		$this->button_file_rel_dirname = $options['button_file_rel_dirname'] ? $options['button_file_rel_dirname'] : '';
 		$relpath = $this->button_file_rel_dirname ? $this->button_file_rel_dirname . '/' . $button_file_name : $button_file_name;		
 		$this->button_file_path = WP_CONTENT_DIR . '/' . $relpath;
 		$this->button_file_url = WP_CONTENT_DIR . '/' . $relpath;
@@ -133,19 +133,20 @@ class picasa_album_uploader_options
 		$slug_replacement[1] = '';
 		$options['slug'] = preg_replace($slug_pattern, $slug_replacement, $options['slug']);
 		
-		// button file relative directory path can not contain .. references
-		$button_file_pattern[0] = '/^\.\.\//';	// Not allowed to start with ../
-		$button_file_replacement[0] = '';
-		$button_file_pattern[1] = '/\/\.\.\/';	// No intermediate ..
-		$button_file_replacement[1] = '/';
-		$button_file_pattern[2] = '/^\/|\/$/';	// Trim Leading and Trailing slashes
-		$button_file_replacement[2] = '';
-		$options['button_file_rel_dirname'] = preg_replace($button_file_pattern, $button_file_replacement, $options['button_file']);
+		// Ensure button file path is relative to the WP_CONTENT_DIR
+		$realpath = realpath(WP_CONTENT_DIR .'/'.$options['button_file_rel_dirname']);
+		if ( strncmp($realpath, WP_CONTENT_DIR, strlen(WP_CONTENT_DIR)) ) {
+			$options['button_file_rel_dirname'] = '';
+			error_log('Wordpress ' . PAU_PLUGIN_NAME . ' Illegal path provided for button file location: ' .$realpath);
+			// FIXME Enable feedback of errors to user
+			$options['error'] = 'Illegal path provided for button file location.';
+		}
 		
 		// If User wanted the button file generated act on it here.
+		// FIXME Don't generate button if there was an error processing
 		if ( $options['generate_button'] ) {
 			$result = self::generate_picasa_button();
-			error_log($result);
+			error_log($result); // FIXME Send Feedback to user
 		}
 		return $options;
 	}
