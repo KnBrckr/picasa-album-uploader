@@ -42,8 +42,9 @@ if ( ! defined( 'PAU_PLUGIN_NAME' ) ) {
 	define( 'PAU_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . PAU_PLUGIN_NAME );	// Base directory for Plugin
 	define ( 'PAU_PLUGIN_URL', WP_PLUGIN_URL . '/' . PAU_PLUGIN_NAME);	// Base URL for plugin directory
 	
-	// Name string used in Nonce hanldling
+	// Name strings used in Nonce hanldling
 	define ( 'PAU_NONCE_UPLOAD', 'picasa-album-uploader-upload-images');
+	define ( 'PAU_NONCE_GEN_BUTTON', 'picasa-album-uploader-gen-button');
 
 	// plugin function requested based on URL request
 	define ('PAU_BUTTON', 1);
@@ -123,6 +124,11 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			
 			// Add CSS to HTML header
 			add_action('wp_head', array(&$this, 'add_css'));
+
+			// Add section for reporting configuration errors
+			if (is_admin () ) {
+				add_action('admin_notices', array( &$this, 'pau_admin_notice'));
+			}
 		}
 		
 		/**
@@ -132,16 +138,16 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 */
 		function sc_download_button( $atts, $content = null ) {
 			// Build the URL to the button
-			$button_path = $this->pau_options->button_file_path();
-			$button_url = $this->pau_options->button_file_url();
+			$button_path = $this->pau_options->button_file_path;
+			$button_url = $this->pau_options->button_file_url;
 			
 			if ( is_readable($button_path) ) {
 				$text = '<a href="picasa://importbutton/?url=' . $button_url . '" title="Download Picasa Button and Install in Picasa Desktop">Install Image Upload Button in Picasa Desktop</a>';				
 			} else {
 				// Button file not readable on the server
-				$text = "Button File is not available - Use Admin Screen to generate it.";
+				$text = "Picasa Album Uploader Configuration Required.";
 			}
-			
+						
 			return $text;
 		}	
 		
@@ -223,6 +229,19 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		{
 			echo '<link rel="stylesheet" type="text/css" href="' . PAU_PLUGIN_URL . '/picasa-album-uploader.css" />';
 		}
+		
+		/**
+		 * Display Notice messages at head of admin screen
+		 *
+		 * @return void
+		 **/
+		function pau_admin_notice()
+		{
+			if ( ! $this->pau_options->error )
+				return;
+				
+			echo "<div class='error'><p><a href='options-media.php'>".PAU_PLUGIN_NAME."</a> needs attention: please review the configuration.</p></div>";
+		}
 
 		/**
 		 * Parse incoming request and test if it should be handled by this plugin.
@@ -233,7 +252,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		private function parse_request( $wp_request ){
 			$tokens = split( '/', $wp_request );
 
-			if ( $this->pau_options->slug() != $tokens[0] ) {
+			if ( $this->pau_options->slug != $tokens[0] ) {
 				return false; // Request is not for this plugin
 			}
 			
@@ -263,79 +282,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			}
 			
 			return true; // Have a valid request to be handled by this plugin
-		}
-		
-		/**
-		 * Generate the Picasa PZB file and save as a media file for later download.
-		 *
-		 * See http://code.google.com/apis/picasa/docs/button_api.html for a
-		 * description of the contents of the PZB file.
-		 *
-		 * @access private
-		 */
-		private function generate_picasa_button( ) {
-			$blogname = get_bloginfo( 'name' );
-			$guid = self::guid(); // TODO Only Generate GUID once for a blog - keep same guid - allow blog config to update it.
-			$upload_url = self::build_url('minibrowser');
-			
-			// XML to describe the Picasa plugin button
-			$pbf = <<<EOF
-<?xml  version="1.0" encoding="utf-8" ?>
-<buttons format="1" version="1">
-   <button id="picasa-album-uploader/$guid" type="dynamic">
-   	<icon name="$guid/upload-button" src="pbz"/>
-   	<label>Wordpress</label>
-		<label_en>Wordpress</label_en>
-		<label_zh-tw>上传</label_zh-tw>
-		<label_zh-cn>上載</label_zh-cn>
-		<label_cs>Odeslat</label_cs>
-		<label_nl>Uploaden</label_nl>
-		<label_en-gb>Wordpress</label_en-gb>
-		<label_fr>Transférer</label_fr>
-		<label_de>Hochladen</label_de>
-		<label_it>Carica</label_it>
-		<label_ja>アップロード</label_ja>
-		<label_ko>업로드</label_ko>
-		<label_pt-br>Fazer  upload</label_pt-br>
-		<label_ru>Загрузка</label_ru>
-		<label_es>Cargar</label_es>
-		<label_th>อัปโหลด</label_th>
-		<tooltip>Upload to "$blogname"</tooltip>
-		<action verb="hybrid">
-		   <param name="url" value="$upload_url"/>
-		</action>
-	</button>
-</buttons>
-EOF;
-			
-			// Create Zip stream and add the XML data to the zip
-			$zip = new zipfile();
-			if (null == $zip) {
-				self::log_error("Unable to initialize zipfile module.");
-				return false;
-			}
-			$zip->addFile( $pbf, $guid . '.pbf' );
-			
-			// TODO Allow icon to be replaced by theme
-			// Add PSD icon to zip
-			$psd_filename =  PAU_PLUGIN_DIR . '/images/wordpress-logo-blue.psd'; // button icon
-			$fsize = @filesize( $psd_filename );
-			if (false == $fsize) {
-				self::log_error("Unable to get filesize of " . $psd_filename);
-				return false;
-			}
-			$zip->addFile( file_get_contents( $psd_filename ), $guid . '.psd' );
-
-			// Copy Zip file into media area for later download
-			$button_file = $this->pau_options->button_file_path();
-			// FIXME - Create file w/in system somewhere
-			$retval = file_put_contents($button_file, $zip->file());
-			if ( 0 == $retval ) {
-				self::log_error("Failed to write contents of " . $button_file );
-			}
-
-			return $retval;
-		}
+		}		
 		
 		/**
 		 * Generate post content for Picasa minibrowser image uploading.
@@ -465,30 +412,6 @@ EOF;
 		}
 
 		/**
-		 * Generate a standard format guid
-		 *
-		 * @return string UUID in form: {xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}
-		 * @access private
-		 */
-		private function guid() {
-			if ( function_exists( 'com_create_guid' ) ) {
-				return com_create_guid();
-			} else {
-				mt_srand( (double)microtime()*10000 ) ;//optional for php 4.2.0 and up.
-				$charid = strtoupper( md5( uniqid( rand(), true ) ) );
-				$hyphen = chr( 45 );	// "-"
-				$uuid = chr( 123 )		// "{"
-					.substr($charid, 0, 8).$hyphen
-					.substr($charid, 8, 4).$hyphen
-					.substr($charid,12, 4).$hyphen
-					.substr($charid,16, 4).$hyphen
-					.substr($charid,20,12)
-					.chr(125);	// "}"
-				return $uuid;
-			}
-		}
-		
-		/**
 		 * Generate the form used in the Picasa minibrowser to confirm the upload
 		 *
 		 * Examines $_POST['rss'] for RSS feed from Picasa to display form dialog
@@ -598,10 +521,10 @@ FORM_FIN;
 		 * Build a URL to pages generated by this plugin based on use of permalinks
 		 *
 		 * 
-		 * @access private
+		 * @access public
 		 * @return string URL to a plugin generated page
 		 **/
-		private function build_Url( $page )
+		public function build_Url( $page )
 		{
 			$url = get_bloginfo('wpurl') . '/';
 			if ( ! $this->using_permalinks ) {
@@ -609,7 +532,7 @@ FORM_FIN;
 				# Request might include a parameter string.  Convert to ?p1&p2 syntax
 				$page = str_replace('?', '&', $page);
 			}
-			$url .= $this->pau_options->slug() . '/' . $page;
+			$url .= $this->pau_options->slug . '/' . $page;
 			
 			return $url;
 		}
