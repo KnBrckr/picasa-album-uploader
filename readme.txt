@@ -118,8 +118,8 @@ If it doesn't, you may need to go to Tools -> Configure Buttons and move the but
 == Changelog ==
 
 = 0.4 =
-* Change Picasa Button handling to pre-generate button file for download.
-* Address issues in URL format when permalinks are not being used on a site.
+* Address issues when permalinks are not being used on a site.  Picasa Desktop is challenged if permalinks are not enabled when processing URLs.
+* Added error logging in plugin to aid in diagnosis
 
 = 0.3.1 =
 * Fix defect in redirect URL to display results page
