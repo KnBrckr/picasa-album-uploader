@@ -120,7 +120,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			$this->pau_options = new picasa_album_uploader_options();
 
 			// Check for permalink usage
-			$pau->pau_options->error_log("Permalink structure: " . get_option('permalink_structure'));
+			$this->pau_options->error_log("Permalink structure: " . get_option('permalink_structure'));
 			$this->using_permalinks = get_option('permalink_structure') != '';
 			
 			// Shortcode to generate URL to download Picassa Button
@@ -168,7 +168,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				return $posts;
 			}
 			
-			$this->pau_options->error_log("Request will be handled by plugin: " . $query);
+			$this->pau_options->error_log("Request will be handled by plugin");
 			
 			//	Request is for this plugin.  Setup a dummy Post.			
 			$post = self::gen_post();
@@ -238,6 +238,8 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 */
 		private function parse_request( $wp_request ){
 			$tokens = split( '/', $wp_request );
+			
+			$this->pau_options->error_log("Parsing request $wp_request");
 
 			if ( $this->pau_options->slug != $tokens[0] ) {
 				return false; // Request is not for this plugin
@@ -247,7 +249,6 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			//	PAU_BUTTON_FILE_NAME
 			//	mini_browser
 			//	upload
-			$this->pau_options->error_log("Requested page: " . $tokens[1]);
 			switch ( $tokens[1] ) {
 				case PAU_BUTTON_FILE_NAME:
 					$this->pau_serve = PAU_BUTTON;
@@ -287,6 +288,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			
 			// Make sure user is logged in to proceed
 			if (false == is_user_logged_in()) {
+				$this->pau_options->error_log("Redirected minibrowser request to login");
 				
 				// Redirect user to the login page - come back here after login complete
 				if (wp_redirect(wp_login_url( self::build_url('minibrowser') ))) {
@@ -345,6 +347,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 
 			// User must be able to upload files to proceed
 			if (! current_user_can('upload_files')) {
+				$this->pau_options->error_log("User is not allowed to upload files.");
 				$result = PAU_RESULT_NO_PERMISSION;
 			} else {
 				if ( $_FILES ) {
@@ -381,7 +384,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 							'post_mime_type' => $type,
 							'guid' => $url), array());
 						
-						$pau->pau_options->error_log("Received file: $file")
+						$this->pau_options->error_log("Received file: $file");
 						// Insert the image into the WP media library
 
 						$id = wp_insert_attachment($object, $file,0);
@@ -392,10 +395,10 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 						
 						$i++; // Next array element					
 					} // end foreach $file
-					$pau->pau_options->error_log("Processed $i files from Picasa");
+					$this->pau_options->error_log("Processed $i files from Picasa");
 					$result = PAU_RESULT_SUCCESS;
 				} else {
-					$pau->pau_options->error_log("Picasa did not upload any files");
+					$this->pau_options->error_log("Picasa did not upload any files");
 					$result = PAU_RESULT_NO_FILES;
 				}
 			}
@@ -403,6 +406,8 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			// Tell Picasa to open a result page in the browser.
 			echo self::build_url('result?result=' . $result);
 
+			// Save log file messages before exit
+			$this->pau_options->save_error_log();
 			exit; // No more WP processing should be performed.
 		}
 
@@ -582,8 +587,8 @@ EOF;
 			// Create Zip stream and add the XML data to the zip
 			$zip = new zipfile();
 			if (null == $zip) {
-				$pau->pau_options->error_log("Unable to initialize zipfile module; can't generate button.");
-				$pau->pau_options->save_error_log();  // Must call directly to save since process will exit
+				$this->pau_options->error_log("Unable to initialize zipfile module; can't generate button.");
+				$this->pau_options->save_error_log();  // Must call directly to save since process will exit
 				echo "Unable to initialize zipfile module; can't generate button.";
 				exit;  // No more WP processing should be performed
 			}
@@ -594,8 +599,8 @@ EOF;
 			$psd_filename =  PAU_PLUGIN_DIR . '/images/wordpress-logo-blue.psd'; // button icon
 			$fsize = @filesize( $psd_filename );
 			if (false == $fsize) {
-				$pau->pau_options->error_log("Unable to get filesize of " . $psd_filename . "; can't generate button.");
-				$pau->pau_options->save_error_log();  // Must call directly to save since process will exit
+				$this->pau_options->error_log("Unable to get filesize of " . $psd_filename . "; can't generate button.");
+				$this->pau_options->save_error_log();  // Must call directly to save since process will exit
 				echo "Unable to get filesize of " . $psd_filename . "; can't generate button.";
 				exit;  // No more WP processing should be performed
 			}
@@ -610,8 +615,8 @@ EOF;
 
 			echo $zipcontents;
 			
-			$pau->pau_options->error_log("Delivered button file to client");
-			$pau->pau_options->save_error_log();  // Must call directly to save since process will exit
+			$this->pau_options->error_log("Delivered button file to client");
+			$this->pau_options->save_error_log();  // Must call directly to save since process will exit
 			
 			exit; // Finished sending the button - No more WP processing should be performed
 		}

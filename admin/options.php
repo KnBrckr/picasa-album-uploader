@@ -57,9 +57,6 @@ class picasa_album_uploader_options
 		$this->error_log_enabled = $options['error_log_enabled'] ? $options['error_log_enabled'] : 0;
 		$this->error_log = $options['error_log'] ? $options['error_log'] : array();
 		
-		if ( $this->error_log_enabled )
-			self::error_log("Logging Enabled.");
-
 		// When displaying admin screens ...
 		if ( is_admin() ) {
 			add_action( 'admin_init', array( &$this, 'pau_settings_admin_init' ) );
