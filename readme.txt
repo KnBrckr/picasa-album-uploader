@@ -99,11 +99,13 @@ On XP:  C:\Documents and Settings\[Username]\Local Settings\Application Data\Goo
 
 On Vista, it's C:\Users\[Username]\AppData\Local\Google\Picasa2\buttons.
 
-FIXME Troubleshooting section
-Reword
-When I click the "install" button, Firefox says it does not recognize the protocol.
+== Troubleshooting section ==
+= When I click the "install" button, my browser says it does not recognize the protocol. =
 
-This message means that Picasa has not registered itself with Firefox as being able to handle links starting with picasa://, which are used to install plugins. You could reinstall Picasa, which should cause it to re-register itself. If it doesn't, or if you don't want to reinstall Picasa, it's also possible to install the button manually.
+This message means that Picasa has not registered itself with your browser as being the application to handle links starting with picasa://. You could try to reinstall Picasa, which should cause it to register itself with your browser.
+
+= If the Button does not show up in Picasa ... =
+1. Confirm that the button file is present in the Picasa button folder.
 
 FIXME How do I install the plugin manually?
 

@@ -27,7 +27,6 @@ along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
 TODO Document how to handle failures to install in Picasa.
 TODO Optionally Create a New Post to attach the uploaded images as a WP gallery using [gallery] shortcode.
 TODO Internationalize Plugin
-FIXME Add error logging to isolate failures.
 
 */
 
@@ -247,8 +246,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			
 			// Valid values for 2nd parameter:
 			//	PAU_BUTTON_FILE_NAME
-			//	mini_browser
-			//	upload
+			//	PAU_MINIBROWSER
+			//	PAU_UPLOAD
+			//  PAU_RESULT
 			switch ( $tokens[1] ) {
 				case PAU_BUTTON_FILE_NAME:
 					$this->pau_serve = PAU_BUTTON;
@@ -284,14 +284,16 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			global $post; // To setup the Post content
 			
 			// Open the plugin content div for theme formatting
-			$content = '<div class="picasa-album-uploader">';
+			$content = '<div class="picasa_album_uploader">';
 			
 			// Make sure user is logged in to proceed
 			if (false == is_user_logged_in()) {
-				$this->pau_options->error_log("Redirected minibrowser request to login");
+				$this->pau_options->error_log("Redirecting minibrowser request to login");
 				
 				// Redirect user to the login page - come back here after login complete
 				if (wp_redirect(wp_login_url( self::build_url('minibrowser') ))) {
+					// Save log file messages before exit
+					$this->pau_options->save_error_log();
 					// Requested browser to redirect - done here.
 					exit;
 				}
@@ -303,28 +305,37 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				// As long as current user is allowed to upload files, check for requested files
 				if ( current_user_can('upload_files') ) {
 					if ($_POST['rss']) {
-						$content = self::build_upload_form();					
+						$content .= self::build_upload_form();					
 					} else {
+						$this->pau_options->error_log("No pictures received from Picasa");
 					 	$content .= '<p class="error">Sorry, but no pictures were received from Picasa.</p>';
 					}					
 				} else {
 					// User is not allowed to upload files
+					$this->pau_options->error_log("User does not have permission to upload files");
 					$content .= '<p class="error">Sorry, you do not have permission to upload files.</p>';
 				}
 			}
 			
-			$content .= '</div>';  // Close the Div for this post text
+			// TODO Error states would be better displayed in browser to avoid use of the Picasa minibrowser 
+			//      as a general purpose browser window.
+			
+			$content .= '</div>';  // Close picasa_album_uploader div for this post text
 			
 			// Setup post content
 			$post->post_content = $content;
 			
 			// If Theme has a defined the plugin template, use it, otherwise use template from the plugin
 			if ($theme_template = get_query_template('page-picasa_album_uploader')) {
+				$this->pau_options->error_log("Using Theme supplied template: " . $theme_template);
 				include($theme_template);
 			} else {
+				$this->pau_options->error_log("Using plugin supplied template");
 				include(PAU_PLUGIN_DIR.'/templates/page-picasa_album_uploader.php');
 			}
 
+			// Save log file messages before exit
+			$this->pau_options->save_error_log();
 			exit; // Finished displaying the minibrowser page - No more WP processing should be performed
 		}
 		
@@ -342,7 +353,6 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			require_once( ABSPATH . 'wp-admin/includes/admin.php' ); // Load functions to handle uploads
 
 			// Confirm the nonce field to allow operation to continue
-			// TODO On Nonce failure generate better failure screen.
 			check_admin_referer(PAU_NONCE_UPLOAD, PAU_NONCE_UPLOAD);
 
 			// User must be able to upload files to proceed
@@ -371,6 +381,8 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 						$type = $status['type'];
 						$file = $status['file'];
 						
+						$this->pau_options->error_log("Received file: $file");
+						
 						// Use title, caption and description received from form
 						$title = $_POST['title'][$i];
 						$excerpt = $_POST['caption'][$i];
@@ -384,9 +396,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 							'post_mime_type' => $type,
 							'guid' => $url), array());
 						
-						$this->pau_options->error_log("Received file: $file");
 						// Insert the image into the WP media library
-
 						$id = wp_insert_attachment($object, $file,0);
 						if ( !is_wp_error($id) ) {
 							wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
@@ -449,7 +459,8 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			$pData = $xh->xmlParse();
 
 			// Start div used to display images
-			$content .= "<p class='pau_header'>Selected images</p><div class='pau_images'>\n";
+			$content .= '<p class="pau_header">Selected images</p>';
+			$content .= '<div class="pau_images">';
 
 			// For each image, display the image and setup hidden form field for upload processing.
 			foreach($pData as $e) {
@@ -468,7 +479,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 
 			// TODO Provide method for admin screen to pick available image sizes
 			$content .= <<<FORM_FIN
-</div>
+</div><!-- End of pau_images class -->
 <div class='header'>Select your upload image size
 <INPUT type="radio" name="size" onclick="chURL('640')">640
 <INPUT type="radio" name="size" onclick="chURL('1024')" CHECKED>1024
@@ -478,6 +489,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 <div class='button'>
 <input type="submit" value="Upload">&nbsp;
 </div>
+</form>
 FORM_FIN;
 
 			return $content;
@@ -553,6 +565,8 @@ FORM_FIN;
 			$blogname = get_bloginfo( 'name' );
 			$guid = self::guid(); // TODO Only Generate GUID once for a blog - keep same guid - allow blog config to update it.
 			$upload_url = $pau->build_url('minibrowser');
+			
+			$this->pau_options->error_log("Building Button with target URL " . $upload_url);
 
 			// XML to describe the Picasa plugin button
 			$pbf = <<<EOF
@@ -658,9 +672,14 @@ function pau_error_log($msg) {
 	array_push($pau_errors, PAU_PLUGIN_NAME . $msg);
 }
 
+// Display errors logged when the plugin options module is not available.
 function pau_error_log_display() {
-	// FIXME - put errors into Admin screen
-	error_log("display errors");
+	echo "<div class='error'><p><a href='options-media.php'>" . PAU_PLUGIN_NAME 
+		. "</a> unable to initialize correctly.  Error(s):<br />";
+	foreach ($pau_errors as $line) {
+		echo "$line<br/>\n";
+	}
+	echo "</p></div>";
 }
 
 // =========================

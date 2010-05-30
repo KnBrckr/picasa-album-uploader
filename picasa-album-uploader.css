@@ -1,8 +1,17 @@
 /*
  * Picasa does not appear to be able to handle multiple element selectors
  */
-.pau_error {
-	color: red;
+
+/* Applies to content area of the minibrowser window - reset for visibility */
+.picasa_album_uploader {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-weight: inherit;
+  font-size: 100%;
+  vertical-align: baseline;
+	line-height: 1.5;
+	background: none white;
 }
 
 .pau_header {
@@ -11,7 +20,6 @@
 
 /* Applies to div section around all photos */
 .pau_images {
-	
 }
 
 /* Applies to each img displayed */
@@ -26,7 +34,12 @@
 .pau_img_text {
 	width: 35em;
 }
+
 .pau_img_textarea {
 	height: 4em;
 	width: 35em;
+}
+
+.pau_error {
+	color: red;
 }

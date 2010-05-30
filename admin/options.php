@@ -124,7 +124,7 @@ class picasa_album_uploader_options
 		}
 		
 		if ( $this->error_log_enabled ) {
-			echo "<div class='error'><p><a href='options-media.php'>" . PAU_PLUGIN_NAME . "</a> logging is enabled.</p>";
+			echo "<div class='error'><p><a href='options-media.php'>" . PAU_PLUGIN_NAME . "</a> logging is enabled.  If left enabled, this can affect database performance.</p></div>";
 		}
 	}
 	
@@ -162,7 +162,6 @@ class picasa_album_uploader_options
 		echo do_shortcode( "[picasa_album_uploader_button]" );
 		?>
 		<?php
-		// FIXME Provide instructions on manual install
 	}
 	
 	/**
