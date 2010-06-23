@@ -154,7 +154,7 @@ Please follow these instructions to report problems:
 == Upgrade Notice ==
 
 = 0.4 =
-* Allow sites not using Permalinks to work with the plugin
+* Address issues when permalinks are not being used on a site.  Picasa Desktop is challenged if permalinks are not enabled when processing URLs.
 * Improved debugging and error messages to isolate plugin problems detected by users
 
 = 0.3.1 =
