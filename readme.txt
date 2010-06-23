@@ -44,7 +44,7 @@ A log of plugin activity useful to debug failures can be obtained by selecting t
 
 = Why are Permalinks required? =
 
-The Picasa Desktop client is very picky about the format of the URLs that it will accept during the upload process and will only accept a simple URL consisting of a single filename.  The use of the slash (/) and question-marks (?) in the URL syntax results in no files being uploaded by Picasa to the server.
+The Picasa Desktop client is very picky about the format of the URLs that it will accept during the upload process and will only accept a simple URL consisting of a single filename.  The use of the slash (/) and question-marks (?) in the URL syntax results in no files being uploaded by Picasa to the server.  In order to satisfy this requirement, permalinks must be used.
 
 = I changed the slug name (or other part of my WordPress URL) and my button in Picasa stopped working.  What do I do? =
 
@@ -69,13 +69,13 @@ There is no executable code in the download.  It is comprised of two elements:
 
 Yes!  Just put the shortcode `[picasa_album_uploader_button]` where you want the button to display.
 
-= Can I have buttons from multiple WordPress sites installed at the same time? =
+= Can I have buttons from multiple WordPress sites installed in Picasa at the same time? =
 
 Yes!  The tool tip for the button will identify the name of the WordPress site associated with the button.  You might want to change the button icon to graphically differentiate the connected WordPress installs.  I have no experience with WPMU so can't comment on how this will function within that environment.
 
-= Can I change the button image? =
+= How do I change the button icon? =
 
-In the future, a theme will be allowed to override the button graphic.  Right now, the only way to change the button is by replacing the file `picasa-album-uploader/images/wordpress-logo-blue.psd` in the plugin directory with the desired content.  The layer containing the button image must be "upload-button".  The image should be no larger than 40 pixels wide by 25 pixels high with 72 dpi resolution.  The color model used must be RGB with 8 bits/channel and should use a transparent background.  Full details can be found at the [Picasa Button API](http://code.google.com/apis/picasa/docs/button_api.html "Picasa Button API") reference.
+In the future, a theme will be allowed to override the button graphic.  Right now, the only way to change the button is by replacing the file `picasa-album-uploader/images/wordpress-logo-blue.psd` in the plugin directory with the desired content.  This is a photoshop file and a compatible image editor must be used.  The layer containing the button image must be named "upload-button".  The image should be no larger than 40 pixels wide by 25 pixels high with 72 dpi resolution.  The color model used must be RGB with 8 bits/channel and should use a transparent background.  Full details can be found at the [Picasa Button API](http://code.google.com/apis/picasa/docs/button_api.html "Picasa Button API") reference.
 
 = Other Picasa Uploader plugins require files be placed in the `wp-admin` and/or the server root.  Does this plugin require the same? =
 
@@ -108,7 +108,7 @@ OSX: ~/Library/Application Support/Google/Picasa3/buttons
 == Troubleshooting section ==
 = When I click the "install" button, my browser says it does not recognize the protocol. =
 
-This message means that Picasa has not registered itself with your browser as being the application to handle links starting with `picasa://`. You could try to reinstall Picasa, which should cause it to register itself with your browser.
+This message means that Picasa has not registered itself with your browser as being the application to handle links starting with `picasa://`. You could try to reinstall Picasa, which should cause it to register itself with your browser.  You must also be using at least Picasa v3.0.
 
 = When I click the "install" button, Picasa does not launch. =
 
@@ -130,7 +130,7 @@ Please follow these instructions to report problems:
 
 = 0.4 =
 * Address issues when permalinks are not being used on a site.  Picasa Desktop is challenged if permalinks are not enabled when processing URLs.
-* Added error logging in plugin to aid in diagnosis
+* Added debug logging in plugin to aid in diagnosis of reported problems
 
 = 0.3.1 =
 * Fix defect in redirect URL to display results page
