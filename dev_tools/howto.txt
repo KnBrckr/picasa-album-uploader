@@ -1,0 +1,7 @@
+To create new release version:
+
+Create svn tag release for version
+	svn copy trunk tags/<version>
+	svn ci
+	
+Update readme.txt headers to point at correct version in SVN tree

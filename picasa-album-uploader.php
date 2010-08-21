@@ -379,14 +379,17 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 
 						$url = $status['url'];
 						$type = $status['type'];
-						$file = $status['file'];
-						
-						$this->pau_options->error_log("Received file: $file");
+						$file = $status['file'];						
 						
 						// Use title, caption and description received from form
 						$title = $_POST['title'][$i];
 						$excerpt = $_POST['caption'][$i];
 						$content = $_POST['description'][$i];
+						
+						$this->pau_options->error_log('Received file: "' . $file . '"'); 
+						$this->pau_options->error_log('Title: "' . $title . '"');
+						$this->pau_options->error_log('Excerpt: "' . $excerpt . '"');
+						$this->pau_options->error_log('Description: "' . $content . '"');
 
 						$object = array_merge( array(
 							'post_title' => $title,
