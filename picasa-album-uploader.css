@@ -2,8 +2,22 @@
  * Picasa does not appear to be able to handle multiple element selectors
  */
 
+.pau-error {
+	color: red;
+}
+
+/* Hide the post meta and utility sections for plugin generated pages */
+.post-picasa-album-uploader .entry-meta,
+.post-picasa-album-uploader .entry-utility {
+	display: none;
+}
+
+/* ========================== */
+/* = Minibrowser formatting = */
+/* ========================== */
+
 /* Applies to content area of the minibrowser window - reset for visibility */
-.picasa_album_uploader {
+.post-pau-minibrowser {
   margin: 0;
   padding: 0;
   border: 0;
@@ -14,32 +28,75 @@
 	background: none white;
 }
 
-.pau_header {
+.post-pau-minibrowser .pau-header {
 	font-size: 120%;
 }
 
 /* Applies to div section around all photos */
-.pau_images {
+.post-pau-minibrowser .pau-images {
 }
 
 /* Applies to each img displayed */
-.pau_img {
+.post-pau-minibrowser .pau-img {
 }
 
 /* Format Form Table field headers */
-.pau_img_header {
+.post-pau-minibrowser .pau-img-header {
 	font-size: 110%;
 }
 
-.pau_img_text {
+.post-pau-minibrowser .pau-img-text {
 	width: 35em;
 }
 
-.pau_img_textarea {
+.post-pau-minibrowser .pau-img-textarea {
 	height: 4em;
 	width: 35em;
 }
 
-.pau_error {
-	color: red;
+/* ============================================================ */
+/* = Hide major elements of a page when Minibrowser is active = */
+/* ============================================================ */
+
+/* Hide Meta and Navigational elements of a post */
+.picasa-album-uploader-minibrowser .entry-meta, 
+.picasa-album-uploader-minibrowser .entry-utility {
+	display: none;
+}
+
+/* Hide colophon (footer section) */
+.picasa-album-uploader-minibrowser #colophon {
+	display: none;
+}
+
+/**
+ * = Theme Interoperability = 
+ */
+
+/* Attempt to hide navigation definition */
+.picasa-album-uploader-minibrowser #nav,
+.picasa-album-uploader-minibrowser .nav,
+.picasa-album-uploader-minibrowser #access,
+.picasa-album-uploader-minibrowser .menu
+{
+	display: none;
+}
+
+/* Attempt to hide login section */
+.picasa-album-uploader-minibrowser #loginout {
+	display: none;
+}
+
+/* =========================== */
+/* = Plugin Interoperability = */
+/* =========================== */
+
+/**
+ * Plugin:  add-to-any
+ *
+ * Hide the section added by add-to-any in a page entry
+ */
+.post-picasa-album-uploader .addtoany_share_save_container,  
+.picasa-album-uploader-minibrowser .addtoany_share_save_container {
+	display: none;
 }

@@ -191,7 +191,7 @@ class picasa_album_uploader_options
 		Enable Plugin Debug Logging. When enabled, log will display below.
 		<?php
 		if ( $this-> error_log_enabled ) {
-			echo "<div class=pau_error_log>";
+			echo "<div class=pau-error-log>";
 			foreach ($this->error_log as $line) {
 				echo "$line<br/>\n";
 			}

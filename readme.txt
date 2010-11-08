@@ -128,6 +128,10 @@ Please follow these instructions to report problems:
 
 == Changelog ==
 
+= Trunk =
+* Modified class names used by plugin and improved default formatting on plugin displayed pages
+* Additional debug logging
+
 = 0.4 =
 * Address issues when permalinks are not being used on a site.  Picasa Desktop is challenged if permalinks are not enabled when processing URLs.
 * Added debug logging in plugin to aid in diagnosis of reported problems
