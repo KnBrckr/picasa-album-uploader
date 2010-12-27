@@ -1,4 +1,4 @@
-=== Picsa Album Uploader ===
+=== Picasa Album Uploader ===
 Contributors: draca
 Donate link: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Tags: picasa, upload, images, albums, media
