@@ -3,7 +3,7 @@
 Plugin Name: Picasa Album Uploader
 Plugin URI: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Description: Easily upload media from Google Picasa Desktop into WordPress.  Navigate to <a href="options-media.php">Settings &rarr; Media</a> to configure.
-Version: 0.4
+Version: 0.4.1
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/blog/
 
@@ -164,7 +164,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			$query = $this->using_permalinks ? $wp->request : $wp->query_vars['page_id'];
 			$requested_page = self::parse_request($query);
 			if (! $requested_page) {
-				$this->pau_options->error_log("Request not matched: '".$query."'");
+				$this->pau_options->error_log("Request is not for plugin: '".$query."'");
 				return $posts;
 			}
 			
@@ -267,7 +267,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		private function parse_request( $wp_request ){
 			$tokens = split( '/', $wp_request );
 			
-			$this->pau_options->error_log("Parsing request $wp_request");
+			$this->pau_options->error_log("Parsing request '$wp_request'");
 
 			if ( $this->pau_options->slug != $tokens[0] ) {
 				return false; // Request is not for this plugin
@@ -296,6 +296,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 					break;
 				
 				default:
+					$this->pau_options->error_log("bad request token: '" . $tokens[1] . "'");
 					return false; // slug matched, but 2nd token did not
 			}
 			
@@ -311,6 +312,8 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 */
 		private function minibrowser() {
 			global $post; // To setup the Post content
+			
+			$this->pau_options->error_log("Generating Minibrowser content");
 			
 			// Add class to the body element for CSS styling of the entire page that will be displayed in the minibrowser
 			add_filter('body_class', array(&$this, 'add_body_class'));
@@ -339,7 +342,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 					if ($_POST['rss']) {
 						$content .= self::build_upload_form();					
 					} else {
-						$this->pau_options->error_log("No pictures received from Picasa");
+						$this->pau_options->error_log("Empty RSS feed from Picasa; unable to build minibrowser form.");
 					 	$content .= '<p class="error">Sorry, but no pictures were received from Picasa.</p>';
 					}					
 				} else {
@@ -382,6 +385,8 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * @access private
 		 */
 		private function upload_images() {
+			$this->pau_options->error_log("Upload request received");
+			
 			require_once( ABSPATH . 'wp-admin/includes/admin.php' ); // Load functions to handle uploads
 
 			// Confirm the nonce field to allow operation to continue
@@ -393,17 +398,19 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				$result = PAU_RESULT_NO_PERMISSION;
 			} else {
 				if ( $_FILES ) {
-					// Don't need to test that this is a wp_upload_form in wp_handle_upload() in loop below
+					// Don't need to test that this is a wp_upload_form in wp_handle_upload() in loop below so set test_form to false
 					$overrides = array( 'test_form' => false );
 
 					$i = 0; // Loop counter
 					foreach ( $_FILES as $key => $file ) {
 						if ( empty( $file ) ) {
+							$this->pau_options->error_log("Empty value for filename detected, skipping.");
 							continue; // Skip if value empty
 						}
 
 						$status = wp_handle_upload( $file, $overrides );
 						if (isset($status['error'])) {
+							$this->pau_options->error_log("Error detected during file upload: " . $status['error']);
 							continue; // Error on this file, go to next one.
 						}
 
@@ -436,6 +443,8 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 						if ( !is_wp_error($id) ) {
 							wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
 							do_action('wp_create_file_in_uploads', $file, $id); // for replication
+						} else {
+							$this->pau_options->error_log("Error from wp_insert_attachment: " . $id->get_error_message());
 						}
 						
 						$i++; // Next array element					
@@ -466,7 +475,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * @return string HTML form
 		 * @access private
 		 */
-		private function build_upload_form() {
+		private function build_upload_form() {			
 			// Form handling requires some javascript - depends on jQuery
 			wp_enqueue_script('picasa-album-uploader', PAU_PLUGIN_URL . '/pau.js' ,'jquery');
 			
@@ -485,7 +494,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 
 			// Parse the RSS feed from Picasa to get the images to be uploaded
 			$xh = new xmlHandler();
-			$nodeNames = array("PHOTO:THUMBNAIL", "PHOTO:IMGSRC", "TITLE", 'DESCRIPTION');
+			$nodeNames = array("PHOTO:THUMBNAIL", "PHOTO:IMGSRC", "TITLE", "DESCRIPTION");
 			$xh->setElementNames($nodeNames);
 			$xh->setStartTag("ITEM");
 			$xh->setVarsDefault();
@@ -499,6 +508,8 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 
 			// For each image, display the image and setup hidden form field for upload processing.
 			foreach($pData as $e) {
+				$this->pau_options->error_log("Form Setup: " . attribute_escape($e['photo:imgsrc']));
+				
 				$content .= "<img class='pau-img' src='".attribute_escape( $e['photo:thumbnail'] )."?size=-96' title='".attribute_escape( $e['title'] )."'>";
 				$large = attribute_escape( $e['photo:imgsrc'] ) ."?size=1024";
 				$content .= "<input type='hidden' name='$large'>\n";
