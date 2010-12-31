@@ -16,6 +16,8 @@ If you are not logged in to your blog, you will first be directed to the login p
 
 This plugin is based on the initial works by [clyang](http://clyang.net/blog/2009/02/06/128 "Picasa2Wordpress Blog Article") and the examples from Google for the [Picasa Button API](http://code.google.com/apis/picasa/docs/button_api.html "Picasa Button API") and [Picasa Web Uploader API](http://code.google.com/apis/picasa/docs/web_uploader.html "Picasa Web Uploader API").
 
+The Picasa API this plugin is based upon has been deprecated by Google.
+
 = What's Next? =
 
 1.  Provide uninstall method
