@@ -219,5 +219,17 @@ class picasa_album_uploader_options
 			update_option('pau_plugin_settings', $options);
 		}
 	}
+	
+	/**
+	 * Log errors to server log and debug log
+	 *
+	 * @return void
+	 * @author Kenneth J. Brucker <ken@pumastudios.com>
+	 **/
+	function error_log($msg)
+	{
+		error_log(PAU_PLUGIN_NAME . ": " . $msg);
+		$this->debug_log($msg);
+	}
 } // END class 
 ?>
