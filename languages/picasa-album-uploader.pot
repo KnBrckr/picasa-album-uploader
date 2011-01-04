@@ -1,0 +1,150 @@
+# Copyright (C) 2010 Picasa Album Uploader
+# This file is distributed under the same license as the Picasa Album Uploader package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Picasa Album Uploader 0.5\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/picasa-album-uploader\n"
+"POT-Creation-Date: 2011-01-04 01:24:45+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2010-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: admin/options.php:123
+msgid "%1$s requires the use of %2$s"
+msgstr ""
+
+#: admin/options.php:129
+msgid ""
+"%s logging is enabled.  If left enabled, this can affect database "
+"performance."
+msgstr ""
+
+#: admin/options.php:162
+msgid ""
+"To use the Picasa Album Uploader, install the Button in Picasa Desktop using "
+"this automated install link:"
+msgstr ""
+
+#: admin/options.php:175
+msgid ""
+"Set the slug used by the plugin.  Only alphanumeric, dash (-) and underscore "
+"(_) characters are allowed.  White space will be converted to dash, illegal "
+"characters will be removed."
+msgstr ""
+
+#: admin/options.php:177
+msgid ""
+"When the slug name is changed, a new button must be installed in Picasa to "
+"match the new setting."
+msgstr ""
+
+#: admin/options.php:188
+msgid "Enable Plugin Debug Logging. When enabled, log will display below."
+msgstr ""
+
+#: picasa-album-uploader.php:131
+msgid "Download Picasa Button and Install in Picasa Desktop"
+msgstr ""
+
+#: picasa-album-uploader.php:132
+msgid "Install Image Upload Button in Picasa Desktop"
+msgstr ""
+
+#: picasa-album-uploader.php:134
+msgid "Picasa Album Uploader Configuration Required."
+msgstr ""
+
+#: picasa-album-uploader.php:202
+msgid "%d image uploaded successfully."
+msgid_plural "%d images uploaded successfully."
+msgstr[0] ""
+msgstr[1] ""
+
+#: picasa-album-uploader.php:204
+msgid "%d error detected."
+msgid_plural "%d errors detected."
+msgstr[0] ""
+msgstr[1] ""
+
+#: picasa-album-uploader.php:205
+msgid "See the server error log for details."
+msgstr ""
+
+#: picasa-album-uploader.php:209
+msgid ""
+"Error:  No files provided for upload.  Related errors might appear in the "
+"server error log."
+msgstr ""
+
+#: picasa-album-uploader.php:210
+msgid ""
+"If your Server is configured to use %s, please refer to the plugin readme "
+"for configuration information."
+msgstr ""
+
+#: picasa-album-uploader.php:213
+msgid "Sorry, You do not have permission to upload files to this Blog."
+msgstr ""
+
+#: picasa-album-uploader.php:216
+msgid "Unknown result code %d reported."
+msgstr ""
+
+#: picasa-album-uploader.php:369
+msgid "Sorry, but no pictures were received from Picasa."
+msgstr ""
+
+#: picasa-album-uploader.php:374
+msgid "Sorry, you do not have permission to upload files."
+msgstr ""
+
+#: picasa-album-uploader.php:536
+msgid "Selected images"
+msgstr ""
+
+#: picasa-album-uploader.php:550
+msgid "Title"
+msgstr ""
+
+#: picasa-album-uploader.php:551
+msgid "Caption"
+msgstr ""
+
+#: picasa-album-uploader.php:552
+msgid "Description"
+msgstr ""
+
+#: picasa-album-uploader.php:557
+msgid "Select your upload image size:"
+msgstr ""
+
+#: picasa-album-uploader.php:564
+msgid "Upload"
+msgstr ""
+
+#. #-#-#-#-#  picasa-album-uploader.pot (Picasa Album Uploader 0.5)  #-#-#-#-#
+#. Plugin Name of the plugin/theme
+#: picasa-album-uploader.php:586
+msgid "Picasa Album Uploader"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Easily upload media from Google Picasa Desktop into WordPress.  Navigate to "
+"<a href=\"options-media.php\">Settings &rarr; Media</a> to configure."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Kenneth J. Brucker"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://pumastudios.com/blog/"
+msgstr ""

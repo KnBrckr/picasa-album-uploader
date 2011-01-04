@@ -26,7 +26,6 @@ along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
 
 TODO Document how to handle failures to install in Picasa.
 TODO Optionally Create a New Post to attach the uploaded images as a WP gallery using [gallery] shortcode.
-TODO Internationalize Plugin
 
 */
 
@@ -118,6 +117,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			
 			// Add CSS to HTML header
 			add_action('wp_head', array(&$this, 'add_css'));
+			
+			// i18n support
+			add_action('init', array(&$this, 'load_textdomain'));
 		}
 		
 		/**
@@ -129,10 +131,10 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				if ( $this->using_permalinks ) {
 					$link =  '<a href="picasa://importbutton/?url=' . get_bloginfo('wpurl') . '/' 
 						. $this->pau_options->slug . '/'. PAU_BUTTON_FILE_NAME 
-						. '" title="' . __('Download Picasa Button and Install in Picasa Desktop'). '">'
-						. __('Install Image Upload Button in Picasa Desktop'). '</a>';
+						. '" title="' . __('Download Picasa Button and Install in Picasa Desktop', 'picasa-album-uploader'). '">'
+						. __('Install Image Upload Button in Picasa Desktop', 'picasa-album-uploader'). '</a>';
 				} else {
-					$link = __('Picasa Album Uploader Configuration Required.');
+					$link = __('Picasa Album Uploader Configuration Required.', 'picasa-album-uploader');
 				}
 			return $link;
 		}	
@@ -200,21 +202,21 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			switch ($result_code) {
 				case PAU_RESULT_SUCCESS: // Went through process loop
 					$good = $file_count - $errors; // Number of successful uploaded files
-					$content = '<p>' . sprintf(_n('%d image uploaded successfully.','%d images uploaded successfully.', $good),$good) . '</p>';
+					$content = '<p>' . sprintf(_n('%d image uploaded successfully.','%d images uploaded successfully.', $good, 'picasa-album-uploader'),$good) . '</p>';
 					if ($errors > 0) {
-						$content .= '<p>' . sprintf(_n('%d error detected.','%d errors detected.', $errors), $errors);
-						$content .= '  ' . __('See the server error log for details.') . '</p>';
+						$content .= '<p>' . sprintf(_n('%d error detected.','%d errors detected.', $errors, 'picasa-album-uploader'), $errors);
+						$content .= '  ' . __('See the server error log for details.', 'picasa-album-uploader') . '</p>';
 					}
 					break;
 				case PAU_RESULT_NO_FILES:
-					$content = '<p>' . __('Error:  No files provided for upload.  Related errors might appear in the server error log.') . '</p>';
-					$content .= '<p>' . __('If your Server is configured to use %s, please refer to the plugin readme for configuration information.') . '</p>';
+					$content = '<p>' . __('Error:  No files provided for upload.  Related errors might appear in the server error log.', 'picasa-album-uploader') . '</p>';
+					$content .= '<p>' . __('If your Server is configured to use %s, please refer to the plugin readme for configuration information.', 'picasa-album-uploader') . '</p>';
 					break;
 				case PAU_RESULT_NO_PERMISSION:
-					$content = '<p>' . __('Sorry, You do not have permission to upload files to this Blog.') . '</p>';
+					$content = '<p>' . __('Sorry, You do not have permission to upload files to this Blog.', 'picasa-album-uploader') . '</p>';
 					break;
 				default:
-					$content = '<p>' . sprintf(__('Unknown result code %d reported.'), $result_code) . '</p>';
+					$content = '<p>' . sprintf(__('Unknown result code %d reported.', 'picasa-album-uploader'), $result_code) . '</p>';
 					break;
 			}
 			
@@ -251,6 +253,17 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		function add_css()
 		{
 			echo '<link rel="stylesheet" type="text/css" href="' . PAU_PLUGIN_URL . '/picasa-album-uploader.css" />';
+		}
+		
+		/**
+		 * Callback to load the i18n text domain for the plugin
+		 *
+		 * @return void
+		 * @access private
+		 **/
+		function load_textdomain()
+		{
+			load_plugin_textdomain(PAU_PLUGIN_NAME , false, basename(dirname(__FILE__)) . '/languages' );
 		}
 		
 		/**
@@ -367,12 +380,12 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 						$content .= self::build_upload_form();					
 					} else {
 						$this->pau_options->error_log("Empty RSS feed from Picasa; unable to build minibrowser form.");
-					 	$content .= '<p class="error">' . __('Sorry, but no pictures were received from Picasa.') . '</p>';
+					 	$content .= '<p class="error">' . __('Sorry, but no pictures were received from Picasa.', 'picasa-album-uploader') . '</p>';
 					}					
 				} else {
 					// User is not allowed to upload files
 					$this->pau_options->debug_log("User does not have permission to upload files");
-					$content .= '<p class="error">' . __('Sorry, you do not have permission to upload files.') . '</p>';
+					$content .= '<p class="error">' . __('Sorry, you do not have permission to upload files.', 'picasa-album-uploader') . '</p>';
 				}
 			}
 			
@@ -534,7 +547,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			$pData = $xh->xmlParse();
 
 			// Start div used to display images
-			$content .= '<p class="pau-header">' . __('Selected images') . '</p>';
+			$content .= '<p class="pau-header">' . __('Selected images', 'picasa-album-uploader') . '</p>';
 			$content .= '<div class="pau-images">';
 
 			// For each image, display the image and setup hidden form field for upload processing.
@@ -548,21 +561,21 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				// Add input tags to update image description, etc.
 				// TODO Put fields into div that can be hidden/displayed
 				$content .= '<dl class="pau-attributes">'; // Start Definition List
-				$content .= '<dt class="pau-img-header"">' . __('Title') . '<dd><input type="text" name="title[]" class="pau-img-text" value="'.attribute_escape( $e['title'] ).'" />';
-				$content .= '<dt class="pau-img-header">' . __('Caption') . '<dd><input type="text" name="caption[]" class="pau-img-text" />';				
-				$content .= '<dt class="pau-img-header">' . __('Description') . '<dd><textarea name="description[]" class="pau-img-textarea" rows="4" cols="80">' . attribute_escape( $e['description'] ) . '</textarea>';
+				$content .= '<dt class="pau-img-header"">' . __('Title', 'picasa-album-uploader') . '<dd><input type="text" name="title[]" class="pau-img-text" value="'.attribute_escape( $e['title'] ).'" />';
+				$content .= '<dt class="pau-img-header">' . __('Caption', 'picasa-album-uploader') . '<dd><input type="text" name="caption[]" class="pau-img-text" />';				
+				$content .= '<dt class="pau-img-header">' . __('Description', 'picasa-album-uploader') . '<dd><textarea name="description[]" class="pau-img-textarea" rows="4" cols="80">' . attribute_escape( $e['description'] ) . '</textarea>';
 				$content .= '</dl>'; // End Definition List
 			}
 
 			// TODO Provide method for admin screen to pick available image sizes
-			$content .= '</div><!-- End of pau-images class --><div class="header">' . __('Select your upload image size:') .
+			$content .= '</div><!-- End of pau-images class --><div class="header">' . __('Select your upload image size:', 'picasa-album-uploader') .
 '<INPUT type="radio" name="size" onclick="chURL(\'640\')">640
 <INPUT type="radio" name="size" onclick="chURL(\'1024\')" CHECKED>1024
 <INPUT type="radio" name="size" onclick="chURL(\'1600\')">1600
 <INPUT type="radio" name="size" onclick="chURL(\'0\')">Original
 </div>
 <div class="button">
-<input type="submit" value="' . __('Upload') . '">&nbsp;
+<input type="submit" value="' . __('Upload', 'picasa-album-uploader') . '">&nbsp;
 </div>
 </form>';
 
@@ -584,7 +597,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			$post->post_author = 1;
 			$post->post_date = $formattedNow;
 			$post->post_date_gmt = $formattedNow;
-			$post->post_title = __('Picasa Album Uploader');
+			$post->post_title = __('Picasa Album Uploader', 'picasa-album-uploader');
 			$post->post_category = 0;
 			$post->post_excerpt = '';
 			$post->post_status = 'publish';

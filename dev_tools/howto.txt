@@ -11,3 +11,8 @@ svn copy http://plugins.svn.wordpress.org/picasa-album-uploader/trunk \
 
 	
 Update readme.txt headers to point at correct version in SVN tree
+
+To build POT files:
+
+php ~/php/i18n/makepot.php wp-plugin .
+
