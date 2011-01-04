@@ -103,8 +103,8 @@ In the future, an uninstall script will be provided to delete the options entry 
 Button files end with `.pbz` and the location depends on the OS you are using:
 
 Windows:  C:\Program Files\Google\Picasa3\buttons
-XP:  C:\Documents and Settings\[Username]\Local Settings\Application Data\Google\Picasa3\buttons  where [Username] is your Windows username.
-Vista:  C:\Users\[Username]\AppData\Local\Google\Picasa3\buttons
+XP:  C:\Documents and Settings\Username\Local Settings\Application Data\Google\Picasa3\buttons
+Vista:  C:\Users\Username\AppData\Local\Google\Picasa3\buttons
 OSX: ~/Library/Application Support/Google/Picasa3/buttons
 
 == Troubleshooting section ==
@@ -115,6 +115,14 @@ This message means that Picasa has not registered itself with your browser as be
 = When I click the "install" button, Picasa does not launch. =
 
 Make sure you are running at least Picasa version 3.0 and that Picasa can open on your computer.
+
+= Everything seems OK, but I get an error page displayed by the browser that no files were uploaded by Picasa =
+
+Review the server error log for possible clues.  One possible cause of this failure is a server that is configured to use the [Suhosin](http://www.hardened-php.net/suhosin/index.html "Suhosin Hardened PHP") PHP plugin.  Special thanks go to [rbredow](http://wordpress.org/support/profile/rbredow "rbredow Wordpress User Profile") for the assistance in diagnosing this interaction.
+
+If Suhosin is configured, you might see an error like the following in the server error log:
+`ALERT - configured request variable name length limit exceeded - dropped variable 'http://localhost:51134/b921a58ec2806ab82f5399515fba226e/image/b0f008e85a4fa153_jpg?size=1024'`.
+Check the Suhosin setting values for `suhosin.post.max_name_length` and `suhosin.request.max_varname_length`.  A setting of at least 100 is recommended to allow the long variable names that are required by the Picasa engine.  You might need to increase it further depending on the length of the dropped variable name observed in the error log.
 
 = Reporting Problems =
 
@@ -129,6 +137,12 @@ Please follow these instructions to report problems:
 1. Picasa Album Uploader Options in Media Settings Admin Screen.
 
 == Changelog ==
+
+= 0.5 =
+* Initial Internationalization of plugin
+* Enhanced result page reporting
+* Fixed defect in reporting of errors detected during upload resulting in silent failure.
+* Documented plugin interaction with PHP Security plugin Suhosin
 
 = 0.4.1 =
 * Modified class names used by plugin and improved default formatting on plugin displayed pages
@@ -158,6 +172,9 @@ Please follow these instructions to report problems:
 * Plugin development initiated
 
 == Upgrade Notice ==
+
+= 0.5 =
+* Improved results and error reporting and plugin internationalization.
 
 = 0.4 =
 * Address issues when permalinks are not being used on a site.  Picasa Desktop is challenged if permalinks are not enabled when processing URLs.

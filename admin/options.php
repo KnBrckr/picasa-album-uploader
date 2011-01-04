@@ -119,12 +119,15 @@ class picasa_album_uploader_options
 	function pau_admin_notice()
 	{
 		if ( get_option('permalink_structure') == '' ) {
-			echo "<div class='error'><p><a href='options-media.php'>" . PAU_PLUGIN_NAME
-				. "</a> requires the use of <a href='options-permalink.php'>Permalinks</a></p></div>";			
+			echo '<div class="error"><p>';
+			printf(__('%1$s requires the use of %2$s'), '<a href="options-media.php">' . PAU_PLUGIN_NAME . '</a>', '<a href="options-permalink.php">Permalinks</a>');
+			echo '</p></div>';
 		}
 		
 		if ( $this->debug_log_enabled ) {
-			echo "<div class='error'><p><a href='options-media.php'>" . PAU_PLUGIN_NAME . "</a> logging is enabled.  If left enabled, this can affect database performance.</p></div>";
+			echo '<div class="error"><p>';
+			printf(__('%s logging is enabled.  If left enabled, this can affect database performance.'),'<a href="options-media.php">' . PAU_PLUGIN_NAME . '</a>');
+			echo '</p></div>';
 		}
 	}
 	
@@ -155,29 +158,24 @@ class picasa_album_uploader_options
 	 **/
 	function settings_section_html()
 	{	
-		?>
-		<p>To use the Picasa Album Uploader, install the Button in Picasa Desktop using this automated install link:</p>
-		<?php
+		echo '<p>';
+		_e('To use the Picasa Album Uploader, install the Button in Picasa Desktop using this automated install link:');
+		echo '</p>';
 		// Display button to download the Picasa Button Plugin
 		echo do_shortcode( "[picasa_album_uploader_button]" );
-		?>
-		<?php
 	}
 	
 	/**
 	 * Emit HTML to create form field for slug name
 	 **/
 	function slug_html()
-	{ ?>
-		<input type='text' name='pau_plugin_settings[slug]' value='<?php echo $this->slug; ?>' />
-		<p>
-			Set the slug used by the plugin.  
-			Only alphanumeric, dash (-) and underscore (_) characters are allowed.
-			White space will be converted to dash, illegal characters will be removed.
-			<br />When the slug name is changed, 
-			a new button must be installed in Picasa to match the new setting.
-		</p>
-		<?php
+	{ 
+		echo '<input type="text" name="pau_plugin_settings[slug]" value="' . $this->slug . '" />';
+		echo '<p>';
+		_e('Set the slug used by the plugin.  Only alphanumeric, dash (-) and underscore (_) characters are allowed.  White space will be converted to dash, illegal characters will be removed.');
+		echo '<br />';
+		_e('When the slug name is changed, a new button must be installed in Picasa to match the new setting.');
+		echo '</p>';
 	}
 	
 	/**
@@ -186,10 +184,8 @@ class picasa_album_uploader_options
 	function debug_log_enabled_html()
 	{ 
 		$checked = $this->debug_log_enabled ? "checked" : "" ;
-		?>
-		<input type="checkbox" name="pau_plugin_settings[debug_log_enabled]" value="1" <?php echo $checked; ?>>
-		Enable Plugin Debug Logging. When enabled, log will display below.
-		<?php
+		echo '<input type="checkbox" name="pau_plugin_settings[debug_log_enabled]" value="1" ' . $checked . '>';
+		_e('Enable Plugin Debug Logging. When enabled, log will display below.');
 		if ( $this-> debug_log_enabled ) {
 			echo "<div class=pau-error-log>";
 			foreach ($this->debug_log as $line) {

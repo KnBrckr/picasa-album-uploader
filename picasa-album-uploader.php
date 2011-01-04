@@ -356,6 +356,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 					exit;
 				}
 				
+				// FIXME - Suspect this is broken
 				// wp_redirect failed for some reason - setup page text with redirect back to this location
 				$content .= '<p>Please <a href="'.wp_login_url( self::build_url('minibrowser') )
 						. '" title="Login">login</a> to continue.</p>';
@@ -366,12 +367,12 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 						$content .= self::build_upload_form();					
 					} else {
 						$this->pau_options->error_log("Empty RSS feed from Picasa; unable to build minibrowser form.");
-					 	$content .= '<p class="error">Sorry, but no pictures were received from Picasa.</p>';
+					 	$content .= '<p class="error">' . __('Sorry, but no pictures were received from Picasa.') . '</p>';
 					}					
 				} else {
 					// User is not allowed to upload files
 					$this->pau_options->debug_log("User does not have permission to upload files");
-					$content .= '<p class="error">Sorry, you do not have permission to upload files.</p>';
+					$content .= '<p class="error">' . __('Sorry, you do not have permission to upload files.') . '</p>';
 				}
 			}
 			
@@ -533,7 +534,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			$pData = $xh->xmlParse();
 
 			// Start div used to display images
-			$content .= '<p class="pau-header">Selected images</p>';
+			$content .= '<p class="pau-header">' . __('Selected images') . '</p>';
 			$content .= '<div class="pau-images">';
 
 			// For each image, display the image and setup hidden form field for upload processing.
@@ -541,32 +542,29 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				$this->pau_options->debug_log("Form Setup: " . attribute_escape($e['photo:imgsrc']));
 				
 				$content .= "<img class='pau-img' src='".attribute_escape( $e['photo:thumbnail'] )."?size=-96' title='".attribute_escape( $e['title'] )."'>";
-				$large = attribute_escape( $e['photo:imgsrc'] ) ."?size=1024";
-				$content .= "<input type='hidden' name='$large'>\n";
+				$large = attribute_escape( $e['photo:imgsrc'] ) .'?size=1024';
+				$content .= '<input type="hidden" name="' . $large . '">';
 				
 				// Add input tags to update image description, etc.
 				// TODO Put fields into div that can be hidden/displayed
-				$content .= "<dl class='pau-attributes'>\n"; // Start Definition List
-				$content .= "<dt class='pau-img-header'>Title<dd><input type='text' name='title[]' class='pau-img-text' value='".attribute_escape( $e['title'] )."' />";
-				$content .= "<dt class='pau-img-header'>Caption<dd><input type='text' name='caption[]' class='pau-img-text' />";				
-				$content .= "<dt class='pau-img-header'>Description<dd><textarea name='description[]' class='pau-img-textarea' rows='4' cols='80'>".attribute_escape( $e['description'] )."</textarea>";
-				$content .= "</dl>\n"; // End Definition List
+				$content .= '<dl class="pau-attributes">'; // Start Definition List
+				$content .= '<dt class="pau-img-header"">' . __('Title') . '<dd><input type="text" name="title[]" class="pau-img-text" value="'.attribute_escape( $e['title'] ).'" />';
+				$content .= '<dt class="pau-img-header">' . __('Caption') . '<dd><input type="text" name="caption[]" class="pau-img-text" />';				
+				$content .= '<dt class="pau-img-header">' . __('Description') . '<dd><textarea name="description[]" class="pau-img-textarea" rows="4" cols="80">' . attribute_escape( $e['description'] ) . '</textarea>';
+				$content .= '</dl>'; // End Definition List
 			}
 
 			// TODO Provide method for admin screen to pick available image sizes
-			$content .= <<<FORM_FIN
-</div><!-- End of pau-images class -->
-<div class='header'>Select your upload image size
-<INPUT type="radio" name="size" onclick="chURL('640')">640
-<INPUT type="radio" name="size" onclick="chURL('1024')" CHECKED>1024
-<INPUT type="radio" name="size" onclick="chURL('1600')">1600
-<INPUT type="radio" name="size" onclick="chURL('0')">Original
+			$content .= '</div><!-- End of pau-images class --><div class="header">' . __('Select your upload image size:') .
+'<INPUT type="radio" name="size" onclick="chURL(\'640\')">640
+<INPUT type="radio" name="size" onclick="chURL(\'1024\')" CHECKED>1024
+<INPUT type="radio" name="size" onclick="chURL(\'1600\')">1600
+<INPUT type="radio" name="size" onclick="chURL(\'0\')">Original
 </div>
-<div class='button'>
-<input type="submit" value="Upload">&nbsp;
+<div class="button">
+<input type="submit" value="' . __('Upload') . '">&nbsp;
 </div>
-</form>
-FORM_FIN;
+</form>';
 
 			return $content;
 		}
@@ -586,7 +584,7 @@ FORM_FIN;
 			$post->post_author = 1;
 			$post->post_date = $formattedNow;
 			$post->post_date_gmt = $formattedNow;
-			$post->post_title = 'Picasa Album Uploader';
+			$post->post_title = __('Picasa Album Uploader');
 			$post->post_category = 0;
 			$post->post_excerpt = '';
 			$post->post_status = 'publish';
