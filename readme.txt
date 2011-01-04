@@ -22,7 +22,6 @@ The Picasa API this plugin is based upon has been deprecated by Google.
 
 1.  Provide uninstall method
 1.  At upload, optionally create a new post using the WP shortcode [gallery] to publish the newly uploaded files.
-1.  Internationalization
 1.  Refine default display of images to be uploaded.
 1.  Improve default formatting in Picasa Mini-browser
 
