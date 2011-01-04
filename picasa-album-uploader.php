@@ -484,7 +484,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 							'guid' => $url), array());
 						
 						// Insert the image into the WP media library
-						$id = wp_insert_attachment($object, $file,0);
+						$id = wp_insert_attachment($object, $file_name, 0);
 						if ( !is_wp_error($id) ) {
 							wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file_name ) );
 							do_action('wp_create_file_in_uploads', $file_name, $id); // for replication
