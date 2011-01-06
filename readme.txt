@@ -3,8 +3,8 @@ Contributors: draca
 Donate link: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Tags: picasa, upload, images, albums, media
 Requires at least: 3.0
-Tested up to: 3.0.1
-Stable tag: 0.4.1
+Tested up to: 3.0.4
+Stable tag: 0.5
 
 Easily upload media from Google Picasa Desktop into WordPress.
 
@@ -120,7 +120,9 @@ Make sure you are running at least Picasa version 3.0 and that Picasa can open o
 Review the server error log for possible clues.  One possible cause of this failure is a server that is configured to use the [Suhosin](http://www.hardened-php.net/suhosin/index.html "Suhosin Hardened PHP") PHP plugin.  Special thanks go to [rbredow](http://wordpress.org/support/profile/rbredow "rbredow Wordpress User Profile") for the assistance in diagnosing this interaction.
 
 If Suhosin is configured, you might see an error like the following in the server error log:
+
 `ALERT - configured request variable name length limit exceeded - dropped variable 'http://localhost:51134/b921a58ec2806ab82f5399515fba226e/image/b0f008e85a4fa153_jpg?size=1024'`.
+
 Check the Suhosin setting values for `suhosin.post.max_name_length` and `suhosin.request.max_varname_length`.  A setting of at least 100 is recommended to allow the long variable names that are required by the Picasa engine.  You might need to increase it further depending on the length of the dropped variable name observed in the error log.
 
 = Reporting Problems =
@@ -138,51 +140,53 @@ Please follow these instructions to report problems:
 == Changelog ==
 
 = 0.5 =
-* Initial Internationalization of plugin
+
+* Add i18n support
 * Enhanced result page reporting
 * Fixed defect in reporting of errors detected during upload resulting in silent failure.
 * Documented plugin interaction with PHP Security plugin Suhosin
 
 = 0.4.1 =
+
 * Modified class names used by plugin and improved default formatting on plugin displayed pages
 * Additional debug logging
 
 = 0.4 =
+
 * Address issues when permalinks are not being used on a site.  Picasa Desktop is challenged if permalinks are not enabled when processing URLs.
 * Added debug logging in plugin to aid in diagnosis of reported problems
 
 = 0.3.1 =
+
 * Fix defect in redirect URL to display results page
 * Fix interaction issue with WordPress.com Stats plugin
 
 = 0.3 =
+
 * Created Admin Settings Section on the Media page.
 * Redirect immediately to login screen if user not logged in
 * Add fields to upload screen to set Title, Caption and Description for uploaded file(s).
 * Initial CSS Formatting of upload screen
 
-= 0.2 =
-* Primary functions of interacting with Picasa and uploading images into WP media complete.
-
-= 0.1 =
-* Prototyped
-
-= 0.0 =
-* Plugin development initiated
-
 == Upgrade Notice ==
 
 = 0.5 =
-* Improved results and error reporting and plugin internationalization.
+
+* Improved results and error reporting
+* Plugin internationalization.
+* Fixed defect in reporting errors detected during upload resulting in silent failure
 
 = 0.4 =
+
 * Address issues when permalinks are not being used on a site.  Picasa Desktop is challenged if permalinks are not enabled when processing URLs.
 * Improved debugging and error messages to isolate plugin problems detected by users
 
 = 0.3.1 =
+
 * Fixes interaction issue with WordPress.com Stats plugin - When both plugins are enabled, navigation to the picasa uploader pages will cause an execution timeout in the Stats plugin.
 
 = 0.3 =
+
 * The first Beta Release!
 
 == Theme Formatting ==
@@ -198,7 +202,3 @@ There are two ways for a theme to control the output of the upload dialog displa
 The file `picasa_album_uploader/templates/page-picasa_album_uploader.php`, supplied by the plugin, is the default page template used to display the upload confirmation dialog.  This file can be copied to the active template and modified as needed.
 * `header-picasa_album_uploader.php` and `footer-picasa_album_uploader.php` –
 If they exist in the active theme, the plugin will use the template files `header-picasa_album_uploader.php` and `footer-picasa_album_uploader.php` for the header and footer respectively.  If they do not exist, the `header.php` and `footer.php` files from the active theme will be used.
-
-
-
-
