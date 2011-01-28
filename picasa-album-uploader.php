@@ -81,6 +81,9 @@ if ( ( include_once PAU_PLUGIN_DIR . '/lib/xmlHandler.class')  == FALSE ) {
 
 global $pau;
 global $pau_errors;
+global $pau_versions;
+
+$pau_versions[] = '$Id$';
 	
 // =================================
 // = Define the picasa album class =
@@ -106,7 +109,6 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			$this->pau_options = new picasa_album_uploader_options();
 
 			// Check for permalink usage
-			$this->pau_options->debug_log("Permalink structure: " . get_option('permalink_structure'));
 			$this->using_permalinks = get_option('permalink_structure') != '';
 			
 			// Shortcode to generate URL to download Picassa Button

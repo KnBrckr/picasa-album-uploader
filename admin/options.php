@@ -22,6 +22,8 @@
  * along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+$pau_versions[] = '$Id$';
+
 class picasa_album_uploader_options
 {
 	/**
@@ -183,15 +185,23 @@ class picasa_album_uploader_options
 	 **/
 	function debug_log_enabled_html()
 	{ 
+		global $pau_versions;
+		
 		$checked = $this->debug_log_enabled ? "checked" : "" ;
 		echo '<input type="checkbox" name="pau_plugin_settings[debug_log_enabled]" value="1" ' . $checked . '>';
 		_e('Enable Plugin Debug Logging. When enabled, log will display below.', 'picasa-album-uploader');
 		if ( $this-> debug_log_enabled ) {
-			echo "<div class=pau-error-log>";
-			foreach ($this->debug_log as $line) {
-				echo "$line<br/>\n";
+			echo '<div class=pau-error-log>';
+			foreach ($pau_versions as $line) {
+				echo esc_attr($line) . '<br/>';
 			}
-			echo "</div>";
+			echo 'Plugin Slug: ' . $this->slug . '<br/>';
+			echo 'Permalink Structure: ' . get_option('permalink_structure') . '<br/>';
+			echo 'Button HTML: ' . esc_attr( do_shortcode( "[picasa_album_uploader_button]" ) ) . '<br/>';
+			foreach ($this->debug_log as $line) {
+				echo esc_attr($line) . '<br/>';
+			}
+			echo '</div>';
 		}
 	}
 	
