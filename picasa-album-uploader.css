@@ -1,5 +1,5 @@
 /*
- * Picasa does not appear to be able to handle multiple element selectors
+ * NOTE:  Picasa does not appear to be able to handle multiple element selectors
  */
 
 .pau-error {
@@ -10,6 +10,20 @@
 .post-picasa-album-uploader .entry-meta,
 .post-picasa-album-uploader .entry-utility {
 	display: none;
+}
+
+/* =========================== */
+/* = Admin Screen formatting = */
+/* =========================== */
+
+.pau-debug-log {
+	margin: 5px ;
+	padding: 5px ;
+	border: 1px black solid ;
+}
+
+.pau-debug-log dd {
+	padding-left: 3em ;
 }
 
 /* ========================== */

@@ -22,7 +22,7 @@
  * along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-$pau_versions[] = '$Id$';
+$pau_versions[] = '$Id: options.php 338310 2011-01-28 20:05:49Z draca $';
 
 class picasa_album_uploader_options
 {
@@ -62,7 +62,7 @@ class picasa_album_uploader_options
 		// When displaying admin screens ...
 		if ( is_admin() ) {
 			add_action( 'admin_init', array( &$this, 'pau_settings_admin_init' ) );
-
+			
 			// Add section for reporting configuration errors
 			add_action('admin_footer', array( &$this, 'pau_admin_notice'));			
 		}
@@ -191,17 +191,19 @@ class picasa_album_uploader_options
 		echo '<input type="checkbox" name="pau_plugin_settings[debug_log_enabled]" value="1" ' . $checked . '>';
 		_e('Enable Plugin Debug Logging. When enabled, log will display below.', 'picasa-album-uploader');
 		if ( $this-> debug_log_enabled ) {
-			echo '<div class=pau-error-log>';
+			echo '<dl class=pau-debug-log>';
+			echo '<dt>Versions: ';
 			foreach ($pau_versions as $line) {
-				echo esc_attr($line) . '<br/>';
+				echo '<dd>' . esc_attr($line);
 			}
-			echo 'Plugin Slug: ' . $this->slug . '<br/>';
-			echo 'Permalink Structure: ' . get_option('permalink_structure') . '<br/>';
-			echo 'Button HTML: ' . esc_attr( do_shortcode( "[picasa_album_uploader_button]" ) ) . '<br/>';
+			echo '<dt>Plugin Slug: <dd>' . $this->slug;
+			echo '<dt>Permalink Structure: <dd>' . get_option('permalink_structure');
+			echo '<dt>Button HTML: <dd>' . esc_attr( do_shortcode( "[picasa_album_uploader_button]" ) );
+			echo '<dt>Log:';
 			foreach ($this->debug_log as $line) {
-				echo esc_attr($line) . '<br/>';
+				echo '<dd>' . esc_attr($line);
 			}
-			echo '</div>';
+			echo '</dl>';
 		}
 	}
 	

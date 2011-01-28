@@ -83,7 +83,7 @@ global $pau;
 global $pau_errors;
 global $pau_versions;
 
-$pau_versions[] = '$Id$';
+$pau_versions[] = '$Id: picasa-album-uploader.php 338310 2011-01-28 20:05:49Z draca $';
 	
 // =================================
 // = Define the picasa album class =
@@ -119,6 +119,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			
 			// Add CSS to HTML header
 			add_action('wp_head', array(&$this, 'add_css'));
+			add_action('admin_head', array(&$this, 'add_css'));			
 			
 			// i18n support
 			add_action('init', array(&$this, 'load_textdomain'));
