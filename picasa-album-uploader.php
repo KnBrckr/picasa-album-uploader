@@ -554,18 +554,18 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 
 			// For each image, display the image and setup hidden form field for upload processing.
 			foreach($pData as $e) {
-				$this->pau_options->debug_log("Form Setup: " . attribute_escape($e['photo:imgsrc']));
+				$this->pau_options->debug_log("Form Setup: " . esc_attr($e['photo:imgsrc']));
 				
-				$content .= "<img class='pau-img' src='".attribute_escape( $e['photo:thumbnail'] )."?size=-96' title='".attribute_escape( $e['title'] )."'>";
-				$large = attribute_escape( $e['photo:imgsrc'] ) .'?size=1024';
+				$content .= "<img class='pau-img' src='".esc_attr( $e['photo:thumbnail'] )."?size=-96' title='".esc_attr( $e['title'] )."'>";
+				$large = esc_attr( $e['photo:imgsrc'] ) .'?size=1024';
 				$content .= '<input type="hidden" name="' . $large . '">';
 				
 				// Add input tags to update image description, etc.
 				// TODO Put fields into div that can be hidden/displayed
 				$content .= '<dl class="pau-attributes">'; // Start Definition List
-				$content .= '<dt class="pau-img-header"">' . __('Title', 'picasa-album-uploader') . '<dd><input type="text" name="title[]" class="pau-img-text" value="'.attribute_escape( $e['title'] ).'" />';
+				$content .= '<dt class="pau-img-header"">' . __('Title', 'picasa-album-uploader') . '<dd><input type="text" name="title[]" class="pau-img-text" value="'.esc_attr( $e['title'] ).'" />';
 				$content .= '<dt class="pau-img-header">' . __('Caption', 'picasa-album-uploader') . '<dd><input type="text" name="caption[]" class="pau-img-text" />';				
-				$content .= '<dt class="pau-img-header">' . __('Description', 'picasa-album-uploader') . '<dd><textarea name="description[]" class="pau-img-textarea" rows="4" cols="80">' . attribute_escape( $e['description'] ) . '</textarea>';
+				$content .= '<dt class="pau-img-header">' . __('Description', 'picasa-album-uploader') . '<dd><textarea name="description[]" class="pau-img-textarea" rows="4" cols="80">' . esc_attr( $e['description'] ) . '</textarea>';
 				$content .= '</dl>'; // End Definition List
 			}
 
