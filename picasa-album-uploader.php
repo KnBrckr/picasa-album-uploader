@@ -83,7 +83,7 @@ global $pau;
 global $pau_errors;
 global $pau_versions;
 
-$pau_versions[] = '$Id: picasa-album-uploader.php 338310 2011-01-28 20:05:49Z draca $';
+$pau_versions[] = '$Id: picasa-album-uploader.php 338318 2011-01-28 20:30:36Z draca $';
 	
 // =================================
 // = Define the picasa album class =
