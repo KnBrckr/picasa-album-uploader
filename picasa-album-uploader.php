@@ -213,7 +213,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 					break;
 				case PAU_RESULT_NO_FILES:
 					$content = '<p>' . __('Error:  No files provided for upload.  Related errors might appear in the server error log.', 'picasa-album-uploader') . '</p>';
-					$content .= '<p>' . __('If your Server is configured to use %s, please refer to the plugin readme for configuration information.', 'picasa-album-uploader') . '</p>';
+					$content .= '<p>' . __('Your server appears to be configured to restrict the length of request variable names.','picasa-album-uploader') . '</p>';
+					$content .= '<p>' . __('Possible modules causing this include Suhosin and mod_security.') . ' ';
+					$content .= __('Please refer to the plugin readme for configuration information.', 'picasa-album-uploader') . '</p>';
 					break;
 				case PAU_RESULT_NO_PERMISSION:
 					$content = '<p>' . __('Sorry, You do not have permission to upload files to this Blog.', 'picasa-album-uploader') . '</p>';

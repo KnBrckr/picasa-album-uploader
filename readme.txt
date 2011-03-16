@@ -125,6 +125,8 @@ If Suhosin is configured, you might see an error like the following in the serve
 
 Check the Suhosin setting values for `suhosin.post.max_name_length` and `suhosin.request.max_varname_length`.  A setting of at least 100 is recommended to allow the long variable names that are required by the Picasa engine.  You might need to increase it further depending on the length of the dropped variable name observed in the error log.
 
+The Apache plugin mod_security can also be configured to restrict the length of the request variable name.  Again, a setting of at least 100 is recommended to allow long variables.
+
 = Reporting Problems =
 
 Please follow these instructions to report problems:
@@ -138,6 +140,10 @@ Please follow these instructions to report problems:
 1. Picasa Album Uploader Options in Media Settings Admin Screen.
 
 == Changelog ==
+
+= Trunk =
+
+* Improved message when no files to be uploaded. 
 
 = 0.5 =
 
