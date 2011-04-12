@@ -27,6 +27,8 @@ The Picasa API this plugin is based upon has been deprecated by Google.
 
 == Installation ==
 
+This plugin requires PHP5!
+
 1.  Configure one of the permlink options in the Admin Settings -> Permalinks screen.  See FAQ for details.
 1.  Upload the picasa-album-uploader to the `wp-content/plugins/` directory
 1.  Activate the plugin in Admin -> Plugins
