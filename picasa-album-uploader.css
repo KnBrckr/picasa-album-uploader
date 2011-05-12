@@ -31,7 +31,7 @@
 /* ========================== */
 
 /* Applies to content area of the minibrowser window - reset for visibility */
-.post-pau-minibrowser {
+#post-pau-minibrowser {
   margin: 0;
   padding: 0;
   border: 0;
@@ -42,28 +42,53 @@
 	background: none white;
 }
 
-.post-pau-minibrowser .pau-header {
+#pau-login-form {
+	display: block;
+}
+
+.pau-privs-error {
+	display: none;
+}
+
+#pau-upload-form {
+	display: none;
+}
+
+.logged-in #pau-login-form {
+	display: none;
+	/* FIXME: disable form */
+}
+
+.logged-in #pau-upload-form {
+	display: block;
+}
+
+.pau-no-priv .pau-privs-error {
+	display: block;
+}
+
+#post-pau-minibrowser .pau-header {
 	font-size: 120%;
 }
 
 /* Applies to div section around all photos */
-.post-pau-minibrowser .pau-images {
+#post-pau-minibrowser .pau-images {
 }
 
 /* Applies to each img displayed */
-.post-pau-minibrowser .pau-img {
+#post-pau-minibrowser .pau-img {
 }
 
 /* Format Form Table field headers */
-.post-pau-minibrowser .pau-img-header {
+#post-pau-minibrowser .pau-img-header {
 	font-size: 110%;
 }
 
-.post-pau-minibrowser .pau-img-text {
+#post-pau-minibrowser .pau-img-text {
 	width: 35em;
 }
 
-.post-pau-minibrowser .pau-img-textarea {
+#post-pau-minibrowser .pau-img-textarea {
 	height: 4em;
 	width: 35em;
 }
@@ -71,6 +96,11 @@
 /* ============================================================ */
 /* = Hide major elements of a page when Minibrowser is active = */
 /* ============================================================ */
+
+/* Hide the admin bar */
+.picasa-album-uploader-minibrowser #wpadminbar {
+	display: none;
+}
 
 /* Hide Meta and Navigational elements of a post */
 .picasa-album-uploader-minibrowser .entry-meta, 
