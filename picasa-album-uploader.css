@@ -31,64 +31,43 @@
 /* ========================== */
 
 /* Applies to content area of the minibrowser window - reset for visibility */
-#post-pau-minibrowser {
-  margin: 0;
+.picasa-album-uploader-minibrowser .entry {
+/*  margin: 0;
   padding: 0;
   border: 0;
-  font-weight: inherit;
+*/  font-weight: inherit;
   font-size: 100%;
-  vertical-align: baseline;
+/*  vertical-align: baseline;*/
 	line-height: 1.5;
 	background: none white;
 }
 
-#pau-login-form {
-	display: block;
-}
-
-.pau-privs-error {
+.picasa-album-uploader-minibrowser .login-remember {
 	display: none;
 }
 
-#pau-upload-form {
-	display: none;
-}
-
-.logged-in #pau-login-form {
-	display: none;
-	/* FIXME: disable form */
-}
-
-.logged-in #pau-upload-form {
-	display: block;
-}
-
-.pau-no-priv .pau-privs-error {
-	display: block;
-}
-
-#post-pau-minibrowser .pau-header {
+.picasa-album-uploader-minibrowser .pau-header {
 	font-size: 120%;
 }
 
 /* Applies to div section around all photos */
-#post-pau-minibrowser .pau-images {
+.picasa-album-uploader-minibrowser .pau-images {
 }
 
 /* Applies to each img displayed */
-#post-pau-minibrowser .pau-img {
+.picasa-album-uploader-minibrowser .pau-img {
 }
 
 /* Format Form Table field headers */
-#post-pau-minibrowser .pau-img-header {
+.picasa-album-uploader-minibrowser .pau-img-header {
 	font-size: 110%;
 }
 
-#post-pau-minibrowser .pau-img-text {
+.picasa-album-uploader-minibrowser .pau-img-text {
 	width: 35em;
 }
 
-#post-pau-minibrowser .pau-img-textarea {
+.picasa-album-uploader-minibrowser .pau-img-textarea {
 	height: 4em;
 	width: 35em;
 }

@@ -290,12 +290,6 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		function add_body_class($classes) {
 			$classes[] = "picasa-album-uploader-minibrowser";
 			
-			// Does user have the proper privs?
-			if (is_user_logged_in() && ! current_user_can('upload_files') ) {
-				$this->pau_options->debug_log("User does not have permission to upload files");
-				$classes[] = "pau-no-priv";	// Class to hide upload form when user does not have privs
-			}
-						
 			return $classes;
 		}
 		
@@ -333,7 +327,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			//	PAU_MINIBROWSER
 			//	PAU_UPLOAD
 			//  PAU_RESULT
-			//	PAU_LOGIN
+			//  PAU_LOGIN
 			switch ( $tokens[1] ) {
 				case PAU_BUTTON_FILE_NAME:
 					$this->pau_serve = PAU_BUTTON;
@@ -354,7 +348,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				case 'login':
 					$this->pau_serve = PAU_LOGIN;
 					break;
-				
+
 				default:
 					$this->pau_options->debug_log("bad request token: '" . $tokens[1] . "'");
 					return false; // slug matched, but 2nd token did not
@@ -364,40 +358,67 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		}
 		
 		/**
-		 * Login to server using credentials provided in AJAX POST
+		 * login form template redirect
 		 *
+		 * User is not logged in yet so present a login window.  Will redirect back to minibrowser on successful login.
+		 *
+		 * This function does not return.
+		 *
+		 * @uses $post For setup of post content
 		 * @return void
 		 **/
 		function login()
 		{
-			$return = array();  // Array of elements to return to AJAX call
+			global $post;
 			
+			$this->pau_options->debug_log("Generating login window content");
+
+			// Add class to the body element for CSS styling of the entire page that will be displayed in the minibrowser
+			add_filter('body_class', array(&$this, 'add_body_class'));
+
 			$log = isset($_REQUEST['log']) ? trim($_REQUEST['log']) : '';
 			$pwd = isset($_REQUEST['pwd']) ? trim($_REQUEST['pwd']) : '';
 			
-			if ($log != '' && $pwd != '') {
-				// Have credentials
-				if (! user_can($log, 'upload_files')) {
-					$return['result'] = false;
-					$return['error'] = 'User ' . $log . ' is not allowed to upload_files';					
-				} else {
-					$signon = wp_signon();
-					if (get_class($signon) == 'WP_User') {
-						$return['result'] = true;
-						$return['error'] = 'Login success.';
-					} else {
-						$return['result'] = false;
-						$return['error'] = 'Username/Password not recognized';
-					}
-				}
-			} else {
-				$return['result'] = false;
-				$return['error'] = 'Username and Password must be supplied to login';
-			}
+			$error = '';
 			
-			echo json_encode($return);
-		}
+			if ($log != '') {
+				$signon = wp_signon();
+				if (get_class($signon) == 'WP_User') {
+					if (! wp_redirect(self::build_url('minibrowser'))) {
+						$this->pau_options->debug_log("Houston, we have a problem... a filter canceled redirect on successful login");
+					}
+					$this->pau_options->save_debug_log();
+					exit;											
+				} else {
+					$error = 'Invalid username and password combination, please try again';
+				}				
+			}
+
+			$content = '<div class=pau-login-error>' . $error . '</div>';			
+				
+			$form = wp_login_form(array(
+				'echo' => false,
+				'form_id' => 'pau-login-form',
+			));
+			
+			$content .= preg_replace('/action=".*?"/', 'action="' . self::build_url('login') . '"', $form);
+			
+			// Setup post content
+			$post->post_content = $content;
 		
+			// If Theme has a defined the plugin template, use it, otherwise use template from the plugin
+			if ($theme_template = get_query_template('page-picasa_album_uploader')) {
+				$this->pau_options->debug_log("Using Theme supplied template: " . $theme_template);
+				include($theme_template);
+			} else {
+				$this->pau_options->debug_log("Using plugin supplied template");
+				include(PAU_PLUGIN_DIR.'/templates/page-picasa_album_uploader.php');
+			}
+
+			// Save log file messages before exit
+			$this->pau_options->save_debug_log();
+			exit; // Finished displaying the minibrowser page - No more WP processing should be performed
+		}
 		/**
 		 * Generate post content for Picasa minibrowser image uploading.
 		 * 
@@ -407,7 +428,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 */
 		private function minibrowser() {
 			global $post; // To setup the Post content
-						
+									
 			$this->pau_options->debug_log("Generating Minibrowser content");
 			
 			// Add class to the body element for CSS styling of the entire page that will be displayed in the minibrowser
@@ -415,16 +436,32 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			
 			// Open the plugin content div for theme formatting
 			$content = '<div id="post-pau-minibrowser">';
-			
-			$content .= '<div class="pau-privs-error">';
-			$content .= '<p class="error">' . __('Sorry, you do not have permission to upload files.', 'picasa-album-uploader') . '</p>';
-			$content .= '</div>';
-			
-			// Display a login window
-			$content .= self::build_login_form();
 
-			// Display the upload form
-			$content .= self::build_upload_form();
+			if (! is_user_logged_in()) {
+				$this->pau_options->debug_log("Redirecting minibrowser request to login");
+
+				// Redirect user to the login page - come back here after login complete
+				if (wp_redirect(self::build_url('login') )) {
+					// Save log file messages before exit
+					$this->pau_options->save_debug_log();
+					// Requested browser to redirect - done here.
+					exit;
+				}
+				
+				// FIXME - Suspect this is broken
+				// wp_redirect failed for some reason - setup page text with redirect back to this location
+				$content .= '<p>Please <a href="'.wp_login_url( self::build_url('minibrowser') )
+						. '" title="Login">login</a> to continue.</p>';
+
+			} elseif (current_user_can('upload_files')) {
+				// Display the upload form
+				$content .= self::build_upload_form();				
+			} else {
+				// TODO Add a logout capability
+				$content .= '<div class="pau-privs-error">';
+				$content .= '<p class="error">' . __('Sorry, you do not have permission to upload files.', 'picasa-album-uploader') . '</p>';
+				$content .= '</div>';
+			}
 			
 			// TODO Error states would be better displayed in browser to avoid use of the Picasa minibrowser 
 			//      as a general purpose browser window.

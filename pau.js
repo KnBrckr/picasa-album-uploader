@@ -36,47 +36,40 @@ function chURL(psize){
 /**
  * Setup Ajax login inside the minibrowser
  **/
-jQuery(document).ready( function($) {
-	$('#pau-login-form').submit(function(event){
-		//Stop event, add loading pic...
-		event.preventDefault();
-		//FIXME -- Add progress wheel
-//		$('<div class="LoginWithAjax_Loading" id="LoginWithAjax_Loading"></div>').prependTo('#LoginWithAjax');
-
-		//Get login URL
-		var url = $('#pau-login-form input[name="redirect_to"]').attr('value');
-		
-		//Get POST data
-		var loginData = getPostData('#pau-login-form *[name]');
-
-		//Make Ajax Call for login
-		$.post(url, loginData, function(data){
-			if(data.result === true){
-				//Login Successful - Extra stuff to do
-				jQuery('body').addClass('logged-in');
-			} else {
-				if (jQuery('#pau-login-form-error').size() === 0) {
-					jQuery('<span id="pau-login-form-error"></span>').appendTo('#pau-login-form');					
-				}
-				jQuery('#pau-login-form-error').text(data.error);
-			}
-		}, "json");
-	});
-	
-	//Get all POSTable data from form.
-	function getPostData(selector){
-		var postData = {};
-		$.each($(selector), function(index,el){
-			el = $(el);
-			postData[el.attr('name')] = el.attr('value');
-		});
-		return postData;
-	}
-});	
-
-
-function pau_login(){
-	// Confirm login
-	jQuery('body').addClass('logged-in');
-	return false;
-}
+// jQuery(document).ready( function($) {
+// 	$('#pau-login-form').submit(function(event){
+// 		//Stop event, add loading pic...
+// 		event.preventDefault();
+// 		//FIXME -- Add progress wheel
+// //		$('<div class="LoginWithAjax_Loading" id="LoginWithAjax_Loading"></div>').prependTo('#LoginWithAjax');
+// 
+// 		//Get login URL
+// 		var url = $('#pau-login-form input[name="redirect_to"]').attr('value');
+// 		
+// 		//Get POST data
+// 		var loginData = getPostData('#pau-login-form *[name]');
+// 
+// 		//Make Ajax Call for login
+// 		$.post(url, loginData, function(data){
+// 			if(data.result === true){
+// 				//Login Successful - Extra stuff to do
+// 				jQuery('body').addClass('logged-in');
+// 			} else {
+// 				if (jQuery('#pau-login-form-error').size() === 0) {
+// 					jQuery('<span id="pau-login-form-error"></span>').appendTo('#pau-login-form');					
+// 				}
+// 				jQuery('#pau-login-form-error').text(data.error);
+// 			}
+// 		}, "json");
+// 	});
+// 	
+// 	//Get all POSTable data from form.
+// 	function getPostData(selector){
+// 		var postData = {};
+// 		$.each($(selector), function(index,el){
+// 			el = $(el);
+// 			postData[el.attr('name')] = el.attr('value');
+// 		});
+// 		return postData;
+// 	}
+// });
