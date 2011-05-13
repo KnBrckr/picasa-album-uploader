@@ -3,7 +3,7 @@
 Plugin Name: Picasa Album Uploader
 Plugin URI: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Description: Easily upload media from Google Picasa Desktop into WordPress.  Navigate to <a href="options-media.php">Settings &rarr; Media</a> to configure.
-Version: 0.5
+Version: 0.6
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/blog/
 
@@ -25,7 +25,6 @@ You should have received a copy of the GNU General Public License
 along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
 
 TODO Document how to handle failures to install in Picasa.
-TODO Optionally Create a New Post to attach the uploaded images as a WP gallery using [gallery] shortcode.
 
 */
 
@@ -50,6 +49,7 @@ if ( ! defined( 'PAU_PLUGIN_NAME' ) ) {
 	define('PAU_MINIBROWSER', 2);
 	define('PAU_UPLOAD', 3);
 	define('PAU_RESULT', 4);
+	define('PAU_LOGIN', 5);
 	
 	// result codes on upload completion or failure
 	define('PAU_RESULT_SUCCESS', 'success');
@@ -179,10 +179,14 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			unset($wp_query->query["error"]);
 			$wp_query->query_vars["error"]="";
 			$wp_query->is_404 = false;
+			
+			$result = isset($_REQUEST['result']) ? $_REQUEST['result'] : '';
+			$file_count = isset($_REQUEST['file_count']) ? $_REQUEST['file_count'] : '';
+			$errors = isset($_REQUEST['errors']) ? $_REQUEST['errors'] : '';
 
 			// If this is a result page it will be handled by default browser - template redirect is not needed
 			if ( PAU_RESULT == $this->pau_serve ) {
-				$post->post_content = self::result_page($_REQUEST[result], $_REQUEST[file_count], $_REQUEST[errors]);
+				$post->post_content = self::result_page($result, $file_count, $errors);
 			} else {
 				// Add template redirect action to process the page
 				add_action('template_redirect', array(&$this, 'template_redirect'));				
@@ -249,6 +253,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 					self::upload_images();
 					// Should not get here
 					exit;
+				case PAU_LOGIN:
+					self::login();
+					exit;
 			}
 		}
 		
@@ -282,6 +289,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 */
 		function add_body_class($classes) {
 			$classes[] = "picasa-album-uploader-minibrowser";
+			
 			return $classes;
 		}
 		
@@ -319,6 +327,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			//	PAU_MINIBROWSER
 			//	PAU_UPLOAD
 			//  PAU_RESULT
+			//  PAU_LOGIN
 			switch ( $tokens[1] ) {
 				case PAU_BUTTON_FILE_NAME:
 					$this->pau_serve = PAU_BUTTON;
@@ -335,15 +344,81 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				case 'result':
 					$this->pau_serve = PAU_RESULT;
 					break;
-				
+					
+				case 'login':
+					$this->pau_serve = PAU_LOGIN;
+					break;
+
 				default:
 					$this->pau_options->debug_log("bad request token: '" . $tokens[1] . "'");
 					return false; // slug matched, but 2nd token did not
 			}
 			
 			return true; // Have a valid request to be handled by this plugin
-		}		
+		}
 		
+		/**
+		 * login form template redirect
+		 *
+		 * User is not logged in yet so present a login window.  Will redirect back to minibrowser on successful login.
+		 *
+		 * This function does not return.
+		 *
+		 * @uses $post For setup of post content
+		 * @return void
+		 **/
+		function login()
+		{
+			global $post;
+			
+			$this->pau_options->debug_log("Generating login window content");
+
+			// Add class to the body element for CSS styling of the entire page that will be displayed in the minibrowser
+			add_filter('body_class', array(&$this, 'add_body_class'));
+
+			$log = isset($_REQUEST['log']) ? trim($_REQUEST['log']) : '';
+			$pwd = isset($_REQUEST['pwd']) ? trim($_REQUEST['pwd']) : '';
+			
+			$error = '';
+			
+			if ($log != '') {
+				$signon = wp_signon();
+				if (get_class($signon) == 'WP_User') {
+					if (! wp_redirect(self::build_url('minibrowser'))) {
+						$this->pau_options->debug_log("Houston, we have a problem... a filter canceled redirect on successful login");
+					}
+					$this->pau_options->save_debug_log();
+					exit;											
+				} else {
+					$error = 'Invalid username and password combination, please try again';
+				}				
+			}
+
+			$content = '<div class=pau-login-error>' . $error . '</div>';			
+				
+			$form = wp_login_form(array(
+				'echo' => false,
+				'form_id' => 'pau-login-form',
+			));
+			
+			$content .= preg_replace('/action=".*?"/', 'action="' . self::build_url('login') . '"', $form);
+			
+			// Setup post content
+			$post->post_content = $content;
+		
+			// If Theme has a defined the plugin template, use it, otherwise use template from the plugin
+			if ($theme_template = get_query_template('page-picasa_album_uploader')) {
+				$this->pau_options->debug_log("Using Theme supplied template: " . $theme_template);
+				include($theme_template);
+			} else {
+				$this->pau_options->debug_log("Using plugin supplied template");
+				include(PAU_PLUGIN_DIR.'/templates/page-picasa_album_uploader.php');
+			}
+
+			// Save log file messages before exit
+			$this->pau_options->save_debug_log();
+			exit; // Finished displaying the minibrowser page - No more WP processing should be performed
+		}
 		/**
 		 * Generate post content for Picasa minibrowser image uploading.
 		 * 
@@ -353,45 +428,38 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 */
 		private function minibrowser() {
 			global $post; // To setup the Post content
-						
+									
 			$this->pau_options->debug_log("Generating Minibrowser content");
 			
 			// Add class to the body element for CSS styling of the entire page that will be displayed in the minibrowser
 			add_filter('body_class', array(&$this, 'add_body_class'));
 			
 			// Open the plugin content div for theme formatting
-			$content = '<div class="post-pau-minibrowser">';
-			
-			// Make sure user is logged in to proceed
-			if (false == is_user_logged_in()) {
+			$content = '<div id="post-pau-minibrowser">';
+
+			if (! is_user_logged_in()) {
 				$this->pau_options->debug_log("Redirecting minibrowser request to login");
-				
+
 				// Redirect user to the login page - come back here after login complete
-				if (wp_redirect(wp_login_url( self::build_url('minibrowser') ))) {
+				if (wp_redirect(self::build_url('login') )) {
 					// Save log file messages before exit
 					$this->pau_options->save_debug_log();
 					// Requested browser to redirect - done here.
 					exit;
 				}
+
+				$this->pau_options->debug_log("Houston, we have a problem... a filter canceled redirect on successful login");
 				
-				// FIXME - Suspect this is broken
-				// wp_redirect failed for some reason - setup page text with redirect back to this location
-				$content .= '<p>Please <a href="'.wp_login_url( self::build_url('minibrowser') )
-						. '" title="Login">login</a> to continue.</p>';
+				$content .= '<p>Please <a href="' . self::build_url('login') . '" title="Login">login</a> to continue.</p>';
+
+			} elseif (current_user_can('upload_files')) {
+				// Display the upload form
+				$content .= self::build_upload_form();				
 			} else {
-				// As long as current user is allowed to upload files, check for requested files
-				if ( current_user_can('upload_files') ) {
-					if ($_POST['rss']) {
-						$content .= self::build_upload_form();					
-					} else {
-						$this->pau_options->error_log("Empty RSS feed from Picasa; unable to build minibrowser form.");
-					 	$content .= '<p class="error">' . __('Sorry, but no pictures were received from Picasa.', 'picasa-album-uploader') . '</p>';
-					}					
-				} else {
-					// User is not allowed to upload files
-					$this->pau_options->debug_log("User does not have permission to upload files");
-					$content .= '<p class="error">' . __('Sorry, you do not have permission to upload files.', 'picasa-album-uploader') . '</p>';
-				}
+				// TODO Add a logout capability
+				$content .= '<div class="pau-privs-error">';
+				$content .= '<p class="error">' . __('Sorry, you do not have permission to upload files.', 'picasa-album-uploader') . '</p>';
+				$content .= '</div>';
 			}
 			
 			// TODO Error states would be better displayed in browser to avoid use of the Picasa minibrowser 
@@ -414,6 +482,21 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			// Save log file messages before exit
 			$this->pau_options->save_debug_log();
 			exit; // Finished displaying the minibrowser page - No more WP processing should be performed
+		}
+		
+		/**
+		 * Setup login form
+		 *
+		 * @return sting HTML for login form
+		 */
+		private function build_login_form() {
+			$content = wp_login_form( array(
+				'echo' => false,
+				'form_id' => 'pau-login-form',
+				'redirect' => self::build_Url('login')
+			) );
+			
+			return $content;
 		}
 		
 		/**
@@ -528,52 +611,57 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			// Form handling requires some javascript - depends on jQuery
 			wp_enqueue_script('picasa-album-uploader', PAU_PLUGIN_URL . '/pau.js' ,'jquery');
 			
-			// **************************************************************************************************
-			// MUST be simple page name target in the POST action for Picasa to process the input URLs correctly.
-			// **************************************************************************************************
-//			$content = '<form method="post" action="' . self::build_url('upload') . '">';
-			$content = '<form method="post" action="upload">';
+			$content = '<div id="pau-upload-form">';
+			if (isset($_POST['rss']) && $_POST['rss']) {
+							// **************************************************************************************************
+							// MUST be simple page name target in the POST action for Picasa to process the input URLs correctly.
+							// **************************************************************************************************
+				//			$content = '<form method="post" action="' . self::build_url('upload') . '">';
+							$content .= '<form method="post" action="upload">';
 
-			// Add nonce field to the form if nonce is supported to improve security
-			if ( function_exists( 'wp_nonce_field' ) ) {
-				// Set nonce and referer fields, use return value vs. echo
-				$content .= wp_nonce_field(PAU_NONCE_UPLOAD, PAU_NONCE_UPLOAD, true, false);
-				$content .= wp_referer_field(false);
-			}
+							// Add nonce field to the form if nonce is supported to improve security
+							if ( function_exists( 'wp_nonce_field' ) ) {
+								// Set nonce and referer fields, use return value vs. echo
+								$content .= wp_nonce_field(PAU_NONCE_UPLOAD, PAU_NONCE_UPLOAD, true, false);
+								$content .= wp_referer_field(false);
+							}
 
-			// Parse the RSS feed from Picasa to get the images to be uploaded
-			$xh = new xmlHandler();
-			$nodeNames = array("PHOTO:THUMBNAIL", "PHOTO:IMGSRC", "TITLE", "DESCRIPTION");
-			$xh->setElementNames($nodeNames);
-			$xh->setStartTag("ITEM");
-			$xh->setVarsDefault();
-			$xh->setXmlParser();
-			$xh->setXmlData(stripslashes($_POST['rss']));
-			$pData = $xh->xmlParse();
+							// Parse the RSS feed from Picasa to get the images to be uploaded
+							$xh = new xmlHandler();
+							$nodeNames = array("PHOTO:THUMBNAIL", "PHOTO:IMGSRC", "TITLE", "DESCRIPTION");
+							$xh->setElementNames($nodeNames);
+							$xh->setStartTag("ITEM");
+							$xh->setVarsDefault();
+							$xh->setXmlParser();
+							$xh->setXmlData(stripslashes($_POST['rss']));
+							$pData = $xh->xmlParse();
 
-			// Start div used to display images
-			$content .= '<p class="pau-header">' . __('Selected images', 'picasa-album-uploader') . '</p>';
-			$content .= '<div class="pau-images">';
+							// Start div used to display images
+							$content .= '<p class="pau-header">' . __('Selected images', 'picasa-album-uploader') . '</p>';
+							$content .= '<div class="pau-images">';
 
-			// For each image, display the image and setup hidden form field for upload processing.
-			foreach($pData as $e) {
-				$this->pau_options->debug_log("Form Setup: " . esc_attr($e['photo:imgsrc']));
-				
-				$content .= "<img class='pau-img' src='".esc_attr( $e['photo:thumbnail'] )."?size=-96' title='".esc_attr( $e['title'] )."'>";
-				$large = esc_attr( $e['photo:imgsrc'] ) .'?size=1024';
-				$content .= '<input type="hidden" name="' . $large . '">';
-				
-				// Add input tags to update image description, etc.
-				// TODO Put fields into div that can be hidden/displayed
-				$content .= '<dl class="pau-attributes">'; // Start Definition List
-				$content .= '<dt class="pau-img-header"">' . __('Title', 'picasa-album-uploader') . '<dd><input type="text" name="title[]" class="pau-img-text" value="'.esc_attr( $e['title'] ).'" />';
-				$content .= '<dt class="pau-img-header">' . __('Caption', 'picasa-album-uploader') . '<dd><input type="text" name="caption[]" class="pau-img-text" />';				
-				$content .= '<dt class="pau-img-header">' . __('Description', 'picasa-album-uploader') . '<dd><textarea name="description[]" class="pau-img-textarea" rows="4" cols="80">' . esc_attr( $e['description'] ) . '</textarea>';
-				$content .= '</dl>'; // End Definition List
-			}
+							// For each image, display the image and setup hidden form field for upload processing.
+							foreach($pData as $e) {
+								$this->pau_options->debug_log("Form Setup: " . esc_attr($e['photo:imgsrc']));
 
-			// TODO Provide method for admin screen to pick available image sizes
-			$content .= '</div><!-- End of pau-images class --><div class="header">' . __('Select your upload image size:', 'picasa-album-uploader') .
+								$title = isset($e['title']) ? esc_attr( $e['title'] ) : '';
+								$description = isset($e['description']) ? esc_attr( $e['description'] ) : '';
+								$large = esc_attr( $e['photo:imgsrc'] ) .'?size=1024';
+
+								$content .= "<img class='pau-img' src='".esc_attr( $e['photo:thumbnail'] )."?size=-96' title='" . $title . "'>";
+								$content .= '<input type="hidden" name="' . $large . '">';
+
+								// Add input tags to update image description, etc.
+								// TODO Put fields into div that can be hidden/displayed
+								$content .= '<dl class="pau-attributes">'; // Start Definition List
+								$content .= '<dt class="pau-img-header"">' . __('Title', 'picasa-album-uploader') . '<dd><input type="text" name="title[]" class="pau-img-text" value="' . $title . '" />';
+								$content .= '<dt class="pau-img-header">' . __('Caption', 'picasa-album-uploader') . '<dd><input type="text" name="caption[]" class="pau-img-text" />';				
+								$content .= '<dt class="pau-img-header">' . __('Description', 'picasa-album-uploader') . '<dd><textarea name="description[]" class="pau-img-textarea" rows="4" cols="80">' . $description . '</textarea>';
+								$content .= '</dl>'; // End Definition List
+							}
+
+							// TODO Provide method for admin screen to pick available image sizes
+							$content .= '</div><!-- End of pau-images class --><div class="header">' . __('Select your upload image size:', 'picasa-album-uploader') .
 '<INPUT type="radio" name="size" onclick="chURL(\'640\')">640
 <INPUT type="radio" name="size" onclick="chURL(\'1024\')" CHECKED>1024
 <INPUT type="radio" name="size" onclick="chURL(\'1600\')">1600
@@ -583,7 +671,12 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 <input type="submit" value="' . __('Upload', 'picasa-album-uploader') . '">&nbsp;
 </div>
 </form>';
-
+			} else {
+				$this->pau_options->error_log("Empty RSS feed from Picasa; unable to build minibrowser form.");
+			 	$content .= '<p class="error">' . __('Sorry, but no pictures were received from Picasa.', 'picasa-album-uploader') . '</p>';
+			}
+			$content .= '</div>';
+			
 			return $content;
 		}
 		
@@ -614,7 +707,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			$post->pinged = '';
 			$post->post_content_filtered = '';
 			$post->post_parent = 0;
-			$post->guid = $url;
+			$post->guid = WP_PLUGIN_URL;
 			$post->menu_order = 0;
 			$post->post_type = 'page';
 			$post->post_mime_type = '';
@@ -642,6 +735,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				$page = str_replace('?', '&', $page);
 			}
 			$url .= $this->pau_options->slug . '/' . $page;
+			$this->pau_options->debug_log("build_url: " . $url);
 			
 			return $url;
 		}

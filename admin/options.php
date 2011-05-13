@@ -52,12 +52,13 @@ class picasa_album_uploader_options
 		// Retrieve Plugin Options
 		$options = get_option('pau_plugin_settings');
 		
+		// TODO Improve handling of default settings
 		// Init value for slug name - supply default if undefined
-		$this->slug = $options['slug'] ? $options['slug'] : 'picasa_album_uploader';
+		$this->slug = isset($options['slug']) ? $options['slug'] : 'picasa_album_uploader';
 		
 		// Init value for error log
-		$this->debug_log_enabled = $options['debug_log_enabled'] ? $options['debug_log_enabled'] : 0;
-		$this->debug_log = $options['debug_log'] ? $options['debug_log'] : array();
+		$this->debug_log_enabled = isset($options['debug_log_enabled']) ? $options['debug_log_enabled'] : 0;
+		$this->debug_log = isset($options['debug_log']) ? $options['debug_log'] : array();
 		
 		// When displaying admin screens ...
 		if ( is_admin() ) {
@@ -148,7 +149,7 @@ class picasa_album_uploader_options
 		$options['slug'] = preg_replace($slug_pattern, $slug_replacement, $options['slug']);
 		
 		// Cleanup error log if it's disabled
-		if ( ! $options['debug_log_enabled'] ) {
+		if ( ! isset($options['debug_log_enabled']) || ! $options['debug_log_enabled'] ) {
 			$options['debug_log'] = array();
 		}
 
