@@ -83,7 +83,7 @@ global $pau;
 global $pau_errors;
 global $pau_versions;
 
-$pau_versions[] = '$Id: picasa-album-uploader.php 372209 2011-04-12 22:58:28Z draca $';
+$pau_versions[] = '$Id: picasa-album-uploader.php 384444 2011-05-13 15:07:33Z draca $';
 	
 // =================================
 // = Define the picasa album class =
@@ -390,7 +390,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 					$this->pau_options->save_debug_log();
 					exit;											
 				} else {
-					$error = 'Invalid username and password combination, please try again';
+					$error = __('Invalid username and password combination, please try again', 'picasa-album-uploader');
 				}				
 			}
 
