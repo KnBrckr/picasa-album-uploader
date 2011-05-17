@@ -22,7 +22,7 @@
  * along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-$pau_versions[] = '$Id: options.php 384444 2011-05-13 15:07:33Z draca $';
+$pau_versions[] = '$Id: options.php 385833 2011-05-17 13:13:20Z draca $';
 
 class picasa_album_uploader_options
 {
@@ -186,26 +186,44 @@ class picasa_album_uploader_options
 	 **/
 	function debug_log_enabled_html()
 	{ 
-		global $pau_versions;
-		
 		$checked = $this->debug_log_enabled ? "checked" : "" ;
 		echo '<input type="checkbox" name="pau_plugin_settings[debug_log_enabled]" value="1" ' . $checked . '>';
 		_e('Enable Plugin Debug Logging. When enabled, log will display below.', 'picasa-album-uploader');
 		if ( $this-> debug_log_enabled ) {
-			echo '<dl class=pau-debug-log>';
-			echo '<dt>Versions: ';
-			foreach ($pau_versions as $line) {
-				echo '<dd>' . esc_attr($line);
-			}
-			echo '<dt>Plugin Slug: <dd>' . $this->slug;
-			echo '<dt>Permalink Structure: <dd>' . get_option('permalink_structure');
-			echo '<dt>Button HTML: <dd>' . esc_attr( do_shortcode( "[picasa_album_uploader_button]" ) );
-			echo '<dt>Log:';
-			foreach ($this->debug_log as $line) {
-				echo '<dd>' . esc_attr($line);
-			}
-			echo '</dl>';
+			echo $this->report_bug();
 		}
+	}
+	
+	/**
+	 * Generate data for debug and bug reporting
+	 *
+	 * @return string HTML to display debug messages
+	 * @author Kenneth J. Brucker <ken@pumastudios.com>
+	 */
+	function report_bug()
+	{
+		global $pau_versions;
+		
+		$content = '<dl class=pau-debug-log>';
+		
+		$content .= '<dt>Plugin Versions: ';
+		foreach ($pau_versions as $line) {
+			$content .= '<dd>' . esc_attr($line);
+		}
+		// Add some environment data
+		$content .= '<dt>PHP Version:<dd>' . phpversion();
+		$content .= '<dt>MySQL Server Version:<dd>' . mysql_get_server_info();
+		
+		$content .= '<dt>Plugin Slug: <dd>' . $this->slug;
+		$content .= '<dt>Permalink Structure: <dd>' . get_option('permalink_structure');
+		$content .= '<dt>Button HTML: <dd>' . esc_attr( do_shortcode( '[picasa_album_uploader_button]' ) );
+		$content .= '<dt>Log:';
+		foreach ($this->debug_log as $line) {
+			$content .= '<dd>' . esc_attr($line);
+		}
+		$content .= '</dl>';
+		
+		return $content;
 	}
 	
 	/**

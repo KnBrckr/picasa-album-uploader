@@ -3,11 +3,11 @@
 Plugin Name: Picasa Album Uploader
 Plugin URI: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Description: Easily upload media from Google Picasa Desktop into WordPress.  Navigate to <a href="options-media.php">Settings &rarr; Media</a> to configure.
-Version: 0.6
+Version: 0.6.1
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/blog/
 
-Copyright: 2010 Kenneth J. Brucker (email: ken@pumastudios.com)
+Copyright: 2011 Kenneth J. Brucker (email: ken@pumastudios.com)
 
 This file is part of Picasa Album Uploader, a plugin for Wordpress.
 
@@ -83,7 +83,7 @@ global $pau;
 global $pau_errors;
 global $pau_versions;
 
-$pau_versions[] = '$Id: picasa-album-uploader.php 384444 2011-05-13 15:07:33Z draca $';
+$pau_versions[] = '$Id: picasa-album-uploader.php 385833 2011-05-17 13:13:20Z draca $';
 	
 // =================================
 // = Define the picasa album class =
@@ -384,9 +384,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			if ($log != '') {
 				$signon = wp_signon();
 				if (get_class($signon) == 'WP_User') {
-					if (! wp_redirect(self::build_url('minibrowser'))) {
-						$this->pau_options->debug_log("Houston, we have a problem... a filter canceled redirect on successful login");
-					}
+					wp_redirect(self::build_url('minibrowser'));
 					$this->pau_options->save_debug_log();
 					exit;											
 				} else {
@@ -441,17 +439,11 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				$this->pau_options->debug_log("Redirecting minibrowser request to login");
 
 				// Redirect user to the login page - come back here after login complete
-				if (wp_redirect(self::build_url('login') )) {
-					// Save log file messages before exit
-					$this->pau_options->save_debug_log();
-					// Requested browser to redirect - done here.
-					exit;
-				}
-
-				$this->pau_options->debug_log("Houston, we have a problem... a filter canceled redirect on successful login");
-				
-				$content .= '<p>Please <a href="' . self::build_url('login') . '" title="Login">login</a> to continue.</p>';
-
+				wp_redirect(self::build_url('login') );
+				// Save log file messages before exit
+				$this->pau_options->save_debug_log();
+				// Requested browser to redirect - done here.
+				exit;
 			} elseif (current_user_can('upload_files')) {
 				// Display the upload form
 				$content .= self::build_upload_form();				
