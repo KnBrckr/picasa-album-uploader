@@ -25,6 +25,7 @@ You should have received a copy of the GNU General Public License
 along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
 
 TODO Document how to handle failures to install in Picasa.
+FIXME Enforce minimum PHP version
 
 */
 
