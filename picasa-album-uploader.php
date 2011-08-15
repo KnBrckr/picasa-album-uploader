@@ -133,7 +133,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 */
 		function sc_download_button( $atts, $content = null ) {
 				if ( $this->using_permalinks ) {
-					$link =  '<a href="picasa://importbutton/?url=' . get_bloginfo('wpurl') . '/' 
+					$link =  '<a href="picasa://importbutton/?url=' . home_url() . '/' 
 						. $this->pau_options->slug . '/'. PAU_BUTTON_FILE_NAME 
 						. '" title="' . __('Download Picasa Button and Install in Picasa Desktop', 'picasa-album-uploader'). '">'
 						. __('Install Image Upload Button in Picasa Desktop', 'picasa-album-uploader'). '</a>';
@@ -721,7 +721,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 **/
 		private function build_Url( $page )
 		{
-			$url = get_bloginfo('wpurl') . '/';
+			$url = home_url() . '/';
 			if ( ! $this->using_permalinks ) {
 				$url .= '?page_id=';
 				# Request might include a parameter string.  Convert to ?p1&p2 syntax
