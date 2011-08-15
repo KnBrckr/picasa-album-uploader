@@ -145,7 +145,7 @@ Please follow these instructions to report problems:
 
 = 0.6.2 =
 
-* Pluging generating wrong URLs when a site is configured with home_url() != site_url().  e.g. when Wordpress installed in a different directory from the one presented to the user.
+* Pluging generating wrong URLs when a site is configured with home_url() != site_url().  e.g. when Wordpress installed in a different directory from the one presented to the user.  Props to [jacob.bro](http://wordpress.org/support/profile/jakobbro) for the debug log that pointed out the flaw.
 
 = 0.6.1 =
 
