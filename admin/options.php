@@ -22,7 +22,7 @@
  * along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-$pau_versions[] = '$Id: options.php 385833 2011-05-17 13:13:20Z draca $';
+$pau_versions[] = '$Id: options.php 385833 2011-05-17 13:13:20Z draca $'; // SVN Version string
 
 class picasa_album_uploader_options
 {
@@ -43,9 +43,14 @@ class picasa_album_uploader_options
 	public $error;
 	
 	/**
+	 * Long variable name used in self_test
+	 */
+	public $long_var_name =   "this_is_a_long_variable_name_to_mimic_picasa_upload_operation_3456789012345678901234567890123456789";
+
+	/**
 	 * Class Constructor function
 	 *
-	 * Setup plugin defaults and register with WordPress for use in Admin screens
+	 * Setup plugin defaults
 	 **/
 	function picasa_album_uploader_options()
 	{
@@ -59,7 +64,15 @@ class picasa_album_uploader_options
 		// Init value for error log
 		$this->debug_log_enabled = isset($options['debug_log_enabled']) ? $options['debug_log_enabled'] : 0;
 		$this->debug_log = isset($options['debug_log']) ? $options['debug_log'] : array();
-		
+	}
+	
+	/**
+	 * Add needed actions into WP stream
+	 *
+	 * @return void
+	 **/
+	function register()
+	{
 		// When displaying admin screens ...
 		if ( is_admin() ) {
 			add_action( 'admin_init', array( &$this, 'pau_settings_admin_init' ) );
@@ -132,6 +145,16 @@ class picasa_album_uploader_options
 			printf(__('%s logging is enabled.  If left enabled, this can affect database performance.', 'picasa-album-uploader'),'<a href="options-media.php">' . PAU_PLUGIN_NAME . '</a>');
 			echo '</p></div>';
 		}
+		
+		if ( $result = $this->test_long_var() ) {
+			echo '<div class="error"><p>';
+			printf(__('%s detected error receiving long argument names in HTTP requests and will likely be unable to receive files from Picasa.  ',  'picasa-album-uploader'), '<a href="options-media.php">' . PAU_PLUGIN_NAME . '</a>');
+			echo '<br>';
+			_e('Please check your server security configuration to confirm it will allow argument names of at least 100 characters.',  'picasa-album-uploader');
+			echo ' ';
+			printf(__('More details are available in the %s',  'picasa-album-uploader'), '<a href="https://wordpress.org/extend/plugins/picasa-album-uploader/faq/">' . __('FAQ',  'picasa-album-uploader') . '.</a>');
+			echo '</p></div>';
+		}
 	}
 	
 	/**
@@ -182,6 +205,50 @@ class picasa_album_uploader_options
 	}
 	
 	/**
+	 * Perform self test operations and emit reporting HTML
+	 *   Attempt to load page using long GET request
+	 *
+	 * @return string HTML content
+	 **/
+	function selftest()
+	{
+		$text = '';
+		
+		// Run long REQUEST Variable name test
+		if ($result = $this->test_long_var()) {
+			$text .= 'Long Request Variable Test Failed: ' . $result . '<br>';
+		} else {
+			$text .= 'REQUEST long variable OK<br>';
+		}
+		
+		return $text;
+	}
+	
+	/**
+	 * Perform HTTP request to self test page including a long request variable name
+	 *
+	 * @return false if able to retrieve long variable name, string describing error otherwise
+	 **/
+	function test_long_var()
+	{
+		if (!ini_get('allow_url_fopen')) {
+			$result = 'Unable to complete HTTP REQUEST test; allow_url_fopen in php.ini is false.';
+		} else {
+			$baseurl = home_url() . '/' . $this->slug . '/selftest';
+			$url = $baseurl . '?' . $this->long_var_name . '=' . $this->long_var_name;
+			$contents = file_get_contents($url);
+			if ($contents) {
+				$result = $false;
+			} else {
+				$status = preg_grep("/^HTTP\/1.[01] [^3]/", $http_response_header);
+				$result = implode($status);
+			}
+		}
+		
+		return $result;
+	}
+	
+	/**
 	 * Emit HTML to create form field used to enable/disable Debug Logging
 	 **/
 	function debug_log_enabled_html()
@@ -217,6 +284,7 @@ class picasa_album_uploader_options
 		$content .= '<dt>Plugin Slug: <dd>' . $this->slug;
 		$content .= '<dt>Permalink Structure: <dd>' . get_option('permalink_structure');
 		$content .= '<dt>Button HTML: <dd>' . esc_attr( do_shortcode( '[picasa_album_uploader_button]' ) );
+		$content .= '<dt>Self Test: <dd>' . self::selftest();
 		$content .= '<dt>Log:';
 		foreach ($this->debug_log as $line) {
 			$content .= '<dd>' . esc_attr($line);

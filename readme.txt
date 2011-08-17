@@ -16,7 +16,7 @@ If you are not logged in to your blog, you will first be directed to the login p
 
 This plugin is based on the initial works by [clyang](http://clyang.net/blog/2009/02/06/128 "Picasa2Wordpress Blog Article") and the examples from Google for the [Picasa Button API](http://code.google.com/apis/picasa/docs/button_api.html "Picasa Button API") and [Picasa Web Uploader API](http://code.google.com/apis/picasa/docs/web_uploader.html "Picasa Web Uploader API").
 
-The Picasa API this plugin is based upon has been deprecated by Google.
+The Picasa API this plugin is based upon has been deprecated by Google.  A future update of Picasa could remove the API completely which will terminate the ability of this plugin to receive uploads from Picasa.
 
 = What's Next? =
 
@@ -43,11 +43,41 @@ To display the button load link in a post or page, insert the shortcode `[picasa
 
 A log of plugin activity useful to debug failures can be obtained by selecting the plugin option 'Enable Debug Log' and saving the configuration change.  The logging might impact performance of your website so should only be enabled when debugging is required.
 
+= Reporting Problems =
+
+Please follow these instructions to report problems:
+
+1. Enable debug logging in Admin -> Settings -> Media
+1. Reproduce the problem
+1. Provide the log results, description of problem, plugin version and WordPress version in a post to the [Support Forum](http://wordpress.org/tags/picasa-album-uploader?forum_id=10 "Picasa Album Uploader Support Forum").
+
 == Frequently Asked Questions ==
+
+= The plugin reports a problem receiving long argument names. =
+
+This is the result of a self test added in v0.7 to detect when the server is configured in a way that prevents required arguments sent by Picasa from being received by the plugin.  This test is run anytime an admin screen is displayed.  The self test results have also been added to the debug log report when the plugin debugging is enabled.
+
+See next question regarding no files uploaded by Picasa for discussion on the symptom and possible solution.
+
+= An error page is displayed in the browser that no files were uploaded by Picasa =
+
+The most likely cause of this problem is software between Picasa and the plugin that is removing HTTP Request arguments with a long name.  When Picasa is sending the upload request, it uses a long argument name like `http://localhost:55995/4cb54313c490d285f54664e018d50799/image/e50b8dc1ae05b682_jpg?size=1024` in the request to the server.  Some server software like [Suhosin](http://www.hardened-php.net/suhosin/index.html "Suhosin Hardened PHP") (PHP security plugin) and [modsecurity](https://modsecurity.org/ "modsecurity - Open Source Web Application Firewall") (Apache security plugin) can be configured to remove long argument names from the HTTP Request as a security measure.  Unfortunately this has the undesirable side effect of breaking this plugin.  There may be other security applications that will have a similar affect on the incoming HTTP Request.
+
+Review the server error logs for possible clues.  If Suhosin is configured, you might see an error like the following in the server error log:
+
+`ALERT - configured request variable name length limit exceeded - dropped variable 'http://localhost:51134/b921a58ec2806ab82f5399515fba226e/image/b0f008e85a4fa153_jpg?size=1024'`.
+
+Check the Suhosin setting values for `suhosin.post.max_name_length` and `suhosin.request.max_varname_length`.  A setting of at least 100 is recommended to allow the long argument names that are required by the Picasa engine.  You might need to increase it further depending on the length of the dropped argument name observed in the error log.  In my experience, the arguments used by Picasa have been 93 characters.
+
+The Apache plugin mod_security can also be configured to restrict the length of the argument name.  Again, a setting of at least 100 is recommended to allow the long names used by Picasa.  Depending on your configuration, the modsecurity configuration line affecting this size might look like the following:
+
+`SecAction "phase:1,t:none,nolog,pass,setvar:tx.arg_name_length=100"`
+
+Special thanks go to [rbredow](http://wordpress.org/support/profile/rbredow "rbredow Wordpress User Profile") for the assistance in diagnosing this interaction with server software.
 
 = Why are Permalinks required? =
 
-The Picasa Desktop client is very picky about the format of the URLs that it will accept during the upload process and will only accept a simple URL consisting of a single filename.  The use of the slash (/) and question-marks (?) in the URL syntax results in no files being uploaded by Picasa to the server.  In order to satisfy this requirement, permalinks must be used.
+The Picasa Desktop client is very picky about the format of the URLs that it will accept during the upload process and will only accept a simple URL consisting of a single filename.  The use of the slash (/) and question-marks (?) in the URL syntax results in no files being uploaded by Picasa to the server.  In order to satisfy this Picasa requirement, permalinks must be used.
 
 = I changed the slug name (or other part of my WordPress URL) and my button in Picasa stopped working.  What do I do? =
 
@@ -74,7 +104,9 @@ Yes!  Just put the shortcode `[picasa_album_uploader_button]` where you want the
 
 = Can I have buttons from multiple WordPress sites installed in Picasa at the same time? =
 
-Yes!  The tool tip for the button will identify the name of the WordPress site associated with the button.  You might want to change the button icon to graphically differentiate the connected WordPress installs.  I have no experience with WPMU so can't comment on how this will function within that environment.
+Yes!  The tool tip for the button will identify the name of the WordPress site associated with the button.  You might want to change the button icon to graphically differentiate the connected WordPress installs.
+
+The plugin also functions in a multi-site environment.
 
 = How do I change the button icon? =
 
@@ -108,7 +140,6 @@ XP:  C:\Documents and Settings\Username\Local Settings\Application Data\Google\P
 Vista:  C:\Users\Username\AppData\Local\Google\Picasa3\buttons
 OSX: ~/Library/Application Support/Google/Picasa3/buttons
 
-== Troubleshooting section ==
 = When I click the "install" button, my browser says it does not recognize the protocol. =
 
 This message means that Picasa has not registered itself with your browser as being the application to handle links starting with `picasa://`. You could try to reinstall Picasa, which should cause it to register itself with your browser.  You must also be using at least Picasa v3.0.
@@ -117,31 +148,17 @@ This message means that Picasa has not registered itself with your browser as be
 
 Make sure you are running at least Picasa version 3.0 and that Picasa can open on your computer.
 
-= Everything seems OK, but I get an error page displayed by the browser that no files were uploaded by Picasa =
-
-Review the server error log for possible clues.  One possible cause of this failure is a server that is configured to use the [Suhosin](http://www.hardened-php.net/suhosin/index.html "Suhosin Hardened PHP") PHP plugin.  Special thanks go to [rbredow](http://wordpress.org/support/profile/rbredow "rbredow Wordpress User Profile") for the assistance in diagnosing this interaction.
-
-If Suhosin is configured, you might see an error like the following in the server error log:
-
-`ALERT - configured request variable name length limit exceeded - dropped variable 'http://localhost:51134/b921a58ec2806ab82f5399515fba226e/image/b0f008e85a4fa153_jpg?size=1024'`.
-
-Check the Suhosin setting values for `suhosin.post.max_name_length` and `suhosin.request.max_varname_length`.  A setting of at least 100 is recommended to allow the long variable names that are required by the Picasa engine.  You might need to increase it further depending on the length of the dropped variable name observed in the error log.
-
-The Apache plugin mod_security can also be configured to restrict the length of the request variable name.  Again, a setting of at least 100 is recommended to allow long variables.
-
-= Reporting Problems =
-
-Please follow these instructions to report problems:
-
-1. Enable debug logging in Admin -> Settings -> Media
-1. Reproduce the problem
-1. Provide the log results, description of problem, plugin version and WordPress version in a post to the [Support Forum](http://wordpress.org/tags/picasa-album-uploader?forum_id=10 "Picasa Album Uploader Support Forum").
-
 == Screenshots ==
 
 1. Picasa Album Uploader Options in Media Settings Admin Screen.
 
 == Changelog ==
+
+= 0.7 =
+
+* Add selftest to confirm plugin is able to receive long POST variables
+* Implemented activation hook
+* Enforce minimum PHP v5.2 requirement when plugin is activated.
 
 = 0.6.2 =
 
@@ -188,6 +205,10 @@ Please follow these instructions to report problems:
 * Initial CSS Formatting of upload screen
 
 == Upgrade Notice ==
+
+= 0.7 =
+
+* Added self-test to aid in diagnosis when plugin not working
 
 = 0.6.2 =
 

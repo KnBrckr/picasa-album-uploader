@@ -3,7 +3,7 @@
 Plugin Name: Picasa Album Uploader
 Plugin URI: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Description: Easily upload media from Google Picasa Desktop into WordPress.  Navigate to <a href="options-media.php">Settings &rarr; Media</a> to configure.
-Version: 0.6.1
+Version: 0.7
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/blog/
 
@@ -46,11 +46,12 @@ if ( ! defined( 'PAU_PLUGIN_NAME' ) ) {
 	define ( 'PAU_BUTTON_FILE_NAME', 'picasa_album_uploader.pbz');
 
 	// plugin function requested based on URL request
-	define('PAU_BUTTON', 1);
-	define('PAU_MINIBROWSER', 2);
-	define('PAU_UPLOAD', 3);
-	define('PAU_RESULT', 4);
-	define('PAU_LOGIN', 5);
+	define('PAU_BUTTON', 1);       // Download Picasa button file
+	define('PAU_MINIBROWSER', 2);  // Upload screen for Picasa minibrowser
+	define('PAU_UPLOAD', 3);       // Receive upload from Picasa
+	define('PAU_RESULT', 4);       // Report upload results
+	define('PAU_LOGIN', 5);        // User login screen
+	define('PAU_SELFTEST', 6);     // Perform selftest checks
 	
 	// result codes on upload completion or failure
 	define('PAU_RESULT_SUCCESS', 'success');
@@ -84,7 +85,7 @@ global $pau;
 global $pau_errors;
 global $pau_versions;
 
-$pau_versions[] = '$Id: picasa-album-uploader.php 423849 2011-08-15 15:54:46Z draca $';
+$pau_versions[] = '$Id: picasa-album-uploader.php 423849 2011-08-15 15:54:46Z draca $'; // SVN Version string
 	
 // =================================
 // = Define the picasa album class =
@@ -92,6 +93,16 @@ $pau_versions[] = '$Id: picasa-album-uploader.php 423849 2011-08-15 15:54:46Z dr
 
 if ( ! class_exists( 'picasa_album_uploader' ) ) {
 	class picasa_album_uploader {
+		/**
+		 * Minimum version of WordPress required by plugin
+		 **/
+		const wp_version_required = '3.1';
+
+		/**
+		 * Minimum version of PHP required by the plugin
+		 **/
+		const php_version_required = '5.2';
+		
 		/**
 		 * Option settings used by plugin
 		 *
@@ -108,6 +119,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		function picasa_album_uploader() {
 			// Retrieve plugin options
 			$this->pau_options = new picasa_album_uploader_options();
+			
+			// register admin section with WP
+			$this->pau_options->register();
 
 			// Check for permalink usage
 			$this->using_permalinks = get_option('permalink_structure') != '';
@@ -257,6 +271,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				case PAU_LOGIN:
 					self::login();
 					exit;
+				case PAU_SELFTEST:
+					$this->test_access();
+					exit;
 			}
 		}
 		
@@ -323,12 +340,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				return false; // Request is not for this plugin
 			}
 			
-			// Valid values for 2nd parameter:
-			//	PAU_BUTTON_FILE_NAME
-			//	PAU_MINIBROWSER
-			//	PAU_UPLOAD
-			//  PAU_RESULT
-			//  PAU_LOGIN
+			// Decode plugin request
 			switch ( $tokens[1] ) {
 				case PAU_BUTTON_FILE_NAME:
 					$this->pau_serve = PAU_BUTTON;
@@ -348,6 +360,10 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 					
 				case 'login':
 					$this->pau_serve = PAU_LOGIN;
+					break;
+					
+				case 'selftest':
+					$this->pau_serve = PAU_SELFTEST;
 					break;
 
 				default:
@@ -827,7 +843,6 @@ EOF;
 			if ( function_exists( 'com_create_guid' ) ) {
 				return com_create_guid();
 			} else {
-				mt_srand( (double)microtime()*10000 ) ;//optional for php 4.2.0 and up.
 				$charid = strtoupper( md5( uniqid( rand(), true ) ) );
 				$hyphen = chr( 45 );	// "-"
 				$uuid = chr( 123 )		// "{"
@@ -840,6 +855,52 @@ EOF;
 				return $uuid;
 			}
 		}
+
+		/**
+		 * Perform Plugin Activation handling
+		 *  * Confirm that plugin environment requirements are met
+		 *	* Run parent class activation
+		 *
+		 * @return void
+		 **/
+		public static function plugin_activation()
+		{
+			global $wp_version;
+
+			// Enforce minimum PHP version requirements
+			if (version_compare(self::php_version_required, phpversion(), '>')) {
+				die(PAU_PLUGIN_NAME . ' plugin requires minimum PHP v' . self::php_version_required . '.  You are running v' . phpversion());
+			}
+
+			// Enforce minimum WP version
+			if (version_compare(self::wp_version_required, $wp_version, '>')) {
+				die(PAU_PLUGIN_NAME . ' plugin requires minimum WordPress v' . self::wp_version_required . '.  You are running v' . $wp_version);
+			}
+		}
+		
+		/**
+		 * Respond to self test URL request
+		 *
+		 * @return void
+		 **/
+		function test_access()
+		{
+			if (isset($_REQUEST[$this->pau_options->long_var_name])) {
+				if ($_REQUEST[$this->pau_options->long_var_name] != $this->pau_options->long_var_name) {
+					header('Status: 200 OK');
+					header('HTTP/1.1 200 OK');
+					echo 'REQUEST long variable OK, received length=' . strlen($this->pau_options->long_var_name);
+				} else {
+					header('Status: 400 REQUEST long variable received - Data wrong');
+					header('HTTP/1.1 400 REQUEST long variable received - Data wrong');
+					echo 'REQUEST long variable received - Data wrong';
+				}
+			} else {
+				header('Status: 400 REQUEST missing expected variable');
+			  header('HTTP/1.1 400 REQUEST missing expected variable');
+				echo 'REQUEST missing expected variable';
+			}
+		}		
 	} // End Class picasa_album_uploader
 }
 
@@ -872,5 +933,9 @@ function pau_error_log_display() {
 if ( class_exists( 'picasa_album_uploader' ) ) {
 	$pau = new picasa_album_uploader();
 }
+
+// Setup plugin activation function
+register_activation_hook( __FILE__, array('picasa_album_uploader', 'plugin_activation'));
+
 
 ?>
