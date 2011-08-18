@@ -51,6 +51,9 @@ class picasa_album_uploader_options
 	 * Class Constructor function
 	 *
 	 * Setup plugin defaults
+	 *
+	 * @access public
+	 * @return void
 	 **/
 	function picasa_album_uploader_options()
 	{
@@ -69,6 +72,7 @@ class picasa_album_uploader_options
 	/**
 	 * Cleanup database if uninstall is requested
 	 *
+	 * @access public
 	 * @return void
 	 **/
 	function uninstall() {
@@ -76,8 +80,9 @@ class picasa_album_uploader_options
 	}
 	
 	/**
-	 * Add needed actions into WP stream
+	 * Register plugin actions with WordPress
 	 *
+	 * @access public
 	 * @return void
 	 **/
 	function register()
@@ -98,7 +103,10 @@ class picasa_album_uploader_options
 	}
 		
 	/**
-	 * Register the plugin settings options when running admin_screen
+	 * WP action to register the plugin settings options when running admin_screen
+	 *
+	 * @access public
+	 * @return void
 	 **/
 	function pau_settings_admin_init ()
 	{
@@ -132,13 +140,12 @@ class picasa_album_uploader_options
 		
 		// Register the slug name setting;
 		register_setting( 'media', 'pau_plugin_settings', array (&$this, 'sanitize_settings') );
-		
-		// TODO Need an unregister_setting routine for de-install of plugin
 	}
 	
 	/**
-	 * Display Notice messages at head of admin screen
+	 * WP action to emit Admin notice messages with class "error" for display on WP Admin pages
 	 *
+	 * @access public
 	 * @return void
 	 **/
 	function pau_admin_notice()
@@ -155,6 +162,7 @@ class picasa_album_uploader_options
 			echo '</p></div>';
 		}
 		
+		// TODO Reduce frequency long_var test is run.
 		if ( $result = $this->test_long_var() ) {
 			echo '<div class="error"><p>';
 			printf(__('%s detected error receiving long argument names in HTTP requests and will likely be unable to receive files from Picasa.  ',  'picasa-album-uploader'), '<a href="options-media.php">' . PAU_PLUGIN_NAME . '</a>');
@@ -167,8 +175,10 @@ class picasa_album_uploader_options
 	}
 	
 	/**
-	 * Sanitize the Plugin Options received from the user
+	 * WP callback function to sanitize the Plugin Options received from the user
 	 *
+	 * @access public
+	 * @param hash $options Options defined by plugin indexed by option name
 	 * @return hash Sanitized hash of plugin options
 	 **/
 	function sanitize_settings($options)
@@ -189,19 +199,32 @@ class picasa_album_uploader_options
 	}
 	
 	/**
-	 * Emit HTML to create a settings section for the plugin in admin screen.
+	 * WP options screen callback to emit HTML to create a settings section for the plugin in admin screen.
+	 *
+	 * @access public
+	 * @return void
 	 **/
 	function settings_section_html()
 	{	
-		echo '<p>';
-		_e('To use the Picasa Album Uploader, install the Button in Picasa Desktop using this automated install link:', 'picasa-album-uploader');
-		echo '</p>';
-		// Display button to download the Picasa Button Plugin
-		echo do_shortcode( "[picasa_album_uploader_button]" );
+		// Permalinks must be enabled ...
+		if ( get_option('permalink_structure') != '' ) {
+			echo '<p>';
+			_e('To use Picasa Album Uploader, install the Button in Picasa Desktop using this automated install link:', 'picasa-album-uploader');
+			echo '</p>';
+			// Display button to download the Picasa Button Plugin
+			echo do_shortcode( "[picasa_album_uploader_button]" );
+		} else {
+			echo '<p>';
+			_e('To use Picasa Album Uploader, Permalinks must be enabled due to limitations in the Desktop Picasa application.');
+			echo '</p>';
+		}
 	}
 	
 	/**
-	 * Emit HTML to create form field for slug name
+	 * WP options screen callback to emit HTML to create form field for slug name
+	 *
+	 * @access public
+	 * @return void
 	 **/
 	function slug_html()
 	{ 
@@ -217,9 +240,10 @@ class picasa_album_uploader_options
 	 * Perform self test operations and emit reporting HTML
 	 *   Attempt to load page using long GET request
 	 *
-	 * @return string HTML content
+	 * @access private
+	 * @return string HTML report of self test results
 	 **/
-	function selftest()
+	private function selftest()
 	{
 		$text = '';
 		
@@ -235,10 +259,12 @@ class picasa_album_uploader_options
 	
 	/**
 	 * Perform HTTP request to self test page including a long request variable name
+	 * This test confirms that the WP install is capable of receiving the long argument names that are sent by Picasa.
 	 *
+	 * @access private
 	 * @return false if able to retrieve long variable name, string describing error otherwise
 	 **/
-	function test_long_var()
+	private function test_long_var()
 	{
 		if (!ini_get('allow_url_fopen')) {
 			$result = 'Unable to complete HTTP REQUEST test; allow_url_fopen in php.ini is false.';
@@ -250,7 +276,11 @@ class picasa_album_uploader_options
 				$result = $false;
 			} else {
 				$status = preg_grep("/^HTTP\/1.[01] [^3]/", $http_response_header);
-				$result = implode($status);
+				if (count($status) > 0) {
+					$result = implode($status);					
+				} else {
+					$result = "Unrecognized failure opening $baseurl";
+				}
 			}
 		}
 		
@@ -258,7 +288,10 @@ class picasa_album_uploader_options
 	}
 	
 	/**
-	 * Emit HTML to create form field used to enable/disable Debug Logging
+	 * WP options callback to emit HTML to create form field used to enable/disable Debug Logging
+	 *
+	 * @access public
+	 * @return void
 	 **/
 	function debug_log_enabled_html()
 	{ 
@@ -266,17 +299,17 @@ class picasa_album_uploader_options
 		echo '<input type="checkbox" name="pau_plugin_settings[debug_log_enabled]" value="1" ' . $checked . '>';
 		_e('Enable Plugin Debug Logging. When enabled, log will display below.', 'picasa-album-uploader');
 		if ( $this-> debug_log_enabled ) {
-			echo $this->report_bug();
+			echo $this->debug_report();
 		}
 	}
 	
 	/**
 	 * Generate data for debug and bug reporting
 	 *
+	 * @access private
 	 * @return string HTML to display debug messages
-	 * @author Kenneth J. Brucker <ken@pumastudios.com>
 	 */
-	function report_bug()
+	private function debug_report()
 	{
 		global $pau_versions;
 		
@@ -304,7 +337,10 @@ class picasa_album_uploader_options
 	}
 	
 	/**
-	 * Log an error message for display
+	 * Log a debug message
+	 *
+	 * @access public
+	 * @return void
 	 **/
 	function debug_log($msg)
 	{
@@ -313,7 +349,11 @@ class picasa_album_uploader_options
 	}
 	
 	/**
-	 * Save the error log if it's enabled
+	 * Save the error log if it's enabled.  Must be called before server code exits to preserve
+	 * any log messages recorded during session.
+	 *
+	 * @access public
+	 * @return void
 	 **/
 	function save_debug_log()
 	{
@@ -327,8 +367,8 @@ class picasa_album_uploader_options
 	/**
 	 * Log errors to server log and debug log
 	 *
+	 * @access public
 	 * @return void
-	 * @author Kenneth J. Brucker <ken@pumastudios.com>
 	 **/
 	function error_log($msg)
 	{
