@@ -22,7 +22,7 @@
  * along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-$pau_versions[] = '$Id: options.php 425381 2011-08-18 13:46:51Z draca $'; // SVN Version string
+$pau_versions[] = '$Id: options.php 425397 2011-08-18 15:04:39Z draca $'; // SVN Version string
 
 class picasa_album_uploader_options
 {
