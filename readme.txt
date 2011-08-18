@@ -118,6 +118,7 @@ This is a real plugin that lives in the `wp-content/plugins/` directory and does
 
 = How do I uninstall this plugin? =
 
+This plugin can be managed with the WordPress Plugin 
 1. Deactivate the plugin from the Admin -> Plugins Screen
 1. Delete the directory `wp-content/plugins/picasa-album-uploader` in your WordPress installation
 1. The plugin adds a single DB entry to the WordPress options table called "pau_plugin_settings".  Using phpMyAdmin or similar utility remove this entry from the table.
@@ -159,6 +160,7 @@ Make sure you are running at least Picasa version 3.0 and that Picasa can open o
 * Add selftest to confirm plugin is able to receive long POST variables
 * Implemented activation hook
 * Enforce minimum PHP v5.2 requirement when plugin is activated.
+* Implement uninstall script
 
 = 0.6.2 =
 
@@ -180,7 +182,7 @@ Make sure you are running at least Picasa version 3.0 and that Picasa can open o
 * Add i18n support
 * Enhanced result page reporting
 * Fixed defect in reporting of errors detected during upload resulting in silent failure.
-* Documented plugin interaction with PHP Security plugin Suhosin
+* Documented plugin interaction with PHP Security plugin Suhosin.  Thanks go to [rbredow](http://wordpress.org/support/profile/rbredow "rbredow Wordpress User Profile") for diagnosing the interaction.
 
 = 0.4.1 =
 

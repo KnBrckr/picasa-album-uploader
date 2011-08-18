@@ -1,10 +1,10 @@
 <?php
 /**
- * Class to manage options
+ * picasa_album_uploader_options class to manage options
  *
  * @package Picasa Album Uploader
  * @author Kenneth J. Brucker <ken@pumastudios.com>
- * @copyright 2010 Kenneth J. Brucker (email: ken@pumastudios.com)
+ * @copyright 2011 Kenneth J. Brucker (email: ken@pumastudios.com)
  * 
  * This file is part of Picasa Album Uploader, a plugin for Wordpress.
  *
@@ -64,6 +64,15 @@ class picasa_album_uploader_options
 		// Init value for error log
 		$this->debug_log_enabled = isset($options['debug_log_enabled']) ? $options['debug_log_enabled'] : 0;
 		$this->debug_log = isset($options['debug_log']) ? $options['debug_log'] : array();
+	}
+	
+	/**
+	 * Cleanup database if uninstall is requested
+	 *
+	 * @return void
+	 **/
+	function uninstall() {
+		delete_option('pau_plugin_settings'); // Remove the plugin settings		
 	}
 	
 	/**

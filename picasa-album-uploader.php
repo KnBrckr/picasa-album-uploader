@@ -886,7 +886,7 @@ EOF;
 		function test_access()
 		{
 			if (isset($_REQUEST[$this->pau_options->long_var_name])) {
-				if ($_REQUEST[$this->pau_options->long_var_name] != $this->pau_options->long_var_name) {
+				if ($_REQUEST[$this->pau_options->long_var_name] == $this->pau_options->long_var_name) {
 					header('Status: 200 OK');
 					header('HTTP/1.1 200 OK');
 					echo 'REQUEST long variable OK, received length=' . strlen($this->pau_options->long_var_name);
