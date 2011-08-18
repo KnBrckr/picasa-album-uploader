@@ -6,6 +6,7 @@ Description: Easily upload media from Google Picasa Desktop into WordPress.  Nav
 Version: 0.7
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/blog/
+Text Domain: picasa-album-uploader
 
 Copyright: 2011 Kenneth J. Brucker (email: ken@pumastudios.com)
 
@@ -24,8 +25,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-// TODO Document how to handle failures to install in Picasa.
 
 // =======================================
 // = Define constants used by the plugin =
@@ -83,7 +82,7 @@ global $pau;
 global $pau_errors;
 global $pau_versions;
 
-$pau_versions[] = '$Id: picasa-album-uploader.php 423849 2011-08-15 15:54:46Z draca $'; // SVN Version string
+$pau_versions[] = '$Id: picasa-album-uploader.php 425381 2011-08-18 13:46:51Z draca $'; // SVN Version string
 	
 // =================================
 // = Define the picasa album class =
@@ -239,11 +238,15 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 					
 				// Plugin did not receive files from Picasa for upload.  Probable server configuration problem
 				case PAU_RESULT_NO_FILES:
-				  // TODO Add selftest call in this flow
-					$content = '<p>' . __('Error:  No files provided for upload.  Related errors might appear in the server error log.', 'picasa-album-uploader') . '</p>';
-					$content .= '<p>' . __('Your server appears to be configured to restrict the length of request variable names.','picasa-album-uploader') . '</p>';
-					$content .= '<p>' . __('Possible modules causing this include Suhosin and mod_security.') . ' ';
-					$content .= __('Please refer to the plugin readme for configuration information.', 'picasa-album-uploader') . '</p>';
+					$content = '<p>' . __('Error:  No files received in upload request.  Related errors might appear in the server error log.', 'picasa-album-uploader') . '</p>';
+				
+					// Perform long-var check now, could be reason no files received.
+					if ( $result = $this->pau_options->test_long_var() ) {
+						$content .= '<p>' . __('Your server might be configured to restrict the length of request argument names.','picasa-album-uploader') . '</p>';
+						$content .= '<p>' . __('Possible modules causing this include Suhosin and mod_security.') . ' ';
+						$content .= sprintf(__('More details are available in the Picasa Album Uploader %s',  'picasa-album-uploader'), '<a href="https://wordpress.org/extend/plugins/picasa-album-uploader/faq/">' . __('FAQ',  'picasa-album-uploader') . '.</a>');
+						$content .= '</p>';
+					}
 					break;
 					
 				// User does not have required permission for uploads

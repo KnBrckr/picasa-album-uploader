@@ -22,7 +22,7 @@
  * along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-$pau_versions[] = '$Id: options.php 385833 2011-05-17 13:13:20Z draca $'; // SVN Version string
+$pau_versions[] = '$Id: options.php 425381 2011-08-18 13:46:51Z draca $'; // SVN Version string
 
 class picasa_album_uploader_options
 {
@@ -160,18 +160,7 @@ class picasa_album_uploader_options
 			echo '<div class="error"><p>';
 			printf(__('%s logging is enabled.  If left enabled, this can affect database performance.', 'picasa-album-uploader'),'<a href="options-media.php">' . PAU_PLUGIN_NAME . '</a>');
 			echo '</p></div>';
-		}
-		
-		// TODO Reduce frequency long_var test is run.
-		if ( $result = $this->test_long_var() ) {
-			echo '<div class="error"><p>';
-			printf(__('%s detected error receiving long argument names in HTTP requests and will likely be unable to receive files from Picasa.  ',  'picasa-album-uploader'), '<a href="options-media.php">' . PAU_PLUGIN_NAME . '</a>');
-			echo '<br>';
-			_e('Please check your server security configuration to confirm it will allow argument names of at least 100 characters.',  'picasa-album-uploader');
-			echo ' ';
-			printf(__('More details are available in the %s',  'picasa-album-uploader'), '<a href="https://wordpress.org/extend/plugins/picasa-album-uploader/faq/">' . __('FAQ',  'picasa-album-uploader') . '.</a>');
-			echo '</p></div>';
-		}
+		}		
 	}
 	
 	/**

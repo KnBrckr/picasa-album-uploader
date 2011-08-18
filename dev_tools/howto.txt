@@ -14,5 +14,5 @@ Update readme.txt headers to point at correct version in SVN tree
 
 To build POT files:
 
-php ~/php/i18n/makepot.php wp-plugin .
+php ~/tools/wordpress-i18n/makepot.php wp-plugin . languages/picasa-album-uploader.pot
 
