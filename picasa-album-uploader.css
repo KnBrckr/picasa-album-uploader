@@ -24,6 +24,10 @@
 /* = Admin Screen formatting = */
 /* =========================== */
 
+#pau_slug {
+	width: 15em;
+}
+
 .pau-debug-log {
 	margin: 5px ;
 	padding: 5px ;

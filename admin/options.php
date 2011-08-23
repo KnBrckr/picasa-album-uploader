@@ -217,7 +217,7 @@ class picasa_album_uploader_options
 	 **/
 	function slug_html()
 	{ 
-		echo '<input type="text" name="pau_plugin_settings[slug]" value="' . $this->slug . '" />';
+		echo '<input id="pau_slug" type="text" name="pau_plugin_settings[slug]" value="' . $this->slug . '" />';
 		echo '<p>';
 		_e('Set the slug used by the plugin.  Only alphanumeric, dash (-) and underscore (_) characters are allowed.  White space will be converted to dash, illegal characters will be removed.', 'picasa-album-uploader');
 		echo '<br />';
