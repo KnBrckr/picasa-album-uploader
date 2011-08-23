@@ -134,9 +134,14 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				$this->pau_options->debug_log('Permalinks not enabled - Plugin filter is not setup.');
 			}
 			
-			// Add CSS to HTML header
-			add_action('wp_head', array(&$this, 'add_css'));
-			add_action('admin_head', array(&$this, 'add_css'));			
+			// Register Plugin CSS
+			wp_register_style('picasa-album-uploader-style', PAU_PLUGIN_URL . '/picasa-album-uploader.css');
+			wp_enqueue_style('picasa-album-uploader-style');
+			
+			wp_register_style('picasa-album-uploader-minibrowser', PAU_PLUGIN_URL . '/minibrowser.css');
+
+			// Register Plugin javascript
+			wp_register_script('picasa-album-uploader-minibrowser', PAU_PLUGIN_URL . '/minibrowser.js', array('jquery'));	
 			
 			// i18n support
 			add_action('init', array(&$this, 'load_textdomain'));
@@ -304,17 +309,6 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		}
 		
 		/**
-		 * WP action to emit HTML needed to include plugin's CSS file
-		 *
-		 * @access public
-		 * @return void
-		 **/
-		function add_css()
-		{
-			echo '<link rel="stylesheet" type="text/css" href="' . PAU_PLUGIN_URL . '/picasa-album-uploader.css" />';
-		}
-		
-		/**
 		 * WP action to load the i18n text domain for the plugin
 		 *
 		 * @access public
@@ -439,6 +433,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			}
 
 			$this->pau_options->debug_log("Generating login window content");
+
+			// Add minibrowser styling
+			wp_enqueue_style('picasa-album-uploader-minibrowser');			
 
 			// Add class to the body element for CSS styling of the entire page that will be displayed in the minibrowser
 			add_filter('body_class', array(&$this, 'add_body_class'));
@@ -632,9 +629,10 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * @access private
 		 * @return string HTML form
 		 */
-		private function build_upload_form() {			
-			// Form handling requires some javascript - depends on jQuery
-			wp_enqueue_script('picasa-album-uploader', PAU_PLUGIN_URL . '/pau.js' ,'jquery');
+		private function build_upload_form() {
+			// Form handling in the minibrowser requires some javascript - depends on jQuery
+			wp_enqueue_script('picasa-album-uploader-minibrowser');
+			wp_enqueue_style('picasa-album-uploader-minibrowser');
 			
 			$content = '<div id="pau-upload-form">';
 			if (isset($_POST['rss']) && $_POST['rss']) {
@@ -670,33 +668,36 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 							foreach($pData as $e) {
 								$this->pau_options->debug_log("Form Setup: " . esc_attr($e['photo:imgsrc']));
 
+								$content .= '<div  class="pau-img">';
 								$title = isset($e['title']) ? esc_attr( $e['title'] ) : '';
 								$description = isset($e['description']) ? esc_attr( $e['description'] ) : '';
 								$large = esc_attr( $e['photo:imgsrc'] ) .'?size=1024';
 
-								$content .= "<img class='pau-img' src='".esc_attr( $e['photo:thumbnail'] )."?size=-96' title='" . $title . "'>";
-								$content .= '<input type="hidden" name="' . $large . '">';
-
+								$content .= "<img alt='Image from Picasa' src='".esc_attr( $e['photo:thumbnail'] )."?size=-96' title='" . $title . "'>";
+								
 								// Add input tags to update image description, etc.
 								// TODO Put fields into div that can be hidden/displayed
-								$content .= '<dl class="pau-attributes">'; // Start Definition List
-								$content .= '<dt class="pau-img-header"">' . __('Title', 'picasa-album-uploader') . '<dd><input type="text" name="title[]" class="pau-img-text" value="' . $title . '" />';
-								$content .= '<dt class="pau-img-header">' . __('Caption', 'picasa-album-uploader') . '<dd><input type="text" name="caption[]" class="pau-img-text" />';				
-								$content .= '<dt class="pau-img-header">' . __('Description', 'picasa-album-uploader') . '<dd><textarea name="description[]" class="pau-img-textarea" rows="4" cols="80">' . $description . '</textarea>';
-								$content .= '</dl>'; // End Definition List
-							}
+								$content .= '<div class="pau-attributes">'; // Start Definition List
+								$content .= '<input type="hidden" name="' . $large . '">';
+								$content .= '<label><span>' . __('Title', 'picasa-album-uploader') . '</span><input type="text" name="title[]" class="pau-img-text" value="' . $title . '" /></label>';
+								$content .= '<label><span>' . __('Caption', 'picasa-album-uploader') . '</span><input type="text" name="caption[]" class="pau-img-text" /></label>';				
+								$content .= '<label><span>' . __('Description', 'picasa-album-uploader') . '</span><textarea name="description[]" class="pau-img-textarea" rows="4" cols="80">' . $description . '</textarea></label>';
+								$content .= '</div>'; // End Image Attributes
+								$content .= '</div>';
+							} // End of image list
 
 							// TODO Provide method for admin screen to pick available image sizes
-							$content .= '</div><!-- End of pau-images class --><div class="header">' . __('Select your upload image size:', 'picasa-album-uploader') .
-'<INPUT type="radio" name="size" onclick="chURL(\'640\')">640
-<INPUT type="radio" name="size" onclick="chURL(\'1024\')" CHECKED>1024
-<INPUT type="radio" name="size" onclick="chURL(\'1600\')">1600
-<INPUT type="radio" name="size" onclick="chURL(\'0\')">Original
-</div>
-<div class="button">
-<input type="submit" value="' . __('Upload', 'picasa-album-uploader') . '">&nbsp;
-</div>
-</form>';
+							$content .= '</div><!-- End of pau-images -->';
+							$content .= '<div class="pau-img-size">';
+							$content .= __('Select your upload image size:', 'picasa-album-uploader');
+							$content .= '<label><INPUT type="radio" name="size" onclick="chURL(\'640\')">640</label>';
+							$content .= '<label><INPUT type="radio" name="size" onclick="chURL(\'1024\')" CHECKED>1024</label>';
+							$content .= '<label><INPUT type="radio" name="size" onclick="chURL(\'1600\')">1600</label>';
+							$content .= '<label><INPUT type="radio" name="size" onclick="chURL(\'0\')">Original</label>';
+							$content .= '</div><!-- End image size selection -->';
+							$content .= '<div class="button">';
+							$content .= '<input type="submit" value="' . __('Upload', 'picasa-album-uploader') . '">&nbsp;';
+							$content .= '</div></form>';
 			} else {
 				$this->pau_options->error_log("Empty RSS feed from Picasa; unable to build minibrowser form.");
 			 	$content .= '<p class="error">' . __('Sorry, no images were received from Picasa.', 'picasa-album-uploader') . '</p>';
@@ -742,6 +743,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			
 			// Add plugin class to the generated post for CSS formatting
 			add_filter('post_class', array(&$this, 'add_post_class'));
+			
+			// Plugin crafted the content - avoid wpautop formatting which inserts <br> elements when not desired
+			remove_filter( 'the_content', 'wpautop' );
 			
 			return $post;
 		}

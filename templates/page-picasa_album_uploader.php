@@ -2,7 +2,7 @@
 /**
  * @package Picasa Album Uploader
  * @author Kenneth J. Brucker <ken@pumastudios.com>
- * @copyright 2010 Kenneth J. Brucker (email: ken@pumastudios.com)
+ * @copyright 2011 Kenneth J. Brucker (email: ken@pumastudios.com)
  * 
  * This file is part of Picasa Album Uploader, a plugin for Wordpress.
  *

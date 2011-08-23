@@ -1,10 +1,18 @@
 /*
- * NOTE:  Picasa does not appear to be able to handle multiple element selectors
- */
+	Copyright: 2011 Kenneth J. Brucker (email: ken@pumastudios.com)
 
-.pau-error {
-	color: red;
-}
+	This file is part of Picasa Album Uploader, a plugin for Wordpress.
+
+	Picasa Album Uploader is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Picasa Album Uploader is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+*/
 
 /* Hide the post meta and utility sections for plugin generated pages */
 .post-picasa-album-uploader .entry-meta,
@@ -26,90 +34,6 @@
 	padding-left: 3em ;
 }
 
-/* ========================== */
-/* = Minibrowser formatting = */
-/* ========================== */
-
-/* Applies to content area of the minibrowser window - reset for visibility */
-.picasa-album-uploader-minibrowser .entry {
-/*  margin: 0;
-  padding: 0;
-  border: 0;
-*/  font-weight: inherit;
-  font-size: 100%;
-/*  vertical-align: baseline;*/
-	line-height: 1.5;
-	background: none white;
-}
-
-.picasa-album-uploader-minibrowser .login-remember {
-	display: none;
-}
-
-.picasa-album-uploader-minibrowser .pau-header {
-	font-size: 120%;
-}
-
-/* Applies to div section around all photos */
-.picasa-album-uploader-minibrowser .pau-images {
-}
-
-/* Applies to each img displayed */
-.picasa-album-uploader-minibrowser .pau-img {
-}
-
-/* Format Form Table field headers */
-.picasa-album-uploader-minibrowser .pau-img-header {
-	font-size: 110%;
-}
-
-.picasa-album-uploader-minibrowser .pau-img-text {
-	width: 35em;
-}
-
-.picasa-album-uploader-minibrowser .pau-img-textarea {
-	height: 4em;
-	width: 35em;
-}
-
-/* ============================================================ */
-/* = Hide major elements of a page when Minibrowser is active = */
-/* ============================================================ */
-
-/* Hide the admin bar */
-.picasa-album-uploader-minibrowser #wpadminbar {
-	display: none;
-}
-
-/* Hide Meta and Navigational elements of a post */
-.picasa-album-uploader-minibrowser .entry-meta, 
-.picasa-album-uploader-minibrowser .entry-utility {
-	display: none;
-}
-
-/* Hide colophon (footer section) */
-.picasa-album-uploader-minibrowser #colophon {
-	display: none;
-}
-
-/**
- * = Theme Interoperability = 
- */
-
-/* Attempt to hide navigation definition */
-.picasa-album-uploader-minibrowser #nav,
-.picasa-album-uploader-minibrowser .nav,
-.picasa-album-uploader-minibrowser #access,
-.picasa-album-uploader-minibrowser .menu
-{
-	display: none;
-}
-
-/* Attempt to hide login section */
-.picasa-album-uploader-minibrowser #loginout {
-	display: none;
-}
-
 /* =========================== */
 /* = Plugin Interoperability = */
 /* =========================== */
@@ -119,7 +43,6 @@
  *
  * Hide the section added by add-to-any in a page entry
  */
-.post-picasa-album-uploader .addtoany_share_save_container,  
-.picasa-album-uploader-minibrowser .addtoany_share_save_container {
+.post-picasa-album-uploader .addtoany_share_save_container {
 	display: none;
 }

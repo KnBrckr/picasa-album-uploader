@@ -161,6 +161,7 @@ Make sure you are running at least Picasa version 3.0 and that Picasa can open o
 * Implemented activation hook
 * Enforce minimum PHP v5.2 requirement when plugin is activated.
 * Implement uninstall script
+* Improve formatting in mini-browser window
 
 = 0.6.2 =
 
