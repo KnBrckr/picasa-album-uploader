@@ -212,6 +212,7 @@ Make sure you are running at least Picasa version 3.0 and that Picasa can open o
 = 0.7 =
 
 * Added self-test to aid in diagnosis when plugin not working
+* Improve formatting of minibrowser pages
 
 = 0.6.2 =
 
