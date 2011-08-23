@@ -159,24 +159,25 @@ Make sure you are running at least Picasa version 3.0 and that Picasa can open o
 
 * Add selftest to confirm plugin is able to receive long POST variables
 * Implemented activation hook
-* Enforce minimum PHP v5.2 requirement when plugin is activated.
+* FIX: Enforce minimum PHP v5.2 requirement when plugin is activated.
 * Implement uninstall script
 * Improve formatting in mini-browser window
+* FIX: Slug field too short in admin screen
 
 = 0.6.2 =
 
-* Pluging generating wrong URLs when a site is configured with home_url() != site_url().  e.g. when Wordpress installed in a different directory from the one presented to the user.  Props to [jacob.bro](http://wordpress.org/support/profile/jakobbro) for the debug log that pointed out the flaw.
+* FIX: Pluging generating wrong URLs when a site is configured with home_url() != site_url().  e.g. when Wordpress installed in a different directory from the one presented to the user.  Props to [jacob.bro](http://wordpress.org/support/profile/jakobbro) for the debug log that pointed out the flaw.
 
 = 0.6.1 =
 
-* Assume wp_redirect() will succeed as rest of core does.
+* FIX: Assume wp_redirect() will succeed as rest of core does.
 
 = 0.6 =
 
 * Supports Wordpress Multi-site
 * Improved message when no files to be uploaded.
-* Use plugin supplied login screen for authentication to address redirect issues when running in certain multi-site configurations.
-* Hide WP Admin bar in Picasa minibrowser window
+* FIX: Use plugin supplied login screen for authentication to address redirect issues when running in certain multi-site configurations.
+* FIX: Hide WP Admin bar in Picasa minibrowser window
 
 = 0.5 =
 
