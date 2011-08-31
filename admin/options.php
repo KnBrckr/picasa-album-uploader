@@ -329,14 +329,8 @@ class picasa_album_uploader_options
 		
 		$content .= '<dt>Plugin Slug: <dd>' . $this->slug;
 		$content .= '<dt>Permalink Structure: <dd>' . get_option('permalink_structure');
-		$content .= '<dt>Sample Plugin URL: <dd>';
-		$url = $this->build_url('sample');
-		if (function_exists('http_build_url')) {
-			$url = http_build_url($url, array("host" => "filtered.com"));
-		} else {
-			$url = preg_replace('/:\/\/.+?\//','://*masked-host*/', $url);
-		}
-		$content .= esc_attr($url);
+		// Filter the hostname of running system from debug log
+		$content .= '<dt>Sample Plugin URL: <dd>' . esc_attr(preg_replace('/:\/\/.+?\//','://*masked-host*/', $this->build_url('sample')));
 		$content .= '<dt>Self Test: <dd>' . self::selftest();
 		$content .= '<dt>Log:';
 		foreach ($this->debug_log as $line) {
