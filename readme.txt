@@ -18,26 +18,20 @@ This plugin is based on the initial works by [clyang](http://clyang.net/blog/200
 
 The Picasa API this plugin is based upon has been deprecated by Google.  A future update of Picasa could remove the API completely which will terminate the ability of this plugin to receive uploads from Picasa.
 
-= What's Next? =
-
-1.  Provide uninstall method
-1.  At upload, optionally create a new post using the WP shortcode [gallery] to publish the newly uploaded files.
-1.  Refine default display of images to be uploaded.
-1.  Improve default formatting in Picasa Mini-browser
-
 == Installation ==
 
 This plugin requires PHP5.2
 
-1.  Configure one of the permlink options in the Admin Settings -> Permalinks screen.  See FAQ for details.
-1.  Upload the picasa-album-uploader to the `wp-content/plugins/` directory
+1.  Add the plugin files in your WordPress installation like any other plugin.
+1.  Configure one of the permlink options in the Admin -> Settings -> Permalinks screen.  You must use permalinks for this plugin to function.  See the FAQ for details.
 1.  Activate the plugin in Admin -> Plugins
 1.  Configure the plugin options in Admin -> Settings -> Media
 1.  Use the "Install Image Upload Button in Picasa Desktop" Link in Admin -> Settings -> Media to import the upload button into Picasa
-1.  If desired, create the files header-picasa_album_uploader.php and footer-picasa_album_uploader.php in the top level of your themes directory to provide customized header and footer in the upload confirmation dialog displayed by Picasa.
-1.  Begin uploading photos from Picasa to your blog.
+1.  If desired, create the files header-picasa_album_uploader.php and footer-picasa_album_uploader.php in the top level of your themes directory to provide customized header and footer in the dialog displayed by Picasa.
 
 = Usage Hints =
+
+Once installed in Picasa Desktop, select photos in Picasa and press the WordPress button to upload the selected photos to your blog.
 
 To display the button load link in a post or page, insert the shortcode `[picasa_album_uploader_button]` at the desired location.
 
@@ -69,9 +63,14 @@ Review the server error logs for possible clues.  If Suhosin is configured, you 
 
 Check the Suhosin setting values for `suhosin.post.max_name_length` and `suhosin.request.max_varname_length`.  A setting of at least 100 is recommended to allow the long argument names that are required by the Picasa engine.  You might need to increase it further depending on the length of the dropped argument name observed in the error log.  In my experience, the arguments used by Picasa have been 93 characters.
 
-The Apache plugin mod_security can also be configured to restrict the length of the argument name.  Again, a setting of at least 100 is recommended to allow the long names used by Picasa.  Depending on your configuration, the modsecurity configuration line affecting this size might look like the following:
+The Apache plugin mod_security can also be configured to restrict the length of the argument name.  The server error log message might look something like this:
 
-`SecAction "phase:1,t:none,nolog,pass,setvar:tx.arg_name_length=100"`
+`ModSecurity: Warning. Operator GT matched 90 at ARGS_NAMES:http://localhost:55995/4cb54313c490d285f54664e018d50799/image/e50b8dc1ae05b682_jpg?size=1024. \[file "...modsecurity_crs_23_request_limits.conf"] \[line "23"] \[id "960209"] \[rev "2.2.1"] \[msg "Argument name too long"] \[severity "WARNING"] \[hostname "localhost"] \[uri "/picasa_album_uploader/selftest"] \[unique_id "Tl5bYgpABGUAAJ5HBIIAAAAK"]
+ModSecurity: Access denied with code 403 (phase 2). Pattern match "(.*)" at TX:960015-PROTOCOL_VIOLATION/MISSING_HEADER-REQUEST_HEADERS. \[file "...modsecurity_crs_49_inbound_blocking.conf"] \[line "26"] \[id "981176"] \[msg "Inbound Anomaly Score Exceeded (Total Score: 6, SQLi=, XSS=): Last Matched Message: Argument name too long"] \[data "Last Matched Data: 0"] \[hostname "localhost"] \[uri "/picasa_album_uploader/selftest"] \[unique_id "Tl5bYgpABGUAAJ5HBIIAAAAK"]`
+
+Depending on your configuration, the modsecurity configuration line affecting this size might look like the following.  Again, a setting of at least 100 is recommended to allow the long names used by Picasa.
+
+`SecAction "phase:1,t:none,nolog,pass,setvar:tx.arg_name_length=90"`
 
 Special thanks go to [rbredow](http://wordpress.org/support/profile/rbredow "rbredow Wordpress User Profile") for the assistance in diagnosing this interaction with server software.
 
@@ -87,11 +86,11 @@ The Picasa button contains a URL to your WordPress installation, including the s
 
 You may freely change the format of your permalinks without affecting the ability to upload files from Picasa Desktop.  You must however keep permalinks enabled as discussed above.
 
-= The URL to download the button points to a .pbz file that does not exist in the installed material.  What's up? =
+= Why is the picasa_album_uploader.pbz file missing from the plugin contents? =
 
 The .pbz file is dynamically created by the plugin due to the customization required in the contents.  See the question below about the contents of the download for details.
 
-= What's in that download that needs to be installed into Picasa? =
+= What's in that download (.pbz file) that needs to be installed into Picasa? =
 
 There is no executable code in the download.  It is comprised of two elements:
 
@@ -163,6 +162,7 @@ Make sure you are running at least Picasa version 3.0 and that Picasa can open o
 * Implement uninstall script
 * Improve formatting in mini-browser window
 * FIX: Slug field too short in admin screen
+* Mask hostname in debug log
 
 = 0.6.2 =
 
