@@ -35,7 +35,7 @@ if ( ! defined( 'PAU_PLUGIN_NAME' ) ) {
 	
 	define( 'PAU_PLUGIN_NAME', 'picasa-album-uploader' );	// Plugin name
 	define( 'PAU_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . PAU_PLUGIN_NAME );	// Base directory for Plugin
-	define( 'PAU_PLUGIN_URL', WP_PLUGIN_URL . '/' . PAU_PLUGIN_NAME);	// Base URL for plugin directory
+	define( 'PAU_PLUGIN_URL', plugins_url(PAU_PLUGIN_NAME));	// Base URL for plugin directory
 	
 	// Name strings used in Nonce hanldling
 	define( 'PAU_NONCE_UPLOAD', 'picasa-album-uploader-upload-images');

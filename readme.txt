@@ -163,6 +163,7 @@ Make sure you are running at least Picasa version 3.0 and that Picasa can open o
 * Improve formatting in mini-browser window
 * FIX: Slug field too short in admin screen
 * Mask hostname in debug log
+* FIX: Multi-site configs expose cross-site reference that can trip mod_security rules
 
 = 0.6.2 =
 
