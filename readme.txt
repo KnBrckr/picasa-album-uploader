@@ -55,40 +55,41 @@ See next question regarding no files uploaded by Picasa for discussion on the sy
 
 = An error page is displayed in the browser that no files were uploaded by Picasa =
 
-The most likely cause of this problem is software between Picasa and the plugin that is removing HTTP Request arguments with a long name.  When Picasa is sending the upload request, it uses a long argument name like `http://localhost:55995/4cb54313c490d285f54664e018d50799/image/e50b8dc1ae05b682_jpg?size=1024` in the request to the server.  Some server software like [Suhosin](http://www.hardened-php.net/suhosin/index.html "Suhosin Hardened PHP") (PHP security plugin) and [modsecurity](https://modsecurity.org/ "modsecurity - Open Source Web Application Firewall") (Apache security plugin) can be configured to remove long argument names from the HTTP Request as a security measure.  Unfortunately this has the undesirable side effect of breaking this plugin.  There may be other security applications that will have a similar affect on the incoming HTTP Request.
+The most likely cause of this problem is software between Picasa and the plugin that is removing HTTP Request arguments with a long name.  When Picasa is sending the upload request, it uses a long argument name like `http://localhost:55995/4cb54313c490d285f54664e018d50799/image/e50b8dc1ae05b682_jpg?size=1024` in the request to the server.  In my experience, the arguments used by Picasa have been 93 characters.  Some server software like [Suhosin](http://www.hardened-php.net/suhosin/index.html "Suhosin Hardened PHP") (PHP security plugin) and [modsecurity](https://modsecurity.org/ "modsecurity - Open Source Web Application Firewall") (Apache security plugin) can be configured to remove long argument names from the HTTP Request as a security measure.  Unfortunately this has the undesirable side effect of breaking this plugin.  There may be other security applications that will have a similar affect on the incoming HTTP Request.
 
 Review the server error logs for possible clues.  If Suhosin is configured, you might see an error like the following in the server error log:
 
 `ALERT - configured request variable name length limit exceeded - dropped variable 'http://localhost:51134/b921a58ec2806ab82f5399515fba226e/image/b0f008e85a4fa153_jpg?size=1024'`.
 
-Check the Suhosin setting values for `suhosin.post.max_name_length` and `suhosin.request.max_varname_length`.  A setting of at least 100 is recommended to allow the long argument names that are required by the Picasa engine.  You might need to increase it further depending on the length of the dropped argument name observed in the error log.  In my experience, the arguments used by Picasa have been 93 characters.
+Check the Suhosin setting values for `suhosin.post.max_name_length` and `suhosin.request.max_varname_length`.  A setting of at least 100 is recommended to allow the long argument names that are required by the Picasa engine.  You might need to increase it further depending on the length of the dropped argument name observed in the error log.  
 
 The Apache plugin mod_security can also be configured to restrict the length of the argument name.  The server error log message might look something like this:
 
 `ModSecurity: Warning. Operator GT matched 90 at ARGS_NAMES:http://localhost:55995/4cb54313c490d285f54664e018d50799/image/e50b8dc1ae05b682_jpg?size=1024. \[file "...modsecurity_crs_23_request_limits.conf"] \[line "23"] \[id "960209"] \[rev "2.2.1"] \[msg "Argument name too long"] \[severity "WARNING"] \[hostname "localhost"] \[uri "/picasa_album_uploader/selftest"] \[unique_id "Tl5bYgpABGUAAJ5HBIIAAAAK"]
 ModSecurity: Access denied with code 403 (phase 2). Pattern match "(.*)" at TX:960015-PROTOCOL_VIOLATION/MISSING_HEADER-REQUEST_HEADERS. \[file "...modsecurity_crs_49_inbound_blocking.conf"] \[line "26"] \[id "981176"] \[msg "Inbound Anomaly Score Exceeded (Total Score: 6, SQLi=, XSS=): Last Matched Message: Argument name too long"] \[data "Last Matched Data: 0"] \[hostname "localhost"] \[uri "/picasa_album_uploader/selftest"] \[unique_id "Tl5bYgpABGUAAJ5HBIIAAAAK"]`
 
-Depending on your configuration, the modsecurity configuration line affecting this size might look like the following.  Again, a setting of at least 100 is recommended to allow the long names used by Picasa.
+Depending on your configuration, the modsecurity configuration line affecting this size might look like the following.  A setting of at least 100 is recommended to allow the long names used by Picasa.
 
 `SecAction "phase:1,t:none,nolog,pass,setvar:tx.arg_name_length=90"`
 
 Special thanks go to [rbredow](http://wordpress.org/support/profile/rbredow "rbredow Wordpress User Profile") for the assistance in diagnosing this interaction with server software.
 
-= Why are Permalinks required? =
+= Clicking the "install" button doesn't work, the button is not installed in Picasa. =
 
-The Picasa Desktop client is very picky about the format of the URLs that it will accept during the upload process and will only accept a simple URL consisting of a single filename.  The use of the slash (/) and question-marks (?) in the URL syntax results in no files being uploaded by Picasa to the server.  In order to satisfy this Picasa requirement, permalinks must be used.
+There are several possible failures:
 
-= I changed the slug name (or other part of my WordPress URL) and my button in Picasa stopped working.  What do I do? =
-
-The Picasa button contains a URL to your WordPress installation, including the slug name used by this plugin.  If any portion of the URL changes, the button in Picasa must be replaced so that the button is sending to the correct location in your WordPress site.
-
-= What happens if I change my permalink settings? =
-
-You may freely change the format of your permalinks without affecting the ability to upload files from Picasa Desktop.  You must however keep permalinks enabled as discussed above.
+1. Browser says it does not recognize the protocol - This message means that Picasa has not registered itself with your browser as being the application to handle links starting with `picasa://`. You could try to reinstall Picasa, which should cause it to register itself with your browser.  You must also be using at least Picasa v3.0.
+1. Nothing happens, Picasa does not launch. - Make sure you are running at least Picasa version 3.0 and that Picasa can open on your computer.  This is a configuration issue between the browser and Picasa.  The browser should open Picasa when it attempts to open a URL that begins with "picasa://".  You could try re-installing Picasa.  Or check the Applications settings in your browser preferences for how the "picasa:" content type is handled.
+1. Picasa launches but does not  show the Wordpress button to configure - Picasa will send a request to your server to download the button file.  Access to the requested page must be public, no passwords or login to your server required, for Picasa to download the button data file.  There is no opportunity in this stage of processing for Picasa to supply login credentials.  As a possible workaround, you could try manually downloading the button file and placing it in the Picasa configuration directory that is discussed further below.
 
 = Why is the picasa_album_uploader.pbz file missing from the plugin contents? =
 
 The .pbz file is dynamically created by the plugin due to the customization required in the contents.  See the question below about the contents of the download for details.
+
+= How can the button file be manually downloaded? =
+The URL used to generate and download the button file is generated based on the slug name assigned to the plugin.  Assuming a simple default configuration, the URL would be:  http://your-site.com/picasa_album_uploader/picasa_album_uploader.pbz
+
+Once downloaded this file can be placed in the Picasa configuration directory and the button can be configured in Picasa the next time Picasa is launched.  The configuration directory path is detailed further below.
 
 = What's in that download (.pbz file) that needs to be installed into Picasa? =
 
@@ -111,25 +112,32 @@ The plugin also functions in a multi-site environment.
 
 In the future, a theme will be allowed to override the button graphic.  Right now, the only way to change the button is by replacing the file `picasa-album-uploader/images/wordpress-logo-blue.psd` in the plugin directory with the desired content.  This is a photoshop file and a compatible image editor must be used.  The layer containing the button image must be named "upload-button".  The image should be no larger than 40 pixels wide by 25 pixels high with 72 dpi resolution.  The color model used must be RGB with 8 bits/channel and should use a transparent background.  Full details can be found at the [Picasa Button API](http://code.google.com/apis/picasa/docs/button_api.html "Picasa Button API") reference.
 
+= Why are Permalinks required? =
+
+The Picasa Desktop client is very picky about the format of the URLs that it will accept during the upload process and will only accept a simple URL consisting of a single filename.  The use of the slash (/) and question-marks (?) in the URL syntax results in no files being uploaded by Picasa to the server.  In order to satisfy this Picasa requirement, permalinks must be used.
+
+= I changed the slug name (or other part of my WordPress URL) and my button in Picasa stopped working.  What do I do? =
+
+The Picasa button contains a URL to your WordPress installation, including the slug name used by this plugin.  If any portion of the URL changes, the button in Picasa must be replaced so that the button is sending to the correct location in your WordPress site.
+
+= What happens if I change my permalink settings? =
+
+You may freely change the format of your permalinks without affecting the ability to upload files from Picasa Desktop.  You must however keep permalinks enabled as discussed above.
+
 = Other Picasa Uploader plugins require files be placed in the `wp-admin` and/or the server root.  Does this plugin require the same? =
 
 This is a real plugin that lives in the `wp-content/plugins/` directory and does not require special files to be placed in either your server root or in the `wp-admin/` directory.  Further, the plugin supports themes to customize the appearance of the upload dialog displayed by Picasa.
 
 = How do I uninstall this plugin? =
 
-This plugin can be managed with the WordPress Plugin 
-1. Deactivate the plugin from the Admin -> Plugins Screen
-1. Delete the directory `wp-content/plugins/picasa-album-uploader` in your WordPress installation
-1. The plugin adds a single DB entry to the WordPress options table called "pau_plugin_settings".  Using phpMyAdmin or similar utility remove this entry from the table.
-
-In the future, an uninstall script will be provided to delete the options entry from the options table.
+This plugin can be uninstalled from the WordPress Plugin Admin screen.  An uninstall script has been provided that will perform the necessary Wordpress cleanup.
 
 = How do I remove the button from Picasa? =
 
 1. In Picasa Select "Tools -> Configure Buttons..."
 1. In the "Current Buttons" section of the Picasa Dialog, select the "WordPress" button.
 1. Click the "Remove" button.
-1. To completely remove the button from Picasa, remove the associated `picasa_album_uploader.pbz` file from the Picasa configuration.
+1. To completely remove the button from Picasa, remove the associated `picasa_album_uploader.pbz` file from the Picasa configuration directory on your computer.
 
 = Where are the Picasa buttons stored on my computer? =
 
@@ -139,14 +147,6 @@ Windows:  C:\Program Files\Google\Picasa3\buttons
 XP:  C:\Documents and Settings\Username\Local Settings\Application Data\Google\Picasa3\buttons
 Vista:  C:\Users\Username\AppData\Local\Google\Picasa3\buttons
 OSX: ~/Library/Application Support/Google/Picasa3/buttons
-
-= When I click the "install" button, my browser says it does not recognize the protocol. =
-
-This message means that Picasa has not registered itself with your browser as being the application to handle links starting with `picasa://`. You could try to reinstall Picasa, which should cause it to register itself with your browser.  You must also be using at least Picasa v3.0.
-
-= When I click the "install" button, Picasa does not launch. =
-
-Make sure you are running at least Picasa version 3.0 and that Picasa can open on your computer.
 
 == Screenshots ==
 
