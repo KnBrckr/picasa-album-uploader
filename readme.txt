@@ -154,6 +154,10 @@ OSX: ~/Library/Application Support/Google/Picasa3/buttons
 
 == Changelog ==
 
+= 0.7.1 =
+
+* Add debug logging related to creation of minibrowser page
+
 = 0.7 =
 
 * Add selftest to confirm plugin is able to receive long POST variables

@@ -3,7 +3,7 @@
 Plugin Name: Picasa Album Uploader
 Plugin URI: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Description: Easily upload media from Google Picasa Desktop into WordPress.  Navigate to <a href="options-media.php">Settings &rarr; Media</a> to configure.
-Version: 0.7
+Version: 0.7.1
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/blog/
 Text Domain: picasa-album-uploader
@@ -495,6 +495,8 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				// Add the upload form to content
 				$content .= self::build_upload_form();				
 			} else {
+				$this->pau_options->debug_log("Permission violation - user not allowed to upload");
+				
 				// TODO Add a logout capability
 				$content .= '<div class="pau-privs-error">';
 				$content .= '<p class="error">' . __('Sorry, you do not have permission to upload files.', 'picasa-album-uploader') . '</p>';
@@ -634,8 +636,17 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			wp_enqueue_script('picasa-album-uploader-minibrowser');
 			wp_enqueue_style('picasa-album-uploader-minibrowser');
 			
+			if (isset($_POST['rss'])) {
+				$this->pau_options->debug_log('Using $_POST["rss"]');
+				$rss_data = $_POST['rss'];				
+			}
+			elseif (isset($_POST['RSS'])) {
+				$this->pau_options->debug_log('Using $_POST["RSS"]');
+				$rss_data = $_POST['RSS'];				
+			}
+			
 			$content = '<div id="pau-upload-form">';
-			if (isset($_POST['rss']) && $_POST['rss']) {
+			if (isset($rss_data) && $rss_data) {
 							// **************************************************************************************************
 							// MUST be simple page name target in the POST action for Picasa to process the input URLs correctly.
 							// Can't use:
@@ -657,7 +668,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 							$xh->setStartTag("ITEM");
 							$xh->setVarsDefault();
 							$xh->setXmlParser();
-							$xh->setXmlData(stripslashes($_POST['rss']));
+							$xh->setXmlData(stripslashes($rss_data));
 							$pData = $xh->xmlParse();
 
 							// Start div used to display images
@@ -699,7 +710,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 							$content .= '<input type="submit" value="' . __('Upload', 'picasa-album-uploader') . '">&nbsp;';
 							$content .= '</div></form>';
 			} else {
-				$this->pau_options->error_log("Empty RSS feed from Picasa; unable to build minibrowser form.");
+				$this->pau_options->error_log("Empty RSS feed from Picasa; unable to build minibrowser form.  Dumping POST payload:");
+				$this->pau_options->debug_log("_POST: " . print_r($_POST,true));
+				
 			 	$content .= '<p class="error">' . __('Sorry, no images were received from Picasa.', 'picasa-album-uploader') . '</p>';
 			}
 			$content .= '</div>';
