@@ -265,10 +265,10 @@ class picasa_album_uploader_options
 	 * Perform HTTP request to self test page including a long request variable name
 	 * This test confirms that the WP install is capable of receiving the long argument names that are sent by Picasa.
 	 *
-	 * @access private
+	 * @access public
 	 * @return false if able to retrieve long variable name, string describing error otherwise
 	 **/
-	private function test_long_var()
+	function test_long_var()
 	{
 		if (!ini_get('allow_url_fopen')) {
 			$result = 'Unable to complete HTTP REQUEST test; allow_url_fopen in php.ini is false.';
