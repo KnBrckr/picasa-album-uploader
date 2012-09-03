@@ -82,7 +82,7 @@ global $pau;
 global $pau_errors;
 global $pau_versions;
 
-$pau_versions[] = '$Id: picasa-album-uploader.php 432867 2011-09-03 12:43:21Z draca $'; // SVN Version string
+$pau_versions[] = '$Id: picasa-album-uploader.php 534002 2012-04-20 12:34:47Z draca $'; // SVN Version string
 	
 // =================================
 // = Define the picasa album class =
