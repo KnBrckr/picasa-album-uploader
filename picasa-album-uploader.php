@@ -3,7 +3,7 @@
 Plugin Name: Picasa Album Uploader
 Plugin URI: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Description: Easily upload media from Google Picasa Desktop into WordPress.  Navigate to <a href="options-media.php">Settings &rarr; Media</a> to configure.
-Version: 0.7.1
+Version: 0.7.2
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/blog/
 Text Domain: picasa-album-uploader
@@ -134,6 +134,21 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				$this->pau_options->debug_log('Permalinks not enabled - Plugin filter is not setup.');
 			}
 			
+			// Javascript and Styles
+			add_action('wp_enqueue_scripts', array(&$this, 'enqueue_scripts'));
+			
+			// i18n support
+			add_action('init', array(&$this, 'load_textdomain'));
+		}
+		
+		/**
+		 * Enqueue Scripts and Styles
+		 *
+		 * @access public
+		 * @return void
+		 **/
+		function enqueue_scripts()
+		{
 			// Register Plugin CSS
 			wp_register_style('picasa-album-uploader-style', PAU_PLUGIN_URL . '/picasa-album-uploader.css');
 			wp_enqueue_style('picasa-album-uploader-style');
@@ -141,10 +156,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			wp_register_style('picasa-album-uploader-minibrowser', PAU_PLUGIN_URL . '/minibrowser.css');
 
 			// Register Plugin javascript
-			wp_register_script('picasa-album-uploader-minibrowser', PAU_PLUGIN_URL . '/minibrowser.js', array('jquery'));	
-			
-			// i18n support
-			add_action('init', array(&$this, 'load_textdomain'));
+			wp_register_script('picasa-album-uploader-minibrowser', PAU_PLUGIN_URL . '/minibrowser.js', array('jquery'));				
 		}
 		
 		/**
