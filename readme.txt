@@ -154,6 +154,9 @@ OSX: ~/Library/Application Support/Google/Picasa3/buttons
 
 == Changelog ==
 
+= 0.7.3 =
+* fix: PHP split() deprecated, change to explode()
+
 = 0.7.2 =
 * fix: Use wp_enqueue_scripts action to add javascript and styles
 
