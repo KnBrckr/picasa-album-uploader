@@ -372,7 +372,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * @return boolean True if request is to be handled by the plugin
 		 */
 		private function parse_request( $query ){
-			$tokens = split( '/', $query );
+			$tokens = explode( '/', $query );
 			
 			$this->pau_options->debug_log("Parsing request '$query'");
 
