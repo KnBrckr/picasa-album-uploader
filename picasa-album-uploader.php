@@ -288,6 +288,8 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * handled by the plugin via template redirect results in a complete page or action with no
 		 * further action needed by WordPress core.
 		 *
+		 * TODO Is template_redirect the appropriate usage here?  Should template_lookup be used instead?
+		 *
 		 * @access public
 		 * @param string $requested_url - not used
 		 * @param boolean $do_redirect - not used
