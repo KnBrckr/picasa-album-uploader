@@ -279,7 +279,8 @@ class picasa_album_uploader_options
 			$context = stream_context_create(array('http' => array(
 				'method' => 'GET',
 				'header' => "Accept-language: en\r\n" .
-					""
+					"Accept: text/html\r\n" .
+					"User-Agent: PHP\r\n"
 			)));
 			$contents = file_get_contents($url, $false, $context);
 			if ($contents) {
