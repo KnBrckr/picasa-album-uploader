@@ -275,7 +275,13 @@ class picasa_album_uploader_options
 		} else {
 			$baseurl = home_url() . '/' . $this->slug . '/selftest';
 			$url = $baseurl . '?' . $this->long_var_name . '=' . $this->long_var_name;
-			$contents = file_get_contents($url);
+			
+			$context = stream_context_create(array('http' => array(
+				'method' => 'GET',
+				'header' => "Accept-language: en\r\n" .
+					""
+			)));
+			$contents = file_get_contents($url, $false, $context);
 			if ($contents) {
 				$result = $false;
 			} else {
