@@ -2,9 +2,9 @@
 Contributors: draca
 Donate link: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Tags: picasa, upload, images, albums, media
-Requires at least: 3.1
-Tested up to: 3.2.1
-Stable tag: 0.7.2
+Requires at least: 4.0
+Tested up to: 4.0
+Stable tag: 0.8
 
 Easily upload media from Google Picasa Desktop into WordPress.
 
@@ -82,12 +82,12 @@ There are several possible failures:
 1. Nothing happens, Picasa does not launch. - Make sure you are running at least Picasa version 3.0 and that Picasa can open on your computer.  This is a configuration issue between the browser and Picasa.  The browser should open Picasa when it attempts to open a URL that begins with "picasa://".  You could try re-installing Picasa.  Or check the Applications settings in your browser preferences for how the "picasa:" content type is handled.
 1. Picasa launches but does not  show the Wordpress button to configure - Picasa will send a request to your server to download the button file.  Access to the requested page must be public, no passwords or login to your server required, for Picasa to download the button data file.  There is no opportunity in this stage of processing for Picasa to supply login credentials.  As a possible workaround, you could try manually downloading the button file and placing it in the Picasa configuration directory that is discussed further below.
 
-= Why is the picasa_album_uploader.pbz file missing from the plugin contents? =
+= Why is the site-name.pbz file missing from the plugin contents? =
 
-The .pbz file is dynamically created by the plugin due to the customization required in the contents.  See the question below about the contents of the download for details.
+The .pbz file is dynamically created by the plugin due to the customization required in the contents.  See the question below about the contents of the download for details.  The name of the file is determined by the Site Name that is provided in Settings->General.
 
 = How can the button file be manually downloaded? =
-The URL used to generate and download the button file is generated based on the slug name assigned to the plugin.  Assuming a simple default configuration, the URL would be:  http://your-site.com/picasa_album_uploader/picasa_album_uploader.pbz
+The URL used to generate and download the button file is generated based on the slug name assigned to the plugin.  Assuming a simple default configuration, the URL would be:  http://your-site.com/picasa_album_uploader/your-site-name.pbz
 
 Once downloaded this file can be placed in the Picasa configuration directory and the button can be configured in Picasa the next time Picasa is launched.  The configuration directory path is detailed further below.
 
@@ -137,7 +137,7 @@ This plugin can be uninstalled from the WordPress Plugin Admin screen.  An unins
 1. In Picasa Select "Tools -> Configure Buttons..."
 1. In the "Current Buttons" section of the Picasa Dialog, select the "WordPress" button.
 1. Click the "Remove" button.
-1. To completely remove the button from Picasa, remove the associated `picasa_album_uploader.pbz` file from the Picasa configuration directory on your computer.
+1. To completely remove the button from Picasa, remove the associated `your-site-name.pbz` file from the Picasa configuration directory on your computer.
 
 = Where are the Picasa buttons stored on my computer? =
 
@@ -153,6 +153,10 @@ OSX: ~/Library/Application Support/Google/Picasa3/buttons
 1. Picasa Album Uploader Options in Media Settings Admin Screen.
 
 == Changelog ==
+
+= 0.8 =
+
+* Change name of the pbz file to be based on the site name (helpful when multiple sites are managed)
 
 = 0.7.3 =
 * fix: PHP split() deprecated, change to explode()
