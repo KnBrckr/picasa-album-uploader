@@ -20,6 +20,8 @@
  * along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+  // FIXME Trim down header and footer to avoid conflicts and errors with loaded themes
+
   // Load header-picasa_album_uploader.php if available
 	get_header( 'picasa_album_uploader' );
 ?>
@@ -42,6 +44,7 @@
 	<?php endif; ?>
 </div> <!-- End Content -->
 <?php
+
 	// Load footer-picasa_album_uploader.php if available
 	get_footer( 'picasa_album_uploader' );
 ?>

@@ -93,7 +93,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		/**
 		 * Minimum version of WordPress required by plugin
 		 **/
-		const wp_version_required = '3.1';
+		const wp_version_required = '4.0';
 
 		/**
 		 * Minimum version of PHP required by the plugin
@@ -456,6 +456,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 
 			$content = '<div class=pau-login-error>' . $error . '</div>';			
 				
+			// FIXME Login form is not playing nice with new Jetpack security features
 			$form = wp_login_form(array(
 				'echo' => false,
 				'form_id' => 'pau-login-form',
