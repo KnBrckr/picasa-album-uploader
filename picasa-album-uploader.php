@@ -5,7 +5,7 @@ Plugin URI: http://pumastudios.com/software/picasa-album-uploader-wordpress-plug
 Description: Easily upload media from Google Picasa Desktop into WordPress.  Navigate to <a href="options-media.php">Settings &rarr; Media</a> to configure.
 Version: 0.8
 Author: Kenneth J. Brucker
-Author URI: http://pumastudios.com/blog/
+Author URI: http://pumastudios.com/
 Text Domain: picasa-album-uploader
 
 Copyright: 2013,2015 Kenneth J. Brucker (email: ken@pumastudios.com)
@@ -288,7 +288,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * handled by the plugin via template redirect results in a complete page or action with no
 		 * further action needed by WordPress core.
 		 *
-		 * TODO Is template_redirect the appropriate usage here?  Should template_lookup be used instead?
+		 * TODO Is template_redirect the appropriate usage here?  Should template_include be used instead?
 		 *
 		 * @access public
 		 * @param string $requested_url - not used
