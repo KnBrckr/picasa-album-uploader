@@ -1,5 +1,5 @@
 /*
-	Copyright: 2011 Kenneth J. Brucker (email: ken@pumastudios.com)
+	Copyright: 2011,2015 Kenneth J. Brucker (email: ken@pumastudios.com)
 
 	This file is part of Picasa Album Uploader, a plugin for Wordpress.
 
@@ -13,12 +13,6 @@
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
 */
-
-/* Hide the post meta and utility sections for plugin generated pages */
-.post-picasa-album-uploader .entry-meta,
-.post-picasa-album-uploader .entry-utility {
-	display: none;
-}
 
 /* =========================== */
 /* = Admin Screen formatting = */
@@ -36,17 +30,4 @@
 
 .pau-debug-log dd {
 	padding-left: 3em ;
-}
-
-/* =========================== */
-/* = Plugin Interoperability = */
-/* =========================== */
-
-/**
- * Plugin:  add-to-any
- *
- * Hide the section added by add-to-any in a page entry
- */
-.post-picasa-album-uploader .addtoany_share_save_container {
-	display: none;
 }

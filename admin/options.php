@@ -22,8 +22,6 @@
  * along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-$pau_versions[] = '$Id: options.php 534002 2012-04-20 12:34:47Z draca $'; // SVN Version string
-
 class picasa_album_uploader_options
 {
 	/**
@@ -66,6 +64,7 @@ class picasa_album_uploader_options
 		
 		// Init value for error log
 		$this->debug_log_enabled = isset($options['debug_log_enabled']) ? $options['debug_log_enabled'] : 0;
+		$this->log_to_errlog = isset($options['log_to_errlog']) ? $options['log_to_errlog'] : 0;
 		$this->debug_log = isset($options['debug_log']) ? $options['debug_log'] : array();
 	}
 	
@@ -112,31 +111,47 @@ class picasa_album_uploader_options
 	{
 		// Add settings section to the 'media' Settings page
 		add_settings_section( 
-				'pau_settings_section', 
-				'Picasa Album Uploader Settings', 
-				array( &$this, 'settings_section_html'), 
-				'media' );
+			'pau_settings_section', 
+			'Picasa Album Uploader Settings', 
+			array( $this, 'settings_section_html'), 
+			'media' 
+		);
 		
 		// Add slug name field to the plugin admin settings section
 		add_settings_field( 
-				'pau_plugin_settings[slug]', 
-				'Slug', 
-				array( &$this, 'slug_html' ), 
-				'media', 
-				'pau_settings_section' );
+			'pau_plugin_settings[slug]', 
+			'Slug', 
+			array( $this, 'slug_html' ), 
+			'media', 
+			'pau_settings_section' 
+		);
 		
 		// Add Plugin Error Logging
 		add_settings_field( 
-				'pau_plugin_settings[debug_log_enabled]', 
-				'Enable Debug Log', 
-				array( &$this, 'debug_log_enabled_html'), 
-				'media', 
-				'pau_settings_section' );
+			'pau_plugin_settings[debug_log_enabled]', 
+			'Enable Debug', 
+			array( $this, 'debug_log_enabled_html'), 
+			'media', 
+			'pau_settings_section' 
+		);
+
+		// Send log messages to errlog or plugin log? 
+		add_settings_field( 
+			'pau_plugin_settings[log_to_errlog]', 
+			'Send log messages to errlog', 
+			array( $this, 'log_to_errlog_html'), 
+			'media', 
+			'pau_settings_section' 
+		);
+
+		// Section for displaying debug log messages
 		add_settings_field(
-				'pau_plugin_settings[debug_log]',
-				array( &$this, 'debug_log_html'),
-				'media',
-				'pau_settings_section' );
+			'pau_plugin_settings[debug_log]',
+			'System Config',
+			array( $this, 'debug_log_html'),
+			'media',
+			'pau_settings_section' 
+		);
 		
 		// Register the slug name setting;
 		register_setting( 'media', 'pau_plugin_settings', array (&$this, 'sanitize_settings') );
@@ -282,9 +297,9 @@ class picasa_album_uploader_options
 					"Accept: text/html\r\n" .
 					"User-Agent: PHP\r\n"
 			)));
-			$contents = file_get_contents($url, $false, $context);
+			$contents = file_get_contents($url, false, $context);
 			if ($contents) {
-				$result = $false;
+				$result = false;
 			} else {
 				$status = preg_grep("/^HTTP\/1.[01] [^3]/", $http_response_header);
 				if (count($status) > 0) {
@@ -308,44 +323,58 @@ class picasa_album_uploader_options
 	{ 
 		$checked = $this->debug_log_enabled ? "checked" : "" ;
 		echo '<input type="checkbox" name="pau_plugin_settings[debug_log_enabled]" value="1" ' . $checked . '>';
-		_e('Enable Plugin Debug Logging. When enabled, log will display below.', 'picasa-album-uploader');
-		if ( $this-> debug_log_enabled ) {
-			echo $this->debug_report();
-		}
+		_e('Enable Plugin Debug Logging.', 'picasa-album-uploader');
+	}
+	
+	/**
+	 * WP options callback to emit HTML to create form field used to enable/disable sending debug messages to errlog
+	 *
+	 * @access public
+	 * @return void
+	 **/
+	function log_to_errlog_html()
+	{ 
+		$checked = $this->log_to_errlog ? "checked" : "" ;
+		echo '<input type="checkbox" name="pau_plugin_settings[log_to_errlog]" value="1" ' . $checked . '>';
+		_e('Send Debug output to errlog vs. displaying below', 'picasa-album-uploader');
 	}
 	
 	/**
 	 * Generate data for debug and bug reporting
 	 *
-	 * @access private
+	 * @access public
 	 * @return string HTML to display debug messages
 	 */
-	private function debug_report()
+	function debug_log_html()
 	{
-		global $pau_versions;
+		global $wpdb;
 		
+		$plugin_data = get_plugin_data(PAU_PLUGIN_DIR . '/' . PAU_PLUGIN_NAME . '.php');
 		$content = '<dl class=pau-debug-log>';
 		
-		$content .= '<dt>Plugin Versions: ';
-		foreach ($pau_versions as $line) {
-			$content .= '<dd>' . esc_attr($line);
-		}
+		$content .= '<dt>Plugin Version:<dd>' . $plugin_data['Version'];
+
 		// Add some environment data
 		$content .= '<dt>PHP Version:<dd>' . phpversion();
-		$content .= '<dt>MySQL Server Version:<dd>' . mysql_get_server_info();
+		$content .= '<dt>MySQL Server Version:<dd>' . $wpdb->db_version();
 		
 		$content .= '<dt>Plugin Slug: <dd>' . $this->slug;
 		$content .= '<dt>Permalink Structure: <dd>' . get_option('permalink_structure');
 		// Filter the hostname of running system from debug log
 		$content .= '<dt>Sample Plugin URL: <dd>' . esc_attr(preg_replace('/:\/\/.+?\//','://*masked-host*/', $this->build_url('sample')));
-		$content .= '<dt>Self Test: <dd>' . self::selftest();
-		$content .= '<dt>Log:';
-		foreach ($this->debug_log as $line) {
-			$content .= '<dd>' . esc_attr($line);
+		//$content .= '<dt>Self Test: <dd>' . self::selftest();
+		
+		// Add debug log content if not logging to errlog
+		if (! $this->log_to_errlog) {
+			$content .= '<dt>Log:';
+			foreach ($this->debug_log as $line) {
+				$content .= '<dd>' . esc_attr($line);
+			}			
 		}
 		$content .= '</dl>';
 		
-		return $content;
+		echo $content;
+		return;
 	}
 	
 	/**
@@ -356,8 +385,13 @@ class picasa_album_uploader_options
 	 **/
 	function debug_log($msg)
 	{
-		if ( $this->debug_log_enabled )
-			array_push($this->debug_log, date("Y-m-d H:i:s") . " " . $msg);
+		if ( $this->debug_log_enabled ) {
+			if ($this->log_to_errlog) {
+				error_log("PAU: " . $msg);
+			} else {
+				array_push($this->debug_log, date("Y-m-d H:i:s") . " " . $msg);							
+			}
+		}
 	}
 	
 	/**
@@ -369,7 +403,8 @@ class picasa_album_uploader_options
 	 **/
 	function save_debug_log()
 	{
-		if ( $this->debug_log_enabled ) {
+		// Only need to save the log if messages are not being sent to errlog
+		if ($this->debug_log_enabled && ! $this->log_to_errlog ) {
 			$options = get_option('pau_plugin_settings');
 			$options['debug_log'] = $this->debug_log;
 			update_option('pau_plugin_settings', $options);

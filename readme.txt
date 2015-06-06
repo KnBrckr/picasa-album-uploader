@@ -27,7 +27,6 @@ This plugin requires PHP5.2
 1.  Activate the plugin in Admin -> Plugins
 1.  Configure the plugin options in Admin -> Settings -> Media
 1.  Use the "Install Image Upload Button in Picasa Desktop" Link in Admin -> Settings -> Media to import the upload button into Picasa
-1.  If desired, create the files header-picasa_album_uploader.php and footer-picasa_album_uploader.php in the top level of your themes directory to provide customized header and footer in the dialog displayed by Picasa.
 
 = Usage Hints =
 
@@ -35,7 +34,7 @@ Once installed in Picasa Desktop, select photos in Picasa and press the WordPres
 
 To display the button load link in a post or page, insert the shortcode `[picasa_album_uploader_button]` at the desired location.
 
-A log of plugin activity useful to debug failures can be obtained by selecting the plugin option 'Enable Debug Log' and saving the configuration change.  The logging might impact performance of your website so should only be enabled when debugging is required.
+A log of plugin activity useful to debug failures can be obtained by selecting the plugin option 'Enable Debug Log' and saving the configuration change.  The logging might impact performance of your website so should only be enabled when debugging is required. The errors can optionally be sent to your server error logs.
 
 = Reporting Problems =
 
@@ -110,7 +109,7 @@ The plugin also functions in a multi-site environment.
 
 = How do I change the button icon? =
 
-In the future, a theme will be allowed to override the button graphic.  Right now, the only way to change the button is by replacing the file `picasa-album-uploader/images/wordpress-logo-blue.psd` in the plugin directory with the desired content.  This is a photoshop file and a compatible image editor must be used.  The layer containing the button image must be named "upload-button".  The image should be no larger than 40 pixels wide by 25 pixels high with 72 dpi resolution.  The color model used must be RGB with 8 bits/channel and should use a transparent background.  Full details can be found at the [Picasa Button API](http://code.google.com/apis/picasa/docs/button_api.html "Picasa Button API") reference.
+In the future, a setting will be allowed to override the button graphic.  Right now, the only way to change the button is by replacing the file `picasa-album-uploader/images/wordpress-logo-blue.psd` in the plugin directory with the desired content.  This is a photoshop file and a compatible image editor must be used.  The layer containing the button image must be named "upload-button".  The image should be no larger than 40 pixels wide by 25 pixels high with 72 dpi resolution.  The color model used must be RGB with 8 bits/channel and should use a transparent background.  Full details can be found at the [Picasa Button API](http://code.google.com/apis/picasa/docs/button_api.html "Picasa Button API") reference.
 
 = Why are Permalinks required? =
 
@@ -126,7 +125,7 @@ You may freely change the format of your permalinks without affecting the abilit
 
 = Other Picasa Uploader plugins require files be placed in the `wp-admin` and/or the server root.  Does this plugin require the same? =
 
-This is a real plugin that lives in the `wp-content/plugins/` directory and does not require special files to be placed in either your server root or in the `wp-admin/` directory.  Further, the plugin supports themes to customize the appearance of the upload dialog displayed by Picasa.
+This is a real plugin that lives in the `wp-content/plugins/` directory and does not require special files to be placed in either your server root or in the `wp-admin/` directory.
 
 = How do I uninstall this plugin? =
 
@@ -153,6 +152,13 @@ OSX: ~/Library/Application Support/Google/Picasa3/buttons
 1. Picasa Album Uploader Options in Media Settings Admin Screen.
 
 == Changelog ==
+
+= 0.9 =
+
+* Modify login handling to use the default WP login screen
+* Add ability to send debug logging to syslog
+* General cleanup of process flow, redirect to media library on completion of upload instead of virtual result page.
+* Theme formatting of the upload page removed.  It added more complexity for no value.
 
 = 0.8 =
 
@@ -226,6 +232,13 @@ OSX: ~/Library/Application Support/Google/Picasa3/buttons
 
 == Upgrade Notice ==
 
+= 0.9 = 
+
+* Supports WordPress 4.2.2!
+* Reworked overall flow and set of pages used to handle processing.
+* Modify login handling to use the default WP login screen
+* Theme formatting of the upload page removed.  It added more complexity for no value.
+
 = 0.8 =
 
 * Change name of the pbz file to be based on the site name (helpful when multiple sites are managed)
@@ -265,17 +278,3 @@ OSX: ~/Library/Application Support/Google/Picasa3/buttons
 = 0.3 =
 
 * The first Beta Release!
-
-== Theme Formatting ==
-
-When formatting the upload confirmation dialog displayed by Picasa, it is best to avoid links that will navigate away from the upload confirmation screen.  The plugin will handle redirecting to the WordPress login screen to validate the user as necessary.
-
-There are two ways for a theme to control the output of the upload dialog displayed by Picasa Desktop.
-
-1.  The variable `$wp_query-> is_picasa_album_slug` will be set if the page is being handled by the plugin.
-2.  Three templates files can be used to configure the page:  `page-picasa_album_uploader.php`, `header-picasa_album_uploader.php`, `footer-picasa_album_uploader.php`
-
-* `page-picasa_album_uploader.php` –
-The file `picasa_album_uploader/templates/page-picasa_album_uploader.php`, supplied by the plugin, is the default page template used to display the upload confirmation dialog.  This file can be copied to the active template and modified as needed.
-* `header-picasa_album_uploader.php` and `footer-picasa_album_uploader.php` –
-If they exist in the active theme, the plugin will use the template files `header-picasa_album_uploader.php` and `footer-picasa_album_uploader.php` for the header and footer respectively.  If they do not exist, the `header.php` and `footer.php` files from the active theme will be used.

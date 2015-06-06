@@ -1,173 +1,108 @@
-# Copyright (C) 2010 Picasa Album Uploader
+# Copyright (C) 2015 Picasa Album Uploader
 # This file is distributed under the same license as the Picasa Album Uploader package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Picasa Album Uploader 0.7\n"
-"Report-Msgid-Bugs-To: http://wordpress.org/tag/picasa-album-uploader\n"
-"POT-Creation-Date: 2011-08-18 14:54:23+00:00\n"
+"Project-Id-Version: Picasa Album Uploader 0.9\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/picasa-album-"
+"uploader\n"
+"POT-Creation-Date: 2015-06-06 14:37:52+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2010-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2015-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
-#: admin/options.php:155
+#: admin/options.php:170
 msgid "%1$s requires the use of %2$s"
 msgstr ""
 
-#: admin/options.php:161
+#: admin/options.php:176
 msgid ""
 "%s logging is enabled.  If left enabled, this can affect database "
 "performance."
 msgstr ""
 
-#: admin/options.php:168
-msgid ""
-"%s detected error receiving long argument names in HTTP requests and will "
-"likely be unable to receive files from Picasa.  "
-msgstr ""
-
-#: admin/options.php:170
-msgid ""
-"Please check your server security configuration to confirm it will allow "
-"argument names of at least 100 characters."
-msgstr ""
-
-#: admin/options.php:172
-msgid "More details are available in the %s"
-msgstr ""
-
-#: admin/options.php:172 picasa-album-uploader.php:247
-msgid "FAQ"
-msgstr ""
-
-#: admin/options.php:212
+#: admin/options.php:216
 msgid ""
 "To use Picasa Album Uploader, install the Button in Picasa Desktop using "
 "this automated install link:"
 msgstr ""
 
-#: admin/options.php:218
+#: admin/options.php:222
 msgid ""
 "To use Picasa Album Uploader, Permalinks must be enabled due to limitations "
 "in the Desktop Picasa application."
 msgstr ""
 
-#: admin/options.php:233
+#: admin/options.php:237
 msgid ""
 "Set the slug used by the plugin.  Only alphanumeric, dash (-) and underscore "
 "(_) characters are allowed.  White space will be converted to dash, illegal "
 "characters will be removed."
 msgstr ""
 
-#: admin/options.php:235
+#: admin/options.php:239
 msgid ""
 "When the slug name is changed, a new button must be installed in Picasa to "
 "match the new setting."
 msgstr ""
 
-#: admin/options.php:300
-msgid "Enable Plugin Debug Logging. When enabled, log will display below."
+#: admin/options.php:326
+msgid "Enable Plugin Debug Logging."
 msgstr ""
 
-#: picasa-album-uploader.php:155
+#: admin/options.php:339
+msgid "Send Debug output to syslog vs. displaying below"
+msgstr ""
+
+#: picasa-album-uploader.php:266
 msgid "Download Picasa Button and Install in Picasa Desktop"
 msgstr ""
 
-#: picasa-album-uploader.php:156
+#: picasa-album-uploader.php:267
 msgid "Install Image Upload Button in Picasa Desktop"
 msgstr ""
 
-#: picasa-album-uploader.php:232
-msgid "%d image uploaded successfully."
-msgid_plural "%d images uploaded successfully."
-msgstr[0] ""
-msgstr[1] ""
-
-#: picasa-album-uploader.php:234
-msgid "%d error detected."
-msgid_plural "%d errors detected."
-msgstr[0] ""
-msgstr[1] ""
-
-#: picasa-album-uploader.php:235
-msgid "See the server error log for details."
-msgstr ""
-
-#: picasa-album-uploader.php:241
-msgid ""
-"Error:  No files received in upload request.  Related errors might appear in "
-"the server error log."
-msgstr ""
-
-#: picasa-album-uploader.php:245
-msgid ""
-"Your server might be configured to restrict the length of request argument "
-"names."
-msgstr ""
-
-#: picasa-album-uploader.php:246
-msgid "Possible modules causing this include Suhosin and mod_security."
-msgstr ""
-
-#: picasa-album-uploader.php:247
-msgid "More details are available in the Picasa Album Uploader %s"
-msgstr ""
-
-#: picasa-album-uploader.php:256
-msgid "Sorry, You do not have permission to upload files to this site."
-msgstr ""
-
-#: picasa-album-uploader.php:261
-msgid "Unknown result code %d reported."
-msgstr ""
-
-#: picasa-album-uploader.php:439
-msgid "Invalid username and password combination, please try again"
-msgstr ""
-
-#: picasa-album-uploader.php:505
+#: picasa-album-uploader.php:327
 msgid "Sorry, you do not have permission to upload files."
 msgstr ""
 
-#: picasa-album-uploader.php:668
-msgid "Selected images"
-msgstr ""
-
-#: picasa-album-uploader.php:685
-msgid "Title"
-msgstr ""
-
-#: picasa-album-uploader.php:686
-msgid "Caption"
-msgstr ""
-
-#: picasa-album-uploader.php:687
-msgid "Description"
-msgstr ""
-
-#: picasa-album-uploader.php:692
-msgid "Select your upload image size:"
-msgstr ""
-
-#: picasa-album-uploader.php:699
+#: picasa-album-uploader.php:486 picasa-album-uploader.php:528
 msgid "Upload"
 msgstr ""
 
-#: picasa-album-uploader.php:704
-msgid "Sorry, no images were received from Picasa."
+#: picasa-album-uploader.php:492
+msgid "Select your upload image size:"
 msgstr ""
 
-#. #-#-#-#-#  picasa-album-uploader.pot (Picasa Album Uploader 0.7)  #-#-#-#-#
-#. Plugin Name of the plugin/theme
-#: picasa-album-uploader.php:727
-msgid "Picasa Album Uploader"
+#: picasa-album-uploader.php:500
+msgid "Selected images"
+msgstr ""
+
+#: picasa-album-uploader.php:518
+msgid "Title"
+msgstr ""
+
+#: picasa-album-uploader.php:519
+msgid "Caption"
+msgstr ""
+
+#: picasa-album-uploader.php:520
+msgid "Description"
+msgstr ""
+
+#: picasa-album-uploader.php:536
+msgid "Sorry, no images were received from Picasa."
 msgstr ""
 
 #: uninstall.php:41
 msgid ""
 "You do not have authorization to run the uninstall script for this plugin."
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "Picasa Album Uploader"
 msgstr ""
 
 #. Plugin URI of the plugin/theme
@@ -185,5 +120,5 @@ msgid "Kenneth J. Brucker"
 msgstr ""
 
 #. Author URI of the plugin/theme
-msgid "http://pumastudios.com/blog/"
+msgid "http://pumastudios.com/"
 msgstr ""
