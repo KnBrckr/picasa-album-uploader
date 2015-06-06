@@ -151,10 +151,10 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			}
 			
 			// Javascript and Styles
-			add_action('wp_enqueue_scripts', array(&$this, 'enqueue_scripts'));
+			add_action('admin_enqueue_scripts', array($this, 'admin_enqueue_scripts'));
 			
 			// i18n support
-			add_action('init', array(&$this, 'load_textdomain'));
+			add_action('init', array($this, 'load_textdomain'));
 		}
 		
 		/**
@@ -244,13 +244,11 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * @access public
 		 * @return void
 		 **/
-		function enqueue_scripts()
+		function admin_enqueue_scripts()
 		{
-			if (is_admin()) {
-				// Register Plugin CSS
-				wp_register_style('picasa-album-uploader-style', PAU_PLUGIN_URL . '/picasa-album-uploader.css');
-				wp_enqueue_style('picasa-album-uploader-style');				
-			}
+			// Register Plugin CSS
+			wp_register_style('picasa-album-uploader-style', PAU_PLUGIN_URL . '/picasa-album-uploader.css');
+			wp_enqueue_style('picasa-album-uploader-style');
 		}
 		
 		/**

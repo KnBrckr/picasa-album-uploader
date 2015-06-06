@@ -362,14 +362,19 @@ class picasa_album_uploader_options
 		$content .= '<dt>Permalink Structure: <dd>' . get_option('permalink_structure');
 		// Filter the hostname of running system from debug log
 		$content .= '<dt>Sample Plugin URL: <dd>' . esc_attr(preg_replace('/:\/\/.+?\//','://*masked-host*/', $this->build_url('sample')));
-		//$content .= '<dt>Self Test: <dd>' . self::selftest();
+
+		if ($this->debug_log_enabled) {
+			// If debug enabled then include a Self Test
+			$content .= '<dt>Self Test: <dd>' . self::selftest();
 		
-		// Add debug log content if not logging to errlog
-		if (! $this->log_to_errlog) {
-			$content .= '<dt>Log:';
-			foreach ($this->debug_log as $line) {
-				$content .= '<dd>' . esc_attr($line);
-			}			
+			// Add debug log content if not logging to errlog
+			if (! $this->log_to_errlog) {
+				$content .= '<dt>Log:';
+				foreach ($this->debug_log as $line) {
+					$content .= '<dd>' . esc_attr($line);
+				}			
+			}
+			
 		}
 		$content .= '</dl>';
 		
