@@ -52,6 +52,13 @@ Process flow:
  6. Server processes uploaded images and redirects results to 'result' page.
 */
 
+// Protect from direct execution
+if (!defined('WP_PLUGIN_DIR')) {
+	header('Status: 403 Forbidden');
+  header('HTTP/1.1 403 Forbidden');
+  exit();
+}
+
 global $pau;
 global $pau_errors;
 

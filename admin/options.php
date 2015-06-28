@@ -22,6 +22,13 @@
  * along with Picasa Album Uploader.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+// Protect from direct execution
+if (!defined('WP_PLUGIN_DIR')) {
+	header('Status: 403 Forbidden');
+  header('HTTP/1.1 403 Forbidden');
+  exit();
+}
+
 class picasa_album_uploader_options
 {
 	/**
