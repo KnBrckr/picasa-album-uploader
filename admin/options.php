@@ -355,10 +355,11 @@ class picasa_album_uploader_options
 	function debug_log_html()
 	{
 		global $wpdb;
+		global $wp_version;
 		
 		$plugin_data = get_plugin_data(PAU_PLUGIN_DIR . '/' . PAU_PLUGIN_NAME . '.php');
 		$content = '<dl class=pau-debug-log>';
-		
+		$content .= '<dt>Wordpress Version:<dd>' . $wp_version;
 		$content .= '<dt>Plugin Version:<dd>' . $plugin_data['Version'];
 
 		// Add some environment data
@@ -367,6 +368,7 @@ class picasa_album_uploader_options
 		
 		$content .= '<dt>Plugin Slug: <dd>' . $this->slug;
 		$content .= '<dt>Permalink Structure: <dd>' . get_option('permalink_structure');
+
 		// Filter the hostname of running system from debug log
 		$content .= '<dt>Sample Plugin URL: <dd>' . esc_attr(preg_replace('/:\/\/.+?\//','://*masked-host*/', $this->build_url('sample')));
 

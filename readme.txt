@@ -153,6 +153,10 @@ OSX: ~/Library/Application Support/Google/Picasa3/buttons
 
 == Changelog ==
 
+= 0.9.2 =
+
+* Add WP Version to error log data
+
 = 0.9.1 =
 
 * Fix detection of urls when permalinks are using form: http://example.com/%postname%/
