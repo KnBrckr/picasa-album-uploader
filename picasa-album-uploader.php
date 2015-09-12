@@ -3,7 +3,7 @@
 Plugin Name: Picasa Album Uploader
 Plugin URI: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Description: Easily upload media from Google Picasa Desktop into WordPress.  Navigate to <a href="options-media.php">Settings &rarr; Media</a> to configure.
-Version: 0.9
+Version: 0.9.1
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/
 Text Domain: picasa-album-uploader
@@ -55,8 +55,8 @@ Process flow:
 // Protect from direct execution
 if (!defined('WP_PLUGIN_DIR')) {
 	header('Status: 403 Forbidden');
-  header('HTTP/1.1 403 Forbidden');
-  exit();
+	header('HTTP/1.1 403 Forbidden');
+	die( 'I don\'t think you should be here.' );
 }
 
 global $pau;
@@ -171,9 +171,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 */
 		function parse_request($query)
 		{
-			if (! isset($query->query_vars['pagename'])) return $query;
+			if (! isset($query->request)) return $query;
 			
-			$tokens = explode('/', $query->query_vars['pagename']);
+			$tokens = explode('/', $query->request);
 			$this->pau_options->debug_log("Parsing request " . implode('/', $tokens));
 			
 			if (count($tokens) != 2) {
