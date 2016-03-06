@@ -4,7 +4,7 @@
  *
  * @package Picasa Album Uploader
  * @author Kenneth J. Brucker <ken@pumastudios.com>
- * @copyright 2011 Kenneth J. Brucker (email: ken@pumastudios.com)
+ * @copyright 2016 Kenneth J. Brucker (email: ken@pumastudios.com)
  * 
  * This file is part of Picasa Album Uploader, a plugin for Wordpress.
  *
@@ -273,7 +273,7 @@ class picasa_album_uploader_options
 		$text = '';
 		
 		// Run long REQUEST Variable name test
-		// FIXME Turn into a javascript based test so media page doesn't pause
+		// TODO Turn into a javascript based test so media page doesn't pause
 		if ($result = $this->test_long_var()) {
 			$text .= 'Long Request Variable Test Failed: ' . $result . '<br>';
 		} else {

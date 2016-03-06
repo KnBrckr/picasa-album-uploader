@@ -3,12 +3,12 @@
 Plugin Name: Picasa Album Uploader
 Plugin URI: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Description: Easily upload media from Google Picasa Desktop into WordPress.  Navigate to <a href="options-media.php">Settings &rarr; Media</a> to configure.
-Version: 0.9.2
+Version: 0.9.3
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/
 Text Domain: picasa-album-uploader
 
-Copyright: 2013,2015 Kenneth J. Brucker (email: ken@pumastudios.com)
+Copyright: 2016 Kenneth J. Brucker (email: ken@pumastudios.com)
 
 This file is part of Picasa Album Uploader, a plugin for Wordpress.
 
@@ -431,7 +431,6 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				}
 			}
 
-			// TODO Display results on the media upload page
 			// Provide Picasa URL to open a result page in the browser.
 			echo admin_url("upload.php");
 
@@ -477,7 +476,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				}
 
 				// Parse the RSS feed from Picasa to get the images to be uploaded
-				$xh = new xmlHandler();
+				$xh = new picasa_album_uploader_xmlHandler();
 				$nodeNames = array("PHOTO:THUMBNAIL", "PHOTO:IMGSRC", "TITLE", "DESCRIPTION");
 				$xh->setElementNames($nodeNames);
 				$xh->setStartTag("ITEM");
@@ -557,7 +556,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		private function send_picasa_button( ) {
 			$this->pau_options->debug_log("Sending button file to client");
 			
-			$blogname = get_bloginfo( 'name' );
+			$blogname = esc_attr(get_bloginfo( 'name' ));
 			$guid = self::guid(); // TODO Only Generate GUID once for a blog - keep same guid - allow blog config to update it.
 			$upload_url = $this->pau_options->build_url('minibrowser');
 			
@@ -592,7 +591,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 EOF;
 
 			// Create Zip stream and add the XML data to the zip
-			$zip = new zipfile();
+			$zip = new picasa_album_uploader_zipfile();
 			if (null == $zip) {
 				$this->pau_options->error_log("Unable to initialize zipfile module; can't generate button.");
 				$this->pau_options->save_debug_log();  // Must call directly to save since process will exit

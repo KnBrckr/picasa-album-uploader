@@ -1,14 +1,9 @@
 <?php
-/* vim: set expandtab sw=4 ts=4 sts=4: */
-/**
- *
- * @version $Id: zip.lib.php 11986 2008-11-24 11:05:40Z nijel $
- * @package phpMyAdmin
- */
-
 /**
  * Zip file creation class.
  * Makes zip files.
+ *
+ * Lifted from phpMyAdmin - zip.lib.php 11986 2008-11-24 11:05:40Z nijel
  *
  * Based on :
  *
@@ -24,9 +19,8 @@
  * Official ZIP file format: http://www.pkware.com/appnote.txt
  *
  * @access  public
- * @package phpMyAdmin
  */
-class zipfile
+class picasa_album_uploader_zipfile
 {
     /**
      * Array to store compressed data

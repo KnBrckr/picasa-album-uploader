@@ -1,10 +1,11 @@
 <?php
 #
 # xmlhandler class
+# Copied from Google's sample handler
 #
 ################################################################################
 
-  class xmlHandler {
+  class picasa_album_uploader_xmlHandler {
 
 	var $inTagState;
 	var $curTagState;
@@ -83,7 +84,7 @@
 
 		if(!($this->xmlParser = xml_parser_create()))
 		{
-  			xmlHandler::setErr("Couldn't create XML parser!");
+  			picasa_album_uploader_xmlHandler::setErr("Couldn't create XML parser!");
 		}
 	}
 	
@@ -91,14 +92,14 @@
 
 		if(!($this->xmlParser = xml_parser_create("UTF-8")))
                 {
-                        xmlHandler::setErr("Couldn't create XML parser!");
+                        picasa_album_uploader_xmlHandler::setErr("Couldn't create XML parser!");
                 }
 		xml_set_object($this->xmlParser, $this);
 		xml_set_element_handler($this->xmlParser, "startElementHandler", "endElementHandler");
 		xml_set_character_data_handler($this->xmlParser, "characterDataHandler");
   		if(!xml_parse($this->xmlParser, $this->xmlData))
 		{
-			xmlHandler::setErr("Couldn't read XML");
+			picasa_album_uploader_xmlHandler::setErr("Couldn't read XML");
   		}
 		
 		return $this->xmlReturnData;
