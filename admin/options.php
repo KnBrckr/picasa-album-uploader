@@ -296,7 +296,6 @@ class picasa_album_uploader_options
 		$url = $baseurl . '?' . $this->long_var_name . '=' . $this->long_var_name;
 		
 		$res = wp_remote_get($url, array('timeout' => 5));
-		var_dump($res);
 		
 		if (wp_remote_retrieve_response_code($res) == 200) {
 			// Retrieved content successfully
