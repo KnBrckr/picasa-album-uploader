@@ -396,7 +396,7 @@ class picasa_album_uploader_options
 	{
 		if ( $this->debug_log_enabled ) {
 			if ($this->log_to_errlog) {
-				error_log("PAU: " . $msg);
+				error_log(PAU_PLUGIN_NAME . ": " . $msg);
 			} else {
 				array_push($this->debug_log, date("Y-m-d H:i:s") . " " . $msg);							
 			}
@@ -428,7 +428,9 @@ class picasa_album_uploader_options
 	 **/
 	function error_log($msg)
 	{
-		error_log(PAU_PLUGIN_NAME . ": " . $msg);
+		// Avoid double logging
+		if (! $this->log_to_errlog)
+			error_log(PAU_PLUGIN_NAME . ": " . $msg);
 		$this->debug_log($msg);
 	}
 } // END class 

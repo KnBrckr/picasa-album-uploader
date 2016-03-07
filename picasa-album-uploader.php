@@ -3,7 +3,7 @@
 Plugin Name: Picasa Album Uploader
 Plugin URI: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Description: Easily upload media from Google Picasa Desktop into WordPress.  Navigate to <a href="options-media.php">Settings &rarr; Media</a> to configure.
-Version: 0.9.4
+Version: 0.9.5
 Author: Kenneth J. Brucker
 Author URI: http://pumastudios.com/
 Text Domain: picasa-album-uploader
@@ -42,6 +42,8 @@ Virtual Pages served:
 	Perform self-test operation for diagnostic purposes
   /picasa-album-uploader/<button_file_name>
 	Downloads contents of button description file to be loaded into Picasa
+  /picasa-album-uploader/upload_failed
+	Display an error screen
 
 Process flow:
  1. Select images in Picasa and click the Upload button
@@ -171,22 +173,26 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 */
 		function parse_request($query)
 		{
-			if (! isset($query->request)) return $query;
+			if (! isset($query->request)) {
+				$this->pau_options->debug_log("Ignoring empty request");
+				return $query;
+			}
 			
 			$tokens = explode('/', $query->request);
-			$this->pau_options->debug_log("Parsing request " . implode('/', $tokens));
 			
-			if (count($tokens) != 2) {
-				$this->pau_options->debug_log("Valid requests will have 2 elements, skipping.");
+			if (count($tokens) < 2) {
+				$this->pau_options->debug_log("Ignoring request: '" . $query->request. "'");
 				return $query;
 			}
 
 			// Does request slug match request for this plugin?
 			if ( $this->pau_options->slug != $tokens[0] ) {
 				// Request is not for this plugin
-				$this->pau_options->debug_log("Request does not match plugin slug (" . $this->pau_options->slug . ")");
+				$this->pau_options->debug_log("Ignoring request: '" . $query->request. "'");
 				return $query;
 			}
+			
+			$this->pau_options->debug_log("Detected plugin request: '" . $query->request. "'");
 			
 			// Decode plugin request
 			switch ( $tokens[1] ) {
@@ -202,19 +208,30 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 					// Immediately handle display of form to upload content in the Picasa minibrowser window
 					$this->confirm_valid_user();
 					$this->display_upload_form();
+					// Should not get here
 					exit;
 			
 				case 'upload':
-					// Immediately handle image upload if it's been requested
-					$this->confirm_valid_user();
-					$this->upload_images();
-					// Should not get here
+					if (is_user_logged_in()) {
+						// Immediately handle image upload if it's been requested
+						$this->upload_images();
+					} else {
+						$this->pau_options->debug_log("User not logged in; uploaded failed");
+						echo $this->pau_options->build_url('upload_failed/no_user'); // Give Picasa URL to display
+					}
 					exit;
 					
 				case 'selftest':
 					// Immediately handle the self-test request
 					// No authorization appropriate because the request can not be authenticated.
 					$this->test_access();
+					// Should not get here
+					exit;
+					
+				case 'upload_failed':
+					// Display a basic error screen based on 3rd token of request
+					$code = isset($tokens[2])? $tokens[2] : 'undefined';
+					$this->upload_failed($code);
 					// Should not get here
 					exit;
 
@@ -236,9 +253,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		private function confirm_valid_user()
 		{
 			if (! is_user_logged_in()) {
-				$this->pau_options->debug_log("Redirecting request to login");
+				$this->pau_options->debug_log("User not logged in; redirecting request to login");
 
-				// Redirect user to the login page - login process will redirect back here on success
+				// Redirect user to the login page - login process will redirect back on success
 				wp_safe_redirect(wp_login_url($this->pau_options->build_url('minibrowser')));
 				$this->pau_options->save_debug_log();  // Save log file messages before exit
 				exit;  // Requested browser to redirect - done here.
@@ -281,8 +298,10 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 */
 		function display_upload_form() {
 			global $wp_scripts;
+			global $current_user;
 			
 			$this->pau_options->debug_log("Generating Minibrowser content");
+			$this->pau_options->debug_log("User Agent: " . $_SERVER['HTTP_USER_AGENT']);
 			?>
 <!doctype html>
 
@@ -318,24 +337,36 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 </head>
 
 <body>
-  <?php
-			// Open the plugin content div for theme formatting
-
-			if (current_user_can('upload_files')) {
-				// Add the upload form to content
-				echo $this->build_upload_form();				
-			} else {
-				$this->pau_options->debug_log("Permission violation - user not allowed to upload");
-	
-				// TODO Add a logout capability
-				echo '<div class="pau-privs-error">';
-				echo '<p class="error">' . __('Sorry, you do not have permission to upload files.', 'picasa-album-uploader') . '</p>';
-				echo '</div>';
-			}
-  ?>
+	<?php if (current_user_can('upload_files')): ?>
+		<div id="pau_current_user">
+			<p>Hello <?php echo $current_user->user_login; ?></p>
+			<p><a href="<?php echo wp_logout_url($this->pau_options->build_url('minibrowser')); ?>">Logout</a></p>
+		</div>
+		<?php
+	  		// Add the upload form to content
+			echo $this->build_upload_form();
+		?>
+	<?php else:
+		/*
+		 * Log the user out. No sense staying active if permissions are insufficient.
+		 *
+		 * Note that there is a side effect behavior on OSX with Safari. Picasa is using the underlying Safari
+		 * environment so the user will also be logged out from the Safari environment.
+		 */
+		wp_logout();
+		
+		$this->pau_options->debug_log("Permission violation. User not allowed to upload.");
+		?>
+		<div class="pau-privs-error">
+			<p class="error"><?php _e('Sorry, you do not have permission to upload files.', 'picasa-album-uploader'); ?></p>
+			<p class="error"><?php _e('You have been logged out.', 'picasa-album-uploader'); ?></p>
+			<p><?php _e('Please close this window and reissue the request from Picasa.', 'picasa-album-uploader'); ?></p>
+		</div>
+	<?php endif ?>
 </body>
 </html>
 			<?php
+			$this->pau_options->save_debug_log();  // Save log file messages before exit
 			/*
 			 * No more processing is needed, exit here
 			 */
@@ -343,7 +374,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		}
 
 		/**
-		 * template redirect to processes POST request from Picasa to upload images and save in Wordpress.
+		 * Processes POST request from Picasa to upload images and save in Wordpress.
 		 *
 		 * Picasa will close the minibrowser - Any HTML output will be ignored.
 		 * Picasa will accept a URL that will be opened in the user's browser.
@@ -431,8 +462,20 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				}
 			}
 
-			// Provide Picasa URL to open a result page in the browser.
-			echo admin_url("upload.php");
+			switch($result) {
+			case PAU_RESULT_SUCCESS:
+				// Provide Picasa URL to open a result page in the browser.
+				echo admin_url("upload.php");
+				break;
+				
+			case PAU_RESULT_NO_FILES:
+				echo $this->pau_options->build_url('upload_failed/no_files');
+				break;
+				
+			case PAU_RESULT_NO_PERMISSION:
+				echo $this->pau_options->build_url('upload_failed/no_perm');
+				break;
+			}
 
 			// Save log file messages before exit
 			$this->pau_options->save_debug_log();
@@ -534,8 +577,8 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				
 				$content .= '</form>';
 			} else {
-				$this->pau_options->error_log("Empty RSS feed from Picasa; unable to build minibrowser form.  Dumping POST payload:");
-				$this->pau_options->debug_log("_POST: " . print_r($_POST,true));
+				$this->pau_options->error_log("Empty RSS feed from Picasa; unable to build minibrowser form.");
+				$this->pau_options->debug_log("_POST payload: " . print_r($_POST,true));
 				
 			 	$content .= '<p class="error">' . __('Sorry, no images were received from Picasa.', 'picasa-album-uploader') . '</p>';
 			}
@@ -689,7 +732,7 @@ EOF;
 		}
 		
 		/**
-		 * template redirect to respond to self test request
+		 * Respond to self test request
 		 *
 		 * @access private
 		 * @return void
@@ -698,20 +741,59 @@ EOF;
 		{
 			if (isset($_REQUEST[$this->pau_options->long_var_name])) {
 				if ($_REQUEST[$this->pau_options->long_var_name] == $this->pau_options->long_var_name) {
+					$this->pau_options->debug_log('Long Variable names received OK.');
+
 					header('Status: 200 OK');
 					header('HTTP/1.1 200 OK');
 					echo 'REQUEST long variable OK, received length=' . strlen($this->pau_options->long_var_name);
 				} else {
+					$this->pau_options->debug_log('FAILURE: Long variable data mismatch.');
+
 					header('Status: 400 REQUEST long variable received - Data wrong');
 					header('HTTP/1.1 400 REQUEST long variable received - Data wrong');
 					echo 'REQUEST long variable received - Data wrong';
 				}
 			} else {
+				$this->pau_options->debug_log('FAILURE: Long Variable names missing.');
+				
 				header('Status: 400 REQUEST missing expected variable');
 			  	header('HTTP/1.1 400 REQUEST missing expected variable');
 				echo 'REQUEST missing expected variable';
 			}
-		}		
+			$this->pau_options->save_debug_log();  // Must call directly to save since process will exit
+			exit;
+		}
+		
+		/**
+		 * display a simple error message on upload failure
+		 *
+		 * @return void
+		 * @author Kenneth J. Brucker <ken.brucker@action-a-day.com>
+		 */
+		private function upload_failed($code)
+		{
+			header('Status: 400 REQUEST upload failed');
+			header('HTTP/1.1 400 REQUEST upload failed');
+			switch($code) {
+			case 'no_user':
+				echo 'Picasa Upload failed: You are not logged in.';
+				break;
+				
+			case 'no_files':
+				echo 'Picasa Upload failed: No files found to upload.';
+				break;
+				
+			case 'no_perm':
+				echo 'Picasa Upload failed: You do not have permission to upload files';
+				break;		
+				
+			default:
+				echo 'Picasa Upload failed. Unknown failure: ' . esc_html($code);
+				break;
+			}
+
+			exit;
+		}
 	} // End Class picasa_album_uploader
 }
 

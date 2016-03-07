@@ -4,7 +4,7 @@ Donate link: http://pumastudios.com/software/picasa-album-uploader-wordpress-plu
 Tags: picasa, upload, images, albums, media
 Requires at least: 4.0
 Tested up to: 4.4.2
-Stable tag: 0.9.3
+Stable tag: 0.9.4
 
 Easily upload media from Google Picasa Desktop into WordPress.
 
@@ -155,13 +155,20 @@ The button file name is based on the blog name.
 
 == Changelog ==
 
+= 0.9.5 =
+
+* FIX: debug log not saving logs for minibrowser
+* ADD: Display basic errors in browser on upload failures
+* FIX: Duplicate log message when logging to error log
+* ADD: Improve selftest logging
+
 = 0.9.4 =
 
-* Fix selftest error reporting
+* FIX: selftest not working in some cases
 
 = 0.9.3 =
 
-* Fix plugin activation failure due to name space collision. Thanks to [searchdiver](https://wordpress.org/support/profile/searchdiver) for pointing out the issue.
+* FIX: plugin activation failure due to name space collision. Thanks to [searchdiver](https://wordpress.org/support/profile/searchdiver) for pointing out the issue.
 * Escape blog name for proper handling in button tool tip
 
 = 0.9.2 =
@@ -184,10 +191,10 @@ The button file name is based on the blog name.
 * Change name of the pbz file to be based on the site name (helpful when multiple sites are managed)
 
 = 0.7.3 =
-* fix: PHP split() deprecated, change to explode()
+* FIX: PHP split() deprecated, change to explode()
 
 = 0.7.2 =
-* fix: Use wp_enqueue_scripts action to add javascript and styles
+* FIX: Use wp_enqueue_scripts action to add javascript and styles
 
 = 0.7.1 =
 
