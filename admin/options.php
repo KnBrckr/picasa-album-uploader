@@ -292,29 +292,25 @@ class picasa_album_uploader_options
 	 **/
 	function test_long_var()
 	{
-		if (!ini_get('allow_url_fopen')) {
-			$result = 'Unable to complete HTTP REQUEST test; allow_url_fopen in php.ini is false.';
-		} else {
-			$baseurl = home_url() . '/' . $this->slug . '/selftest';
-			$url = $baseurl . '?' . $this->long_var_name . '=' . $this->long_var_name;
-			
-			$context = stream_context_create(array('http' => array(
-				'method' => 'GET',
-				'header' => "Accept-language: en\r\n" .
-					"Accept: text/html\r\n" .
-					"User-Agent: PHP\r\n"
-			)));
-			$contents = file_get_contents($url, false, $context);
-			if ($contents) {
-				$result = false;
+		$baseurl = home_url() . '/' . $this->slug . '/selftest';
+		$url = $baseurl . '?' . $this->long_var_name . '=' . $this->long_var_name;
+		
+		$res = wp_remote_get($url, array('timeout' => 5));
+		var_dump($res);
+		
+		if (wp_remote_retrieve_response_code($res) == 200) {
+			// Retrieved content successfully
+			if (wp_remote_retrieve_body($res) == 'REQUEST long variable OK, received length='.strlen($this->long_var_name)) {
+				// Got expected results, all OK
+				$result = false;				
 			} else {
-				$status = preg_grep("/^HTTP\/1.[01] [^3]/", $http_response_header);
-				if (count($status) > 0) {
-					$result = implode($status);					
-				} else {
-					$result = "Unrecognized failure opening $baseurl";
-				}
+				// Send back first 120 characters of the retrieved body to help in debug
+				$result = 'Unexpected results returned (displaying first 120 characters): ' .
+						 	esc_html(substr(wp_remote_retrieve_body($res), 0, 120));
 			}
+		} else {
+			// Error on retrieval attempt
+			$result = wp_remote_retrieve_response_code($res) . ' ' . wp_remote_retrieve_response_message($res);
 		}
 		
 		return $result;

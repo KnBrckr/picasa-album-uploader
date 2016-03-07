@@ -155,6 +155,10 @@ The button file name is based on the blog name.
 
 == Changelog ==
 
+= 0.9.4 =
+
+* Fix selftest error reporting
+
 = 0.9.3 =
 
 * Fix plugin activation failure due to name space collision. Thanks to [searchdiver](https://wordpress.org/support/profile/searchdiver) for pointing out the issue.
