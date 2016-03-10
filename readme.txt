@@ -155,6 +155,11 @@ The button file name is based on the blog name.
 
 == Changelog ==
 
+= 0.9.6 =
+* FIX: URL building does not honor PATHINFO permalinks
+* FIX: Improve error logging during upload
+* FIX: Improve jquery enqueueing in minibrowser
+
 = 0.9.5 =
 
 * FIX: debug log not saving logs for minibrowser
