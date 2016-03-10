@@ -83,8 +83,10 @@ if ( ! defined( 'PAU_PLUGIN_NAME' ) ) {
 
 	// result codes on upload completion or failure
 	define('PAU_RESULT_SUCCESS', 'success');
-	define('PAU_RESULT_NO_FILES', 'no-files');
-	define('PAU_RESULT_NO_PERMISSION', 'no-permission');
+	define('PAU_RESULT_NOUSER', 'no-user');
+	define('PAU_RESULT_NOFILE', 'no-files');
+	define('PAU_RESULT_NOPERM', 'no-permission');
+	define('PAU_RESULT_ERROR', 'upload-error');
 }
 
 // ================================
@@ -147,7 +149,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			
 			// register admin section with WP
 			$this->pau_options->register();
-
+			
 			// Plugin requires permalink usage - Only setup handling if permalinks enabled
 			if ( get_option('permalink_structure') != '' ) {
 				// Shortcode to generate URL to download Picassa Button
@@ -217,7 +219,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 						$this->upload_images();
 					} else {
 						$this->pau_options->debug_log("User not logged in; uploaded failed");
-						echo $this->pau_options->build_url('upload_failed/no_user'); // Give Picasa URL to display
+						echo $this->pau_options->build_url('upload_failed/' . PAU_RESULT_NOUSER); // Give Picasa URL to display
 					}
 					exit;
 					
@@ -314,11 +316,9 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 
   <link rel="stylesheet" href="<?php echo PAU_PLUGIN_URL; ?>/minibrowser.css">
   <?php
-  if (isset($wp_scripts->registered['jquery-core'])) {
-	  echo '<script type="text/javascript" src="';
-	  echo home_url() . $wp_scripts->registered['jquery-core']->src;  
-	  echo '"></script>';
-  }
+    // JQuery used to manage page content
+	wp_enqueue_script('jquery-core');
+	wp_print_head_scripts();
   ?>
   <script type="text/javascript">
   /**
@@ -398,7 +398,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			// User must be able to upload files to proceed
 			if (! current_user_can('upload_files')) {
 				$this->pau_options->debug_log("User is not allowed to upload files.");
-				$result = PAU_RESULT_NO_PERMISSION;
+				$result = PAU_RESULT_NOPERM;
 			} else {
 				if ( $_FILES ) {
 					// Don't need to test that this is a wp_upload_form in wp_handle_upload() in loop below so set test_form to false
@@ -455,26 +455,22 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 						}
 					} // end foreach $file
 					$this->pau_options->debug_log("Processed $file_count files from Picasa with $errors errors.");
-					$result = PAU_RESULT_SUCCESS;
+					if ($errors)
+						$result = PAU_RESULT_ERROR;
+					else
+						$result = PAU_RESULT_SUCCESS;
 				} else {
 					$this->pau_options->debug_log("Picasa did not upload any files");
-					$result = PAU_RESULT_NO_FILES;
+					$result = PAU_RESULT_NOFILE;
 				}
 			}
-
-			switch($result) {
-			case PAU_RESULT_SUCCESS:
+			
+			if ($result == PAU_RESULT_SUCCESS) {
 				// Provide Picasa URL to open a result page in the browser.
 				echo admin_url("upload.php");
-				break;
-				
-			case PAU_RESULT_NO_FILES:
-				echo $this->pau_options->build_url('upload_failed/no_files');
-				break;
-				
-			case PAU_RESULT_NO_PERMISSION:
-				echo $this->pau_options->build_url('upload_failed/no_perm');
-				break;
+			} else {
+				// Report an error
+				echo $this->pau_options->build_url('upload_failed/' . $result);
 			}
 
 			// Save log file messages before exit
@@ -775,17 +771,21 @@ EOF;
 			header('Status: 400 REQUEST upload failed');
 			header('HTTP/1.1 400 REQUEST upload failed');
 			switch($code) {
-			case 'no_user':
+			case PAU_RESULT_NOUSER:
 				echo 'Picasa Upload failed: You are not logged in.';
 				break;
 				
-			case 'no_files':
+			case PAU_RESULT_NOFILE:
 				echo 'Picasa Upload failed: No files found to upload.';
 				break;
 				
-			case 'no_perm':
+			case PAU_RESULT_NOPERM:
 				echo 'Picasa Upload failed: You do not have permission to upload files';
-				break;		
+				break;
+				
+			case PAU_RESULT_ERROR:
+				echo 'Failures detected during upload. Examine server error log for details.';
+				break;
 				
 			default:
 				echo 'Picasa Upload failed. Unknown failure: ' . esc_html($code);

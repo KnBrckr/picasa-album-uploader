@@ -256,7 +256,20 @@ class picasa_album_uploader_options
 	 **/
 	public function build_url( $page )
 	{
-		$url = home_url() . '/' . $this->slug . '/' . $page;
+		global $wp_rewrite;
+
+		/**
+		 * Get the page permastruct to use.
+		 * PATHINFO Permalinks are "Almost Pretty" and use index.php as base of the permalink URL.
+		 */
+		$url = $wp_rewrite->get_page_permastruct();
+		if (empty($url)) {
+			// Whoa, big problem since we kinda need page permalinks to be available
+			$this->pau_options->debug_log("Tried to build URL; page permalinks not available!");
+			return '';
+		}
+		
+		$url = home_url(str_replace('%pagename%', $this->slug . '/' . $page, $url));
 		return $url;
 	}
 	
@@ -292,7 +305,7 @@ class picasa_album_uploader_options
 	 **/
 	function test_long_var()
 	{
-		$baseurl = home_url() . '/' . $this->slug . '/selftest';
+		$baseurl = $this->build_url('selftest');
 		$url = $baseurl . '?' . $this->long_var_name . '=' . $this->long_var_name;
 		
 		$res = wp_remote_get($url, array('timeout' => 5));
