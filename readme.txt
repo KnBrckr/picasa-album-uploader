@@ -155,6 +155,10 @@ The button file name is based on the blog name.
 
 == Changelog ==
 
+= 0.9.7 =
+* ADD: Include list of active plugins in debug log content
+* FIX: Improve escaping of fields in debug log
+
 = 0.9.6 =
 * FIX: URL building does not honor PATHINFO permalinks
 * FIX: Improve error logging during upload

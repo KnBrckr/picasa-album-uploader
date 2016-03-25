@@ -367,18 +367,23 @@ class picasa_album_uploader_options
 		
 		$plugin_data = get_plugin_data(PAU_PLUGIN_DIR . '/' . PAU_PLUGIN_NAME . '.php');
 		$content = '<dl class=pau-debug-log>';
-		$content .= '<dt>Wordpress Version:<dd>' . $wp_version;
-		$content .= '<dt>Plugin Version:<dd>' . $plugin_data['Version'];
+		$content .= '<dt>Wordpress Version:<dd>' . esc_html($wp_version);
+		$content .= '<dt>Plugin Version:<dd>' . esc_html($plugin_data['Version']);
+		$content .= '<dt>Active Plugins:<dd><ul>';
+		foreach (get_option('active_plugins') as $plugin) {
+			$content .= '<li>' . esc_html($plugin) . '</li>';
+		};
+		$content .= '</ul>';
 
 		// Add some environment data
 		$content .= '<dt>PHP Version:<dd>' . phpversion();
-		$content .= '<dt>MySQL Server Version:<dd>' . $wpdb->db_version();
+		$content .= '<dt>MySQL Server Version:<dd>' . esc_html($wpdb->db_version());
 		
 		$content .= '<dt>Plugin Slug: <dd>' . $this->slug;
-		$content .= '<dt>Permalink Structure: <dd>' . get_option('permalink_structure');
+		$content .= '<dt>Permalink Structure: <dd>' . esc_html(get_option('permalink_structure'));
 
 		// Filter the hostname of running system from debug log
-		$content .= '<dt>Sample Plugin URL: <dd>' . esc_attr(preg_replace('/:\/\/.+?\//','://*masked-host*/', $this->build_url('sample')));
+		$content .= '<dt>Sample Plugin URL: <dd>' . esc_url(preg_replace('/:\/\/.+?\//','://*masked-host*/', $this->build_url('sample')));
 
 		if ($this->debug_log_enabled) {
 			// If debug enabled then include a Self Test
@@ -388,7 +393,7 @@ class picasa_album_uploader_options
 			if (! $this->log_to_errlog) {
 				$content .= '<dt>Log:';
 				foreach ($this->debug_log as $line) {
-					$content .= '<dd>' . esc_attr($line);
+					$content .= '<dd>' . esc_html($line);
 				}			
 			}
 			
