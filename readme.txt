@@ -4,7 +4,7 @@ Donate link: http://pumastudios.com/software/picasa-album-uploader-wordpress-plu
 Tags: picasa, upload, images, albums, media
 Requires at least: 4.0
 Tested up to: 4.4.2
-Stable tag: 0.9.4
+Stable tag: 0.10
 
 Easily upload media from Google Picasa Desktop into WordPress.
 
@@ -85,17 +85,14 @@ There are several possible failures:
 
 The .pbz file is dynamically created by the plugin due to the customization required in the contents.  See the question below about the contents of the download for details.  The name of the file is determined by the Site Name that is provided in Settings->General.
 
-= How can the button file be manually downloaded? =
-The URL used to generate and download the button file is generated based on the slug name assigned to the plugin.  Assuming a simple default configuration, the URL would be:  http://your-site.com/picasa_album_uploader/your-site-name.pbz
-
-Once downloaded this file can be placed in the Picasa configuration directory and the button can be configured in Picasa the next time Picasa is launched.  The configuration directory path is detailed further below.
-
 = What's in that download (.pbz file) that needs to be installed into Picasa? =
 
 There is no executable code in the download.  It is comprised of two elements:
 
 * An XML file describing the button to Picasa Desktop.  This includes a URL to your blog for Picasa to use when the button is clicked.
 * A file containing the button graphic to display within the Picasa Desktop.
+
+The graphic file appears to be ignored by newer versions of Picasa.
 
 = Can I make the link to install the button in Picasa Desktop available in Pages and Posts? =
 
@@ -109,7 +106,7 @@ The plugin also functions in a multi-site environment.
 
 = How do I change the button icon? =
 
-In the future, a setting will be allowed to override the button graphic.  Right now, the only way to change the button is by replacing the file `picasa-album-uploader/images/wordpress-logo-blue.psd` in the plugin directory with the desired content.  This is a photoshop file and a compatible image editor must be used.  The layer containing the button image must be named "upload-button".  The image should be no larger than 40 pixels wide by 25 pixels high with 72 dpi resolution.  The color model used must be RGB with 8 bits/channel and should use a transparent background.  Full details can be found at the [Picasa Button API](http://code.google.com/apis/picasa/docs/button_api.html "Picasa Button API") reference.
+It does not appear to be possible any longer with the last release of Picasa.
 
 = Why are Permalinks required? =
 
@@ -134,7 +131,7 @@ This plugin can be uninstalled from the WordPress Plugin Admin screen.  An unins
 = How do I remove the button from Picasa? =
 
 1. In Picasa Select "Tools -> Configure Buttons..."
-1. In the "Current Buttons" section of the Picasa Dialog, select the "WordPress" button.
+1. In the "Current Buttons" section of the Picasa Dialog, select the button for your site.
 1. Click the "Remove" button.
 1. To completely remove the button from Picasa, remove the associated `your-site-name.pbz` file from the Picasa configuration directory on your computer.
 
@@ -154,6 +151,11 @@ The button file name is based on the blog name.
 1. Picasa Album Uploader Options in Media Settings Admin Screen.
 
 == Changelog ==
+
+= 0.10.0 =
+* ADD: Detect a configuration issue that will prevent proper plugin operation
+* Code Cleanup
+* FIX: Initialization failure while defining plugin constants
 
 = 0.9.7 =
 * ADD: Include list of active plugins in debug log content

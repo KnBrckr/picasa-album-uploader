@@ -3,12 +3,12 @@
 Plugin Name: Picasa Album Uploader
 Plugin URI: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Description: Easily upload media from Google Picasa Desktop into WordPress.  Navigate to <a href="options-media.php">Settings &rarr; Media</a> to configure.
-Version: 0.9.7
+Version: 0.10
 Author: Kenneth J. Brucker
-Author URI: http://pumastudios.com/
+Author URI: http://action-a-day.com
 Text Domain: picasa-album-uploader
 
-Copyright: 2016 Kenneth J. Brucker (email: ken@pumastudios.com)
+Copyright: 2016 Kenneth J. Brucker (email: ken.brucker@action-a-day.com)
 
 This file is part of Picasa Album Uploader, a plugin for Wordpress.
 
@@ -64,22 +64,17 @@ if (!defined('WP_PLUGIN_DIR')) {
 global $pau;
 global $pau_errors;
 
-// =======================================
-// = Define constants used by the plugin =
-// =======================================
-
+// ===================================
+// = Define constants used by plugin =
+// ===================================
 if ( ! defined( 'PAU_PLUGIN_NAME' ) ) {
 	// If Plugin Name not defined, then must need to define all constants used
-	
+
 	define('PAU_PLUGIN_NAME', 'picasa-album-uploader');	// Plugin name
 	define('PAU_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . PAU_PLUGIN_NAME);	// Base directory for Plugin
-	define('PAU_PLUGIN_URL', plugins_url(PAU_PLUGIN_NAME));	// Base URL for plugin directory
-	
+
 	// Name strings used in Nonce hanldling
 	define('PAU_NONCE_UPLOAD', 'picasa-album-uploader-upload-images');
-
-	// Define the Picasa button file name
-	define('PAU_BUTTON_FILE_NAME', sanitize_file_name(get_bloginfo('name') . '.pbz'));
 
 	// result codes on upload completion or failure
 	define('PAU_RESULT_SUCCESS', 'success');
@@ -138,18 +133,48 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		/**
 		 * Constructor function for picasa_album_uploader class.
 		 *
-		 * Adds the needed shortcodes and filters to processing stream
-		 *
 		 * @access public
 		 * @return void
 		 */
 		function picasa_album_uploader() {
 			// Retrieve plugin options
 			$this->pau_options = new picasa_album_uploader_options();
+		}
+		
+		/**
+		 * Hook plugin into WordPress
+		 *
+		 * @access public
+		 * @return void
+		 */
+		function run()
+		{
+			/**
+			 * register admin section with WP
+			 */
+			$this->pau_options->init();
 			
-			// register admin section with WP
-			$this->pau_options->register();
+			/**
+			 * Add bulk of plugin init
+			 */
+			add_action( 'init', array( $this, 'init' ) );
 			
+			/**
+			 * i18n support
+			 */
+			add_action('init', array($this, 'load_textdomain'));
+		}
+		
+		/**
+		 * Main Plugin setup
+		 *
+		 * Adds actions, filters, etc. to WP
+		 *
+		 * @access public
+		 * @return void
+		 */
+		function init()
+		{
 			// Plugin requires permalink usage - Only setup handling if permalinks enabled
 			if ( get_option('permalink_structure') != '' ) {
 				// Shortcode to generate URL to download Picassa Button
@@ -163,9 +188,6 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			
 			// Javascript and Styles
 			add_action('admin_enqueue_scripts', array($this, 'admin_enqueue_scripts'));
-			
-			// i18n support
-			add_action('init', array($this, 'load_textdomain'));
 		}
 		
 		/**
@@ -175,7 +197,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 */
 		function parse_request($query)
 		{
-			if (! isset($query->request)) {
+			if (! isset( $query->request ) || '' == $query->request ) {
 				$this->pau_options->debug_log("Ignoring empty request");
 				return $query;
 			}
@@ -187,35 +209,47 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				return $query;
 			}
 
-			// Does request slug match request for this plugin?
+			/**
+			 * Does request slug match request for this plugin?
+			 */
 			if ( $this->pau_options->slug != $tokens[0] ) {
-				// Request is not for this plugin
+				/**
+				 * Request is not for this plugin
+				 */
 				$this->pau_options->debug_log("Ignoring request: '" . $query->request. "'");
 				return $query;
 			}
 			
-			$this->pau_options->debug_log("Detected plugin request: '" . $query->request. "'");
+			$ssl = is_ssl() ? ' SSL' : '';
+			$this->pau_options->debug_log("Detected " . $ssl . "plugin request: '" . $query->request. "'");
 			
-			// Decode plugin request
+			/**
+			 * Decode plugin request
+			 */
 			switch ( $tokens[1] ) {
-				case PAU_BUTTON_FILE_NAME:
-					// Process request for button immediately, no further WP processing is required.
-					// No authorization required because the client request from Picasa can not be authenticated.
-					// There is also no security harm in downloading the button file.
+				case $this->button_file_name():
+					/**
+					 * Process request for button immediately, no further WP processing is required.
+					 * No authorization required because the client request from Picasa can not be authenticated.
+					 * There is also no security harm in downloading the button file.
+					 */
 					$this->send_picasa_button();
 					// Should not get here
 					exit;
 				
 				case 'minibrowser':
-					// Immediately handle display of form to upload content in the Picasa minibrowser window
-					$this->confirm_valid_user();
-					$this->display_upload_form();
+					/**
+					 * Immediately handle display of form to upload content in the Picasa minibrowser window
+					 */
+					$this->minibrowser();
 					// Should not get here
 					exit;
 			
 				case 'upload':
 					if (is_user_logged_in()) {
-						// Immediately handle image upload if it's been requested
+						/**
+						 * Immediately handle image upload if it's been requested
+						 */
 						$this->upload_images();
 					} else {
 						$this->pau_options->debug_log("User not logged in; uploaded failed");
@@ -247,6 +281,37 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		}
 		
 		/**
+		 * Handle request for the Picasa minibrowser page
+		 *
+		 * @return none
+		 */
+		private function minibrowser()
+		{
+			/**
+			 * Picasa will have problems if all of the following are true:
+			 *  - This screen request is via http
+			 *  - force_ssl_admin() is true
+			 *  - home_url() specifies https
+			 */
+			if ( ( ! is_ssl() ) && force_ssl_admin() && strncasecmp( 'https', home_url(), 5 ) == 0 ) {
+				$this->render_config_error();
+				exit;
+			}
+			
+			/**
+			 * If user is valid, display the upload form. 
+			 * confirm_valid_user() will redirect to a login page if needed
+			 */
+			$this->confirm_valid_user();
+			$this->display_upload_form();
+			
+			/**
+			 * Should not get here
+			 */
+			exit;
+		}
+		
+		/**
 		 * Confirms that the user is logged in before continuing.
 		 * If user is not logged in, will redirect to the WP login form.
 		 *
@@ -257,8 +322,11 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 			if (! is_user_logged_in()) {
 				$this->pau_options->debug_log("User not logged in; redirecting request to login");
 
-				// Redirect user to the login page - login process will redirect back on success
-				wp_safe_redirect(wp_login_url($this->pau_options->build_url('minibrowser')));
+				/**
+				 * Redirect user to the login page - login process will redirect back on success
+				 */
+				$url = wp_login_url( $this->pau_options->build_url( 'minibrowser' ) );
+				wp_safe_redirect( $url );
 				$this->pau_options->save_debug_log();  // Save log file messages before exit
 				exit;  // Requested browser to redirect - done here.
 			}
@@ -273,7 +341,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		function admin_enqueue_scripts()
 		{
 			// Register Plugin CSS
-			wp_register_style('picasa-album-uploader-style', PAU_PLUGIN_URL . '/picasa-album-uploader.css');
+			wp_register_style('picasa-album-uploader-style', plugins_url ( 'picasa-album-uploader.css', __FILE__ ) );
 			wp_enqueue_style('picasa-album-uploader-style');
 		}
 		
@@ -286,7 +354,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * @return string URL to download Picasa button
 		 */
 		function sc_download_button( $atts, $content = null ) {
-			$link =  '<a href="picasa://importbutton/?url=' . $this->pau_options->build_url(PAU_BUTTON_FILE_NAME)
+			$link =  '<a href="picasa://importbutton/?url=' . $this->pau_options->build_url( $this->button_file_name() )
 				. '" title="' . __('Download Picasa Button and Install in Picasa Desktop', 'picasa-album-uploader'). '">'
 				. __('Install Image Upload Button in Picasa Desktop', 'picasa-album-uploader'). '</a>';
 			return $link;
@@ -314,7 +382,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
   <title>Picasa Album Uploader Minibrower Selection Form</title>
   <meta name="description" content="Upload form to display in Picasa to manage upload of images to website.">
 
-  <link rel="stylesheet" href="<?php echo PAU_PLUGIN_URL; ?>/minibrowser.css">
+  <link rel="stylesheet" href="<?php echo plugins_url( 'minibrowser.css', __FILE__ ); ?>/">
   <?php
     // JQuery used to manage page content
 	wp_enqueue_script('jquery-core');
@@ -337,6 +405,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 </head>
 
 <body>
+	<h1>Picasa Album Uploader</h1>
 	<?php if (current_user_can('upload_files')): ?>
 		<div id="pau_current_user">
 			<p>Hello <?php echo $current_user->user_login; ?></p>
@@ -659,7 +728,7 @@ EOF;
 			// Emit zip file to the client
 			$zipcontents = $zip->file();
 			header( 'Content-type: application/octet-stream' );
-			header( 'Content-Disposition: attachment; filename="' . PAU_BUTTON_FILE_NAME . '"' );
+			header( 'Content-Disposition: attachment; filename="' . $this->button_file_name() . '"' );
 			header( 'Content-length: ' . strlen($zipcontents) );
 
 			echo $zipcontents;
@@ -764,7 +833,6 @@ EOF;
 		 * display a simple error message on upload failure
 		 *
 		 * @return void
-		 * @author Kenneth J. Brucker <ken.brucker@action-a-day.com>
 		 */
 		private function upload_failed($code)
 		{
@@ -793,6 +861,82 @@ EOF;
 			}
 
 			exit;
+		}
+		
+		/**
+		 * Generate Picasa button file name
+		 *
+		 * @return string	Name of picasa button file to be downloaded
+		 */
+		private function button_file_name()
+		{
+			return sanitize_file_name(get_bloginfo('name') . '.pbz');
+		}
+		
+		/**
+		 * A site configuration error has been detected when responding to Picasa
+		 *
+		 * @return void
+		 */
+		private function render_config_error() {
+			$this->pau_options->error_log( 'Configuration error detected: is_ssl()=false, force_ssl_admin()=true, home_url() uses https' );
+
+			$https = isset( $_SERVER['HTTPS'] ) ? $_SERVER['HTTPS'] : '<undefined>';
+			$server_port = isset( $_SERVER['SERVER_PORT'] ) ? $_SERVER['SERVER_PORT']  : '<undefined>';
+?><!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Site Configuration Error Detected</title>
+  <meta name="description" content="Site Configuration Error Detected">
+
+  <link rel="stylesheet" href="<?php echo plugins_url( 'minibrowser.css', __FILE__ ); ?>/">
+</head>
+
+<body>
+	<h1>Picasa Album Uploader Detected a Configuration issue</h1>
+	<p>The following three conditions were found to be true:</p>
+	<ol>
+		<li>
+			Picasa made the request for this page using 'http' protocol.<br>
+			$_SERVER['HTTPS'] = <?php echo esc_attr( $https ); ?><br>
+			$_SERVER['SERVER_PORT'] = <?php echo esc_attr( $server_port ); ?>
+		</li>
+		<li>force_ssl_admin() is enabled</li>
+		<li>
+			home_url uses https protocol.<br>
+			home_url() returns <?php echo esc_attr( $this->pau_options->redact_url( home_url() ) ); ?>
+		</li>
+	</ol>
+	<p>It's possible that the home_url() setting has been modified since the button was first setup in Picasa.</p>
+	<p>To fix the issue, try removing the Picasa Upload button from Picasa and adding it again.</p>
+	<h2>How do I remove the button from Picasa?</h2>
+	<ol>
+		<li>In Picasa Select "Tools -> Configure Buttons..."</li>
+		<li>In the "Current Buttons" section of the Picasa Dialog, select the button for your site.</li>
+		<li>Click the "Remove" button.</li>
+		<li>To completely remove the button from Picasa, remove the associated `your-site-name.pbz` file from the Picasa configuration directory on your computer.</li>
+	</ol>
+	<h2>Where are the Picasa buttons stored on my computer?</h2>
+	<p>
+		Button files end with `.pbz` and the location depends on the OS you are using. The button file name is based on the blog name.
+	</p>
+	<ul>
+		<li>Windows:  C:\Program Files\Google\Picasa3\buttons</li>
+		<li>XP:  C:\Documents and Settings\Username\Local Settings\Application Data\Google\Picasa3\buttons</li>
+		<li>Vista:  C:\Users\Username\AppData\Local\Google\Picasa3\buttons</li>
+		<li>OSX: ~/Library/Application Support/Google/Picasa3/buttons</li>
+	</ul>
+	<h2>Adding the button to Picasa</h2>
+	<p>
+		To add the button back in Picasa, go to the Settings->Media in your blog admin screen. 
+		The Picasa Album Uploader section has a link to download the button.
+	</p>
+</body>
+</html>
+		<?php
 		}
 	} // End Class picasa_album_uploader
 }
@@ -823,6 +967,7 @@ function pau_error_log_display() {
 // =========================
 
 $pau = new picasa_album_uploader();
+$pau->run();
 
 // Setup plugin activation function
 register_activation_hook( __FILE__, array('picasa_album_uploader', 'plugin_activation'));

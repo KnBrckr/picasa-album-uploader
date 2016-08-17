@@ -3,8 +3,8 @@
  * picasa_album_uploader_options class to manage options
  *
  * @package Picasa Album Uploader
- * @author Kenneth J. Brucker <ken@pumastudios.com>
- * @copyright 2016 Kenneth J. Brucker (email: ken@pumastudios.com)
+ * @author Kenneth J. Brucker <ken.brucker@action-a-day.com>
+ * @copyright 2016 Kenneth J. Brucker (email: ken.brucker@action-a-day.com)
  * 
  * This file is part of Picasa Album Uploader, a plugin for Wordpress.
  *
@@ -53,18 +53,18 @@ class picasa_album_uploader_options
 	public $long_var_name =   "this_is_a_long_variable_name_to_mimic_picasa_upload_operation_3456789012345678901234567890123456789";
 
 	/**
-	 * Class Constructor function
+	 * Init the class
 	 *
-	 * Setup plugin defaults
+	 * Setup option defaults
+	 * Hook into WP
 	 *
-	 * @access public
 	 * @return void
-	 **/
-	function picasa_album_uploader_options()
+	 */
+	function init()
 	{
 		// Retrieve Plugin Options
 		$options = get_option('pau_plugin_settings');
-		
+
 		// TODO Improve handling of default settings
 		// Init value for slug name - supply default if undefined
 		$this->slug = isset($options['slug']) ? $options['slug'] : 'picasa_album_uploader';
@@ -73,26 +73,7 @@ class picasa_album_uploader_options
 		$this->debug_log_enabled = isset($options['debug_log_enabled']) ? $options['debug_log_enabled'] : 0;
 		$this->log_to_errlog = isset($options['log_to_errlog']) ? $options['log_to_errlog'] : 0;
 		$this->debug_log = isset($options['debug_log']) ? $options['debug_log'] : array();
-	}
-	
-	/**
-	 * Cleanup database if uninstall is requested
-	 *
-	 * @access public
-	 * @return void
-	 **/
-	function uninstall() {
-		delete_option('pau_plugin_settings'); // Remove the plugin settings		
-	}
-	
-	/**
-	 * Register plugin actions with WordPress
-	 *
-	 * @access public
-	 * @return void
-	 **/
-	function register()
-	{
+		
 		// When displaying admin screens ...
 		if ( is_admin() ) {
 			add_action( 'admin_init', array( &$this, 'pau_settings_admin_init' ) );
@@ -105,9 +86,19 @@ class picasa_album_uploader_options
 		if ($this->debug_log_enabled) {
 			add_action('admin_footer', array( &$this, 'save_debug_log'));
 			add_action('wp_footer', array( &$this, 'save_debug_log'));				
-		}
+		}		
 	}
-		
+	
+	/**
+	 * Cleanup database if uninstall is requested
+	 *
+	 * @access public
+	 * @return void
+	 **/
+	function uninstall() {
+		delete_option('pau_plugin_settings'); // Remove the plugin settings		
+	}
+			
 	/**
 	 * WP action to register the plugin settings options when running admin_screen
 	 *
@@ -268,6 +259,7 @@ class picasa_album_uploader_options
 			$this->pau_options->debug_log("Tried to build URL; page permalinks not available!");
 			return '';
 		}
+		$this->debug_log( "get_page_permastruct = $url" );
 		
 		$url = home_url(str_replace('%pagename%', $this->slug . '/' . $page, $url));
 		return $url;
@@ -288,7 +280,7 @@ class picasa_album_uploader_options
 		// Run long REQUEST Variable name test
 		// TODO Turn into a javascript based test so media page doesn't pause
 		if ($result = $this->test_long_var()) {
-			$text .= 'Long Request Variable Test Failed: ' . $result . '<br>';
+			$text .= '<span class="notice notice-error">Long Request Variable Test Failed: ' . $result . '</span>';
 		} else {
 			$text .= 'REQUEST long variable OK<br>';
 		}
@@ -307,11 +299,33 @@ class picasa_album_uploader_options
 	{
 		$baseurl = $this->build_url('selftest');
 		$url = $baseurl . '?' . $this->long_var_name . '=' . $this->long_var_name;
+		$get_opts = array( 'timeout' => 5 );
 		
-		$res = wp_remote_get($url, array('timeout' => 5));
+		/**
+		 * Ignore SSL verification in DEBUG mode. Allows test servers to use self-signed certificates.
+		 */
+		if ( WP_DEBUG ) $get_opts['sslverify'] = false;
 		
-		if (wp_remote_retrieve_response_code($res) == 200) {
-			// Retrieved content successfully
+		/**
+		 * Try remote access
+		 *
+		 * Due to differences in how servers compress data, a warning from gzinflate() may be seen as a result
+		 * of the wp_remote_get() call.  See https://core.trac.wordpress.org/ticket/22952
+		 *     WARNING: wp-includes/class-wp-http-encoding.php:58 - gzinflate(): data error
+		 */
+		$res = wp_remote_get( $url, $get_opts );
+		
+		if ( is_wp_error( $res ) ) {
+			/**
+			 * Got a WP error back
+			 */
+			
+			$result = join( ', ', $res->get_error_messages() );
+			
+		} elseif (wp_remote_retrieve_response_code($res) == 200) {
+			/**
+			 *  Retrieved content successfully
+			 */
 			if (wp_remote_retrieve_body($res) == 'REQUEST long variable OK, received length='.strlen($this->long_var_name)) {
 				// Got expected results, all OK
 				$result = false;				
@@ -321,7 +335,9 @@ class picasa_album_uploader_options
 						 	esc_html(substr(wp_remote_retrieve_body($res), 0, 120));
 			}
 		} else {
-			// Error on retrieval attempt
+			/**
+			 * Retrieved content successfully
+			 */
 			$result = wp_remote_retrieve_response_code($res) . ' ' . wp_remote_retrieve_response_message($res);
 		}
 		
@@ -351,7 +367,7 @@ class picasa_album_uploader_options
 	{ 
 		$checked = $this->log_to_errlog ? "checked" : "" ;
 		echo '<input type="checkbox" name="pau_plugin_settings[log_to_errlog]" value="1" ' . $checked . '>';
-		_e('Send Debug output to errlog vs. displaying below', 'picasa-album-uploader');
+		_e('Use PHP error_log() vs. displaying below', 'picasa-album-uploader');
 	}
 	
 	/**
@@ -364,7 +380,8 @@ class picasa_album_uploader_options
 	{
 		global $wpdb;
 		global $wp_version;
-		
+		global $wp_rewrite;
+
 		$plugin_data = get_plugin_data(PAU_PLUGIN_DIR . '/' . PAU_PLUGIN_NAME . '.php');
 		$content = '<dl class=pau-debug-log>';
 		$content .= '<dt>Wordpress Version:<dd>' . esc_html($wp_version);
@@ -380,10 +397,10 @@ class picasa_album_uploader_options
 		$content .= '<dt>MySQL Server Version:<dd>' . esc_html($wpdb->db_version());
 		
 		$content .= '<dt>Plugin Slug: <dd>' . $this->slug;
-		$content .= '<dt>Permalink Structure: <dd>' . esc_html(get_option('permalink_structure'));
+		$content .= '<dt>Page Permalink Structure: <dd>' . esc_html($wp_rewrite->get_page_permastruct());
 
 		// Filter the hostname of running system from debug log
-		$content .= '<dt>Sample Plugin URL: <dd>' . esc_url(preg_replace('/:\/\/.+?\//','://*masked-host*/', $this->build_url('sample')));
+		$content .= '<dt>Sample Plugin URL: <dd>' . esc_url( $this->redact_url( $this->build_url( 'sample' ) ) );
 
 		if ($this->debug_log_enabled) {
 			// If debug enabled then include a Self Test
@@ -450,6 +467,29 @@ class picasa_album_uploader_options
 		if (! $this->log_to_errlog)
 			error_log(PAU_PLUGIN_NAME . ": " . $msg);
 		$this->debug_log($msg);
+	}
+	
+	/**
+	 * Log a redacted URL to error log
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function log_url( $logmsg, $url )
+	{
+		$this->error_log( $logmsg . $this->redact_url( $url ) );
+	}
+	
+	/**
+	 * Redact the host name portion of a URL for logging
+	 *
+	 * @access private
+	 * @param string	$url, URL to redact
+	 * @return string	Redacted URL
+	 */
+	function redact_url( $url )
+	{
+		return preg_replace('/:\/\/.+?\//','://*masked-host*/', $url );
 	}
 } // END class 
 ?>
