@@ -580,7 +580,6 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 				if ( function_exists( 'wp_nonce_field' ) ) {
 					// Set nonce and referer fields, use return value vs. echo
 					$content .= wp_nonce_field(PAU_NONCE_UPLOAD, PAU_NONCE_UPLOAD, true, false);
-					$content .= wp_referer_field(false);
 				}
 
 				// Parse the RSS feed from Picasa to get the images to be uploaded
