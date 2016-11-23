@@ -2,10 +2,10 @@
 # This file is distributed under the same license as the Picasa Album Uploader package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Picasa Album Uploader 0.10\n"
+"Project-Id-Version: Picasa Album Uploader 0.11\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/picasa-album-"
 "uploader\n"
-"POT-Creation-Date: 2016-08-17 14:43:15+00:00\n"
+"POT-Creation-Date: 2016-11-23 22:56:53+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -76,31 +76,35 @@ msgstr ""
 msgid "Please close this window and reissue the request from Picasa."
 msgstr ""
 
-#: picasa-album-uploader.php:598 picasa-album-uploader.php:640
+#: picasa-album-uploader.php:605 picasa-album-uploader.php:648
 msgid "Upload"
 msgstr ""
 
-#: picasa-album-uploader.php:604
+#: picasa-album-uploader.php:611
 msgid "Select your upload image size:"
 msgstr ""
 
-#: picasa-album-uploader.php:612
+#: picasa-album-uploader.php:619
 msgid "Selected images"
 msgstr ""
 
-#: picasa-album-uploader.php:630
+#: picasa-album-uploader.php:637
 msgid "Title"
 msgstr ""
 
-#: picasa-album-uploader.php:631
+#: picasa-album-uploader.php:638
 msgid "Caption"
 msgstr ""
 
-#: picasa-album-uploader.php:632
+#: picasa-album-uploader.php:639
+msgid "Alt Text"
+msgstr ""
+
+#: picasa-album-uploader.php:640
 msgid "Description"
 msgstr ""
 
-#: picasa-album-uploader.php:648
+#: picasa-album-uploader.php:656
 msgid "Sorry, no images were received from Picasa."
 msgstr ""
 
