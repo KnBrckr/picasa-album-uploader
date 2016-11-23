@@ -3,7 +3,7 @@
 Plugin Name: Picasa Album Uploader
 Plugin URI: http://pumastudios.com/software/picasa-album-uploader-wordpress-plugin
 Description: Easily upload media from Google Picasa Desktop into WordPress.  Navigate to <a href="options-media.php">Settings &rarr; Media</a> to configure.
-Version: 0.10
+Version: 0.11
 Author: Kenneth J. Brucker
 Author URI: http://action-a-day.com
 Text Domain: picasa-album-uploader
@@ -499,6 +499,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 						$title = $_POST['title'][$file_count - 1];
 						$excerpt = $_POST['caption'][$file_count - 1];
 						$content = $_POST['description'][$file_count - 1];
+						$alttext = $_POST['alttext'][$file_count - 1];
 						
 						$this->pau_options->debug_log('Received file: "' . $file_name . '"'); 
 						$this->pau_options->debug_log('Title: "' . $title . '"');
@@ -516,6 +517,13 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 						// Insert the image into the WP media library
 						$id = wp_insert_attachment($object, $file_name, 0);
 						if ( !is_wp_error($id) ) {
+							/**
+							 * Add alt-text if non-blank
+							 */
+							if ( $alttext ) {
+								update_post_meta( $id, '_wp_attachment_image_alt', $alttext );								
+							}
+							
 							wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file_name ) );
 							do_action('wp_create_file_in_uploads', $file_name, $id); // for replication
 						} else {
@@ -626,9 +634,10 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 					// TODO Put fields into div that can be hidden/displayed
 					$content .= '<div class="pau-attributes">'; // Start Definition List
 					$content .= '<input type="hidden" name="' . $large . '">';
-					$content .= '<label><span>' . __('Title', 'picasa-album-uploader') . '</span><input type="text" name="title[]" class="pau-img-text" value="' . $title . '" /></label>';
-					$content .= '<label><span>' . __('Caption', 'picasa-album-uploader') . '</span><input type="text" name="caption[]" class="pau-img-text" /></label>';				
-					$content .= '<label><span>' . __('Description', 'picasa-album-uploader') . '</span><textarea name="description[]" class="pau-img-textarea" rows="4" cols="80">' . $description . '</textarea></label>';
+					$content .= '<label><span>' . __('Title', 'picasa-album-uploader') . '</span><input type="text" name="title[]" class="pau-img-text" value="' . $title . '" /></label><br />';
+					$content .= '<label><span>' . __('Caption', 'picasa-album-uploader') . '</span><textarea name="caption[]" class="pau-img-text" rows="4" cols="80"></textarea></label><br />';
+					$content .= '<label><span>' . __('Alt Text', 'picasa-album-uploader') . '</span><textarea name="alttext[]" class="pau-img-textarea" rows="2" cols="80"></textarea></label><br />';
+					$content .= '<label><span>' . __('Description', 'picasa-album-uploader') . '</span><textarea name="description[]" class="pau-img-textarea" rows="4" cols="80">' . $description . '</textarea></label><br />';
 					$content .= '</div>'; // End Image Attributes
 					$content .= '</div>';
 				} // End of image list

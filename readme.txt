@@ -16,7 +16,7 @@ If you are not logged in to your blog, you will first be directed to the login p
 
 This plugin is based on the initial works by [clyang](http://clyang.net/blog/2009/02/06/128 "Picasa2Wordpress Blog Article") and the examples from Google for the [Picasa Button API](http://code.google.com/apis/picasa/docs/button_api.html "Picasa Button API") and [Picasa Web Uploader API](http://code.google.com/apis/picasa/docs/web_uploader.html "Picasa Web Uploader API").
 
-The Picasa API this plugin is based upon has been deprecated by Google.  A future update of Picasa could remove the API completely which will terminate the ability of this plugin to receive uploads from Picasa.
+The Picasa API this plugin is based upon has been deprecated by Google and the Picasa application is no longer available for download.
 
 == Installation ==
 
@@ -151,6 +151,9 @@ The button file name is based on the blog name.
 1. Picasa Album Uploader Options in Media Settings Admin Screen.
 
 == Changelog ==
+
+= 0.11.0 =
+* ADD: Include textarea to set Alt Text during image upload
 
 = 0.10.0 =
 * ADD: Detect a configuration issue that will prevent proper plugin operation
