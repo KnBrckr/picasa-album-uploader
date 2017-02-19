@@ -136,7 +136,7 @@ if ( ! class_exists( 'picasa_album_uploader' ) ) {
 		 * @access public
 		 * @return void
 		 */
-		function picasa_album_uploader() {
+		function __construct() {
 			// Retrieve plugin options
 			$this->pau_options = new picasa_album_uploader_options();
 		}
