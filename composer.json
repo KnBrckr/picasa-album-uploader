@@ -1,0 +1,20 @@
+{
+	"name": "pumastudios/picasa-album-uploader",
+	"description": "Easily upload media from Google Picasa Desktop into WordPress.",
+	"keywords": ["wordpress",
+		"plugin", "picasa", "media"],
+	"homepage": "https://pumastudios.com",
+	"license": "GPL2",
+	"authors": [
+		{
+			"name": "Kenneth J. Brucker",
+			"email": "ken@pumastudios.com",
+			"homepage": "https://pumastudios.com"
+		}
+	],
+	"type": "wordpress-plugin",
+	"require": {
+		"php": ">=5.3.2",
+		"composer/installers": "^1.0"
+	}
+}
